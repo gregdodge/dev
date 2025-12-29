@@ -96,13 +96,13 @@ a:hover {
 /* /Scrolling banner */
 
 .button1 {
-  width:25%;
+  width: 25%;
   margin: 0 auto;
   border-color: black;
   border-radius: 10px;
   border-style: solid;
   border-width: 1px;
-  margin-top: 30px;
+  margin-top: 20px;
   padding: 10px 0px;
   text-align: center;
 }
