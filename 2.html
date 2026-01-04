@@ -9,11 +9,11 @@
 
 <script>
 function toggleContent() {
-  var content = document.getElementById("myContent");
-  if (content.style.display === "none") {
-    content.style.display = "block";
+  var x = document.getElementById("myDIV");
+  if (x.style.display === "none") {
+    x.style.display = "block"; // Show the content
   } else {
-    content.style.display = "none";
+    x.style.display = "none"; // Hide the content
   }
 }
 </script>
@@ -38,14 +38,11 @@ a:hover {
 } 
 </style>
 
-<!-- WTF?  WTF??  WTF???  WTF????  WTF?????  WTF?????? --> 
-
-
 <div align="center" style="text-align:center;">
 
 <div align="center" style="font-size:290px;font-weight:bold;letter-spacing:15px;line-height:375px;font-family:arial;color:black;width:100%;text-align:center;" class="font">NO<span class="hide">PE</span></div>
 
-<div id="myContent" style="display:none;font-size:80px;font-weight:bold;letter-spacing:5px;line-height:0px;font-family:arial;color:black;width:100%;text-align:center;">
+<div id=""myDIV"" style="display:none;font-size:80px;font-weight:bold;letter-spacing:5px;line-height:0px;font-family:arial;color:black;width:100%;text-align:center;">
   <span class="hide">not right now</span>
 </div>
 
@@ -65,4 +62,5 @@ a:hover {
 
 </div>
 
-</body></html>
+</body>
+</html>
