@@ -7,17 +7,6 @@
 </head>
 <body style="background-color:lightblue;>
 
-<script>
-function toggleContent() {
-  var x = document.getElementById("myDIV");
-  if (x.style.display === "none") {
-    x.style.display = "block"; // Show the content
-  } else {
-    x.style.display = "none"; // Hide the content
-  }
-}
-</script>
-
 <style>
  @media screen and (min-width: 100px) and (max-width: 768px) {
   .font { font-size: 240px !important; } 
@@ -61,6 +50,17 @@ a:hover {
   <p style="font-size:10px;margin-top:25px;">one more hidden</p>
 
 </div>
+
+<script>
+function toggleContent() {
+  var x = document.getElementById("myDIV");
+  if (x.style.display === "none") {
+    x.style.display = "block"; // Show the content
+  } else {
+    x.style.display = "none"; // Hide the content
+  }
+}
+</script>  
 
 </body>
 </html>
