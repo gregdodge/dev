@@ -152,7 +152,31 @@
 
 <p><b>Example 3:</b></p>
 
-<!-- Pop up things -->
+<!-- Grid CSS -->
+
+<style>
+ .itemcontainer {
+    margin: auto;
+    width: 50%;
+    align-content: center;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    padding-top: 40px;
+}
+ .item {
+    border: 1px solid green;
+    border-radius: 10px;
+    padding: 25px;
+ }
+ .item:hover {
+    background-color: orange;
+    border: 1px solid green;
+    color: white;
+ }   
+</style>
+
+<!-- /CSS Grid -->
 
 <div id="popup-box1" class="overlay">
   <div class="popup">
@@ -193,7 +217,6 @@
       <a href="#popup-box4"><div class="item">4</div></a>
     </div>
 
-  <!-- /Pop up things -->  
   
   
 </div>
