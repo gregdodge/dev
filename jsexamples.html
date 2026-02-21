@@ -303,7 +303,7 @@
 	  text-decoration: none; /* Remove default text underline */
 	  font-size: 18px; /* Increase the font-size */
 	  color: black; /* Add a black text color */
-	  display: block; /* Make it into a block element to fill the whole list */
+	  display: none; /* Make it into a block element to fill the whole list */
 	}
 
 	#myUL li a:hover:not(.header) {
@@ -313,9 +313,8 @@
 
   <input type="text" id="myInput" onkeyup="myFunction()" placeholder="Search for names..">
 
-   <div style="display:none;">
 	<ul id="myUL>
-      <li><a href="https://gregdodge.github.io">Greg</a></li>
+      <li><a href="https://gregdodge.github.io/">Greg</a></li>
       <li><a href="https://gregdodge.github.io/tests">Tom</a></li>
       <li><a href="https://gregdodge.github.io/tests/jsonclick.html">Greg</a></li>
       <li><a href="https://gregdodge.github.io/tests/bootstrap.html">Ed</a></li>
@@ -323,7 +322,6 @@
       <li><a href="https://gregdodge.github.io/slicefinder">Huss</a></li>
       <li><a href="https://gregdodge.github.io/cordial/index.txt">Matt</a></li>
     </ul>
-   </div>		
 
 <script>
 function myFunction() {
