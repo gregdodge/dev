@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<link rel="shortcut icon" type="image/png" href="https://gregdodge.github.io/gdr-fav.png">  
+<head>
+<link rel="shortcut icon" type="image/png" href="gdr-fav.png"> 
+  <title>SliceFinder Dev</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1"> 
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <link href='https://fonts.googleapis.com/css?family=Alfa Slab One' rel='stylesheet'>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <style>
+    
+    body {font-family:Tahoma, sans-serif;}
+    
+    /* Remove the navbar's default margin-bottom and rounded borders */ 
+    .navbar {
+      margin-bottom: 0;
+      border-radius: 0;
+    }   
+    /* Set height of the grid so .sidenav can be 100% (adjust as needed) */
+    .row.content {height: 650px}
+    /* Set gray background color and 100% height */ 
+    .sidenav {
+      padding-top: 20px;
+      background-color: #f1f1f1;
+      height: 100%;
+    }
+    /* Set black background color, white text and some padding */
+    footer {
+      background-color: #555;
+      color: white;
+      padding: 15px;
+    }
+    /* On small screens, set height to 'auto' for sidenav and grid */
+    @media screen and (max-width: 800px) {
+      .sidenav {
+        height: auto;
+        padding: 15px;
+      }
+      .row.content {height:auto;} 
+      
+      .col-sm-2 {display:none !important;}
+      .col-sm-8 {width:100% !important;}
+      
+    }
+  </style>
+</head>
+<body>
+  
+<nav class="navbar navbar-inverse">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>                        
+      </button>
+      <a class="navbar-brand" href="#" style="background-color:#fff;">
+        <span style="font-family: 'Alfa Slab One';font-size: 32px;letter-spacing:1px;color:#FF474C;">🍕 SliceFinder</span>
+        <!--<img src="https://gregdodge.github.io/slicefinder/logomirror.gif" style="width:200px;"/>-->
+      </a>  
+    </div>
+    <div class="collapse navbar-collapse" id="myNavbar">
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="https://gregdodge.github.io/dev/bs-sf.html">Home</a></li>
+        <li><a href="https://gregdodge.github.io/dev/bs-sf-restaurants.html">Restaurants</a></li>
+        <li><a href="https://gregdodge.github.io/dev/bs-sf-frozen.html">Frozen Pizza</a></li>
+        <li><a href="https://gregdodge.github.io/dev/bs-sf-news.html">Pizza News</a></li>
+        <li><a href="https://gregdodge.github.io/dev/bs-sf-profile.html">My Profile</a></li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="#"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+  
+<div class="container-fluid text-center">    
+  <div class="row content">
+    <!--
+    <div class="col-sm-2 sidenav">
+      <p><a href="#">Left nav link 1</a></p>
+      <p><a href="#">Left nav link 2</a></p>
+      <p><a href="#">Left nav link 3</a></p>
+    </div>
+    -->
+    <div class="col-sm-8 text-left" style="width:75%;"> 
+      <h1 style="font-family: 'Alfa Slab One';font-size: 32px;letter-spacing:1px;">SliceFinder</h1>
+      <span style="font-family: 'Arial Black', Gadget, sans-serif;font-size:20px;color:#FF474C;">Pizza Restaurants</span>
+      <hr>
+      
+      <div align="left">
+        <h3>Restaurants</h3>
+      </div>
+      
+    </div>
+    <div class="col-sm-2 sidenav" style="width:25%;height:95vh;">
+
+      <div class="well" style="height:325px;">
+       <div align="left"><img src="https://png.pngtree.com/png-clipart/20230916/original/pngtree-twitter-logo-vector-png-image_12256691.png" style="width:75px;"/>
+         <br/><br/>
+         <a href="https://twitter.com/slicefinder?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @x</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+        </div>
+      </div>
+
+      <div class="well" align="left">
+        <p><b>Most reviewed:</b></p>
+          Tony's SF<br/>
+          Arinell Pizza<br/>
+          Goat Hill Pizza<br/>
+          Golden Boy Pizza<br/>
+      </div>
+      
+      <div class="well" align="left">
+        <p><b>Top reviewers:</b></p>
+          gregdodge (85 reviews)<br/>
+          fergusontj (77 reviews)<br/>
+          KingTut (34 reviews)<br/>
+          wintergreenta (32 reviews)<br/>
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+<footer class="container-fluid text-center" style="background-color:#FF474C;height:50px;">
+  <p>SliceFinder &copy;<script>document.write(new Date().getFullYear());</script></p>
+</footer>
+
+</body>
+</html>
