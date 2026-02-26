@@ -31,7 +31,11 @@
       color: red;
 	  transition: all 1s;
 	}
-	</style>
+	</style>		
+	
+	<h3 class="text-slider-p" style="text-align:center;padding-bottom:0px;">
+	  <span class="text-slider" data-words="Passable, Acceptable, Decent, Iffy">Iffy</span> at best.
+	</h3>
 
 	<script id="rendered-js" >
 		const textSlider = document.querySelector('.text-slider');
@@ -48,12 +52,8 @@
 		};
 		log(0);
 		//# sourceURL=pen.js
-	  </script>			
+    </script>	
 	
-	<h3 class="text-slider-p" style="text-align:center;padding-bottom:0px;">
-	  <span class="text-slider" data-words="Passable, Acceptable, Decent, Iffy">Iffy</span> at best.
-	</h3>
-
     <p>&nbsp;</p>
 	  <hr style="border:none;height: 1px;background-color:grey;"/>
 	<p></p>    	
@@ -61,21 +61,6 @@
 	<p><b>Example 2:</b></p>
 
     <p>&nbsp;</p>
-
-	<script>
-		const switchBtn = document.querySelector(".btn");
-		const box1El = document.querySelector(".box--1");
-		switchBtn.addEventListener("click", function () {
-		  const active = document.querySelector('.active');
-		  if(active){
-		    const notActive = document.querySelector('.box:not(.active)')
-		    notActive.classList.add('active')
-		    active.classList.remove('active')
-		  }else{
-		    box1El.classList.add('active')
-		  }
-		});
-	</script>
 	
 	<style>
 	.container {
@@ -134,7 +119,22 @@
 	</div>
 
 	<button class="btn">Switch Players</button>
-	
+
+	<script>
+		const switchBtn = document.querySelector(".btn");
+		const box1El = document.querySelector(".box--1");
+		switchBtn.addEventListener("click", function () {
+		  const active = document.querySelector('.active');
+		  if(active){
+		    const notActive = document.querySelector('.box:not(.active)')
+		    notActive.classList.add('active')
+		    active.classList.remove('active')
+		  }else{
+		    box1El.classList.add('active')
+		  }
+		});
+	</script>
+		
 	</div>
 
     <p>&nbsp;</p>
