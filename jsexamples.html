@@ -326,7 +326,7 @@
 	}
 	</script>
 
-  <input list="options" id="myUL" onkeyup="myFunction()" placeholder="Search for names..">
+  <input type="text" id="myInput" onkeyup="myFunction()" placeholder="Search for names..">
 
 	<ul id="myUL">
       <li><a href="https://gregdodge.github.io">Greg</a></li>
@@ -337,13 +337,19 @@
       <li><a href="https://gregdodge.github.io/slicefinder">Matt</a></li>
     </ul>
 
-  <input id="myInput" placeholder="Options...">
-  <input list="options" id="myInput" placeholder="Options...">
-   <datalist id="options">
-    <option value="https://www.google.com">Greg</option>
-    <option value="http://www.slicefinder.com">Tom</option>
-    <option value="Ed">
-   </datalist>
+<input list="options" id="myInput" placeholder="Options...">
+<datalist id="options">
+  <option value="https://www.google.com">Greg</option>
+  <option value="http://www.slicefinder.com">Tom</option>
+  <option value="Ed">
+</datalist>
+ <!--
+  <datalist id="options">
+   <option value="https://www.google.com">Greg</option>
+   <option value="http://www.slicefinder.com">Tom</option>
+   <option value="Ed">
+  </datalist>
+-->
 		
 </div>
 </div>  
