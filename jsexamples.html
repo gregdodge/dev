@@ -229,20 +229,6 @@
 	}
 	</style>
 
-	<script>
-	const questions = document.querySelectorAll('.items')
-	questions.forEach(question=>{
-	  question.addEventListener('click',()=>{
-		if(question.classList.contains('open')){
-		  question.nextElementSibling.style.maxHeight =0;
-		}else{
-		  question.nextElementSibling.style.maxHeight = question.nextElementSibling.scrollHeight + "px";
-		}
-		question.classList.toggle('open')
-	  })
-	})
-	</script>
-
 	<div class="accordion">
 	  <div class="items">
 	    <p class="number"></p>
@@ -260,6 +246,20 @@
 	  </div>
 	</div>
 
+	<script>
+	const questions = document.querySelectorAll('.items')
+	questions.forEach(question=>{
+	  question.addEventListener('click',()=>{
+		if(question.classList.contains('open')){
+		  question.nextElementSibling.style.maxHeight =0;
+		}else{
+		  question.nextElementSibling.style.maxHeight = question.nextElementSibling.scrollHeight + "px";
+		}
+		question.classList.toggle('open')
+	  })
+	})
+	</script>
+		
 	</div> 
 		
 	<p></p>
