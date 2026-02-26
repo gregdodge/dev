@@ -36,23 +36,6 @@
 	<h3 class="text-slider-p" style="text-align:center;padding-bottom:0px;">
 	  <span class="text-slider" data-words="Passable, Acceptable, Decent, Iffy">Iffy</span> at best.
 	</h3>
-
-	<script id="rendered-js" >
-		const textSlider = document.querySelector('.text-slider');
-		const words = textSlider.dataset.words.split(',');
-		const log = i => {
-		  if (i < words.length) {
-		setTimeout(function () {
-		  textSlider.innerHTML = words[i];
-		  i++;
-		  if (i == words.length) i = 0;
-		  log(i);
-		}, 1000);
-	  	}
-		};
-		log(0);
-		//# sourceURL=pen.js
-    </script>	
 	
     <p>&nbsp;</p>
 	  <hr style="border:none;height: 1px;background-color:grey;"/>
@@ -117,6 +100,23 @@
 	    Active
 	  </div>
 	</div>
+
+	<script id="rendered-js" >
+		const textSlider = document.querySelector('.text-slider');
+		const words = textSlider.dataset.words.split(',');
+		const log = i => {
+		  if (i < words.length) {
+		setTimeout(function () {
+		  textSlider.innerHTML = words[i];
+		  i++;
+		  if (i == words.length) i = 0;
+		  log(i);
+		}, 1000);
+	  	}
+		};
+		log(0);
+		//# sourceURL=pen.js
+    </script>			
 
 	<button class="btn">Switch Players</button>
 
