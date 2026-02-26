@@ -17,10 +17,9 @@
 
 	<p></p>
 	  <hr style="border:none;height: 1px;background-color:grey;"/>
-	<p></p>    
- 
+	<p></p>
 	
-	<p><b>Example 1 - textSlider:</b></p>
+	<p><b>Example 1:</b></p>
 	
 	<style>
 	.text-slider-p {
@@ -34,34 +33,49 @@
 	}
 	</style>
 
-	  <h3 class="text-slider-p" style="text-align:center;padding-bottom:0px;">
-	  <span class="text-slider" data-words="Passable, Acceptable, Decent, Iffy">Iffy</span> at best.
-	  </h3>
-  
-	    <script id="rendered-js" >
+	<script id="rendered-js" >
 		const textSlider = document.querySelector('.text-slider');
 		const words = textSlider.dataset.words.split(',');
 		const log = i => {
 		  if (i < words.length) {
-	    setTimeout(function () {
-	      textSlider.innerHTML = words[i];
-	      i++;
-	      if (i == words.length) i = 0;
-	      log(i);
-	    }, 1000);
-	  }
-	};
-	log(0);
-	//# sourceURL=pen.js
-	  </script>		
+		setTimeout(function () {
+		  textSlider.innerHTML = words[i];
+		  i++;
+		  if (i == words.length) i = 0;
+		  log(i);
+		}, 1000);
+	  	}
+		};
+		log(0);
+		//# sourceURL=pen.js
+	  </script>			
+	
+	<h3 class="text-slider-p" style="text-align:center;padding-bottom:0px;">
+	  <span class="text-slider" data-words="Passable, Acceptable, Decent, Iffy">Iffy</span> at best.
+	</h3>
 
     <p>&nbsp;</p>
 	  <hr style="border:none;height: 1px;background-color:grey;"/>
 	<p></p>    	
 
-	<p><b>Example 2 - switchBtn:</b></p>
+	<p><b>Example 2:</b></p>
 
     <p>&nbsp;</p>
+
+	<script>
+		const switchBtn = document.querySelector(".btn");
+		const box1El = document.querySelector(".box--1");
+		switchBtn.addEventListener("click", function () {
+		  const active = document.querySelector('.active');
+		  if(active){
+		    const notActive = document.querySelector('.box:not(.active)')
+		    notActive.classList.add('active')
+		    active.classList.remove('active')
+		  }else{
+		    box1El.classList.add('active')
+		  }
+		});
+	</script>
 	
 	<style>
 	.container {
@@ -118,37 +132,19 @@
 	    Active
 	  </div>
 	</div>
-		
-	
+
 	<button class="btn">Switch Players</button>
 	
 	</div>
 
     <p>&nbsp;</p>
 
-	<script>
-		const switchBtn = document.querySelector(".btn");
-		const box1El = document.querySelector(".box--1");
-		switchBtn.addEventListener("click", function () {
-		  const active = document.querySelector('.active');
-		  if(active){
-		    const notActive = document.querySelector('.box:not(.active)')
-		    notActive.classList.add('active')
-		    active.classList.remove('active')
-		  }else{
-		    box1El.classList.add('active')
-		  }
-		});
-	</script>
-
 	<p></p>
 	  <hr style="border:none;height: 1px;background-color:grey;"/>
 	<p></p>   	
-
 	
-	<p><b>Example 3 - questions:</b></p>
+	<p><b>Example 3:</b></p>
 
-	
 	<style>
 	.accordion {
 	  max-width: 100%;
@@ -233,6 +229,20 @@
 	}
 	</style>
 
+	<script>
+	const questions = document.querySelectorAll('.items')
+	questions.forEach(question=>{
+	  question.addEventListener('click',()=>{
+		if(question.classList.contains('open')){
+		  question.nextElementSibling.style.maxHeight =0;
+		}else{
+		  question.nextElementSibling.style.maxHeight = question.nextElementSibling.scrollHeight + "px";
+		}
+		question.classList.toggle('open')
+	  })
+	})
+	</script>
+
 	<div class="accordion">
 	  <div class="items">
 	    <p class="number"></p>
@@ -250,28 +260,13 @@
 	  </div>
 	</div>
 
-	<script>
-		const questions = document.querySelectorAll('.items')
-		questions.forEach(question=>{
-		  question.addEventListener('click',()=>{
-		    if(question.classList.contains('open')){
-		      question.nextElementSibling.style.maxHeight =0;
-		    }else{
-		      question.nextElementSibling.style.maxHeight = question.nextElementSibling.scrollHeight + "px";
-		    }
-		    question.classList.toggle('open')
-		  })
-		})
-	</script>
-
 	</div> 
 		
 	<p></p>
 	  <hr style="border:none;height: 1px;background-color:grey;"/>
 	<p></p>   
 
-	
-	<p><b>Example 4 - filter:</b></p>		
+	<p><b>Example 4:</b></p>		
 
     <p>&nbsp;</p>
 
@@ -309,6 +304,28 @@
 	}  
 	</style>  
 
+	<script>
+	function myFunction() {
+	  // Declare variables
+	  var input, filter, ul, li, a, i, txtValue;
+	  input = document.getElementById('myInput');
+	  filter = input.value.toUpperCase();
+	  ul = document.getElementById("myUL");
+	  li = ul.getElementsByTagName('li');
+	
+	  // Loop through all list items, and hide those who don't match the search query
+	  for (i = 0; i < li.length; i++) {
+	    a = li[i].getElementsByTagName("a")[0];
+	    txtValue = a.textContent || a.innerText;
+	    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+	      li[i].style.display = "";
+	    } else {
+	      li[i].style.display = "none";
+	    }
+	  }
+	}
+	</script>
+
   <input type="text" id="myInput" onkeyup="myFunction()" placeholder="Search for names..">
 
 	<ul id="myUL">
@@ -326,30 +343,6 @@
   <option value="Tom">
   <option value="Ed">
 </datalist>
-
-	
-<script>
-function myFunction() {
-  // Declare variables
-  var input, filter, ul, li, a, i, txtValue;
-  input = document.getElementById('myInput');
-  filter = input.value.toUpperCase();
-  ul = document.getElementById("myUL");
-  li = ul.getElementsByTagName('li');
-
-  // Loop through all list items, and hide those who don't match the search query
-  for (i = 0; i < li.length; i++) {
-    a = li[i].getElementsByTagName("a")[0];
-    txtValue = a.textContent || a.innerText;
-    if (txtValue.toUpperCase().indexOf(filter) > -1) {
-      li[i].style.display = "";
-    } else {
-      li[i].style.display = "none";
-    }
-  }
-}
-</script>
-		
 		
 </div>
 </div>  
