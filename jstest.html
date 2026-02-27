@@ -2,64 +2,51 @@
   <title>
     <head></head>
   </title>
+
   <style>
-      /* Style the search box */
-    #myInput {
-      /* Add styling here (e.g., width, padding, border) */
-    }
-    
-    /* Remove default list styling */
-    #myUL {
-      list-style-type: none;
-      padding: 0;
-      margin: 0;
-    }
-    
-    /* Style the list items/links */
-    #myUL li a {
-      /* Add styling here (e.g., border, padding, text-decoration) */
-      display: block; /* Make the whole area clickable */
-    }
-    
-    /* The class to hide list items that do not match the search */
-    .hidden {
-      display: none;
-    }
+.search {
+    display: flex;
+    align-items: end;
+    margin: 10px;
+}
+.search button {
+    margin-right: 10px;
+}
+/* <li> elements should be hidden, not <ul> */
+li {
+    display: none;
+}
   </style>  
+  
  <body>
 
-   <input type="text" id="myInput" oninput="filterList()" placeholder="Search for items...">
-    <ul id="myUL">
-      <li data-keywords="apple fruit red round"><a href="#">Apple</a></li>
-      <li data-keywords="banana fruit yellow long"><a href="#">Banana</a></li>
-      <li data-keywords="orange fruit citrus round"><a href="#">Orange</a></li>
-      <li data-keywords="grape fruit small purple"><a href="#">Grape</a></li>
-    </ul>
+<div class="search">
+    <button  class="dropBtn">Menu</button>
+    <input id="searchBox" onkeyup="search_links()" type="text"  name="searchBox"  placeholder="Search">
+</div>
+<!-- ul needs to be moved outside the flex container -->
+<ul class="searchList" id ='searchList'>
+    <!-- 'searchLinks' class should be at the <li> level, not <a> -->
+    <li class="searchLinks"><a href="../Covid_Website/pages/buisnessGuidance.html">Buisness Guidance</a></li>
+    <li class="searchLinks"><a href="pages/indivdualGuidance.html">Guidance for Indivduals</a></li>
+    <li class="searchLinks"><a href="pages/testing.html">Testing</a></li>
+    <li class="searchLinks"><a href="pages/caseData.html">Case Data</a></li>
+    <li class="searchLinks"><a href="pages/initiatives.html">Current Initiatives</a></li>
+    <li class="searchLinks"><a href="pages/help.html">Help and Contact</a></li>
+</ul>
+<div>Rest of the page...</div>
+   
 
    <script>
-    function filterList() {
-      // Get the input value and filter it to lowercase
-      let input = document.getElementById("myInput");
-      let filter = input.value.toLowerCase();
-    
-      // Get the list items
-      let ul = document.getElementById("myUL");
-      let li = ul.getElementsByTagName("li");
-    
-      // Loop through all list items, and hide those that don't match the search query
-      for (let i = 0; i < li.length; i++) {
-        // Check against text content OR the data-keywords attribute
-        let textValue = li[i].textContent || li[i].innerText;
-        let keywords = li[i].getAttribute("data-keywords");
-        
-        if (textValue.toLowerCase().includes(filter) || (keywords && keywords.toLowerCase().includes(filter))) {
-          li[i].classList.remove("hidden"); // Show the item
-        } else {
-          li[i].classList.add("hidden"); // Hide the item
-        }
-      }
-    }    
+function search_links() {
+    const inputValue = document.getElementById('searchBox').value.toLowerCase();
+    [...document.getElementsByClassName('searchLinks')].forEach((searchLink) => {
+        const matched = inputValue && searchLink.innerHTML.toLowerCase().includes(inputValue);
+        searchLink.style.display = matched ? 'list-item' : 'none';
+    });
+}
    </script>
+
    
  </body>
 </html>
