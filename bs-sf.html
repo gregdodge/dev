@@ -94,6 +94,10 @@
       <div align="center">
         <iframe src="https://www.google.com/maps/embed?pb=!1m16!1m12!1m3!1d25227.52705520998!2d-122.46159176285435!3d37.779706326369535!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!2m1!1spizza%20san%20francisco!5e0!3m2!1sen!2sus!4v1768365996220!5m2!1sen!2sus" width="95%" height="500" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
       </div>
+
+      <div>
+        <a href="https://www.google.com/maps/place/?q=pizza+restaurants&lt;span id=&quot;latitude&quot;&gt;&lt;/span&gt;+&lt;span id=&quot;longitude&quot;&gt;&lt;/span&gt;" target="map">Click for pizza near you</a> 
+      </div>
       
     </div>
     <div class="col-sm-2 sidenav" style="width:25%;height:95vh;">
@@ -132,6 +136,48 @@
 <footer class="container-fluid text-center" style="background-color:#FF474C;height:50px;">
   <p>SliceFinder &copy;<script>document.write(new Date().getFullYear());</script></p>
 </footer>
+
+<script>
+function getLocation() {
+    const messageElement = document.getElementById("message");
+    const latElement = document.getElementById("latitude");
+    const lonElement = document.getElementById("longitude");
+    const url = `ttps://www.google.com/maps/place/${latElement}+${lonElement}`;
+
+    if (navigator.geolocation) {
+        messageElement.textContent = "Fetching location...";
+        // The getCurrentPosition method is asynchronous and takes success and optional error callbacks.
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                // Success callback: updates the HTML elements with the coordinates
+                latElement.textContent = position.coords.latitude;
+                lonElement.textContent = position.coords.longitude;
+                messageElement.textContent = "Location found.";
+            },
+            function(error) {
+                // Error callback: handles potential errors (e.g., user denies permission)
+                switch(error.code) {
+                    case error.PERMISSION_DENIED:
+                        messageElement.textContent = "User denied the request for Geolocation.";
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        messageElement.textContent = "Location information is unavailable.";
+                        break;
+                    case error.TIMEOUT:
+                        messageElement.textContent = "The request to get user location timed out.";
+                        break;
+                    case error.UNKNOWN_ERROR:
+                        messageElement.textContent = "An unknown error occurred.";
+                        break;
+                }
+            }
+        );
+    } else {
+        // Geolocation is not supported by the browser.
+        messageElement.textContent = "Geolocation is not supported by this browser.";
+    }
+}
+</script>
 
 </body>
 </html>
