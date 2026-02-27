@@ -11,7 +11,9 @@
 
 <a href="https://www.google.com/maps/place/&lt;span id=&quot;latitude&quot;&gt;&lt;/span&gt;+&lt;span id=&quot;longitude&quot;&gt;&lt;/span&gt;" target="map">Click for pizza near you</a> 
 
+<!--
 <iframe src="" name="map" height="300px" width="100%" title="Iframe Example"></iframe>
+-->
     
 <script>
 function getLocation() {
@@ -19,7 +21,6 @@ function getLocation() {
     const latElement = document.getElementById("latitude");
     const lonElement = document.getElementById("longitude");
     const url = `ttps://www.google.com/maps/place/${latElement}+${lonElement}`;
-
 
     if (navigator.geolocation) {
         messageElement.textContent = "Fetching location...";
@@ -54,7 +55,6 @@ function getLocation() {
         messageElement.textContent = "Geolocation is not supported by this browser.";
     }
 }
-  
 </script>
 
 </body>
