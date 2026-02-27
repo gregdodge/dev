@@ -1,49 +1,55 @@
+<!DOCTYPE html>
 <html>
-  <title>
-    <head></head>
-  </title>
- <body>
+<body>
 
-<script>   
-// Get references to the HTML elements by their IDs
-const statusElement = document.getElementById("status");
-const coordinatesElement = document.getElementById("coordinates");
+<p>Click the button to get your coordinates:</p>
+<button onclick="getLocation()">Get Location</button>
 
-if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(showPosition, showError);
-} else {
-    statusElement.innerHTML = "Geolocation is not supported by this browser.";
-}
+<p id="message">Geolocation status: Not requested</p>
+<p>Latitude: <span id="latitude"></span></p>
+<p>Longitude: <span id="longitude"></span></p>
 
-// Callback function for successful retrieval of position
-function showPosition(position) {
-    const latitude = position.coords.latitude;
-    const longitude = position.coords.longitude;
-    statusElement.innerHTML = "Location found:";
-    coordinatesElement.innerHTML = "Latitude: " + latitude + "<br>Longitude: " + longitude;
-}
+<script>
+function getLocation() {
+    const messageElement = document.getElementById("message");
+    const latElement = document.getElementById("latitude");
+    const lonElement = document.getElementById("longitude");
 
-// Optional error handling function
-function showError(error) {
-    switch(error.code) {
-        case error.PERMISSION_DENIED:
-            statusElement.innerHTML = "User denied the request for Geolocation.";
-            break;
-        case error.POSITION_UNAVAILABLE:
-            statusElement.innerHTML = "Location information is unavailable.";
-            break;
-        case error.TIMEOUT:
-            statusElement.innerHTML = "The request to get user location timed out.";
-            break;
-        case error.UNKNOWN_ERROR:
-            statusElement.innerHTML = "An unknown error occurred.";
-            break;
+    if (navigator.geolocation) {
+        messageElement.textContent = "Fetching location...";
+        // The getCurrentPosition method is asynchronous and takes success and optional error callbacks.
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                // Success callback: updates the HTML elements with the coordinates
+                latElement.textContent = position.coords.latitude;
+                lonElement.textContent = position.coords.longitude;
+                messageElement.textContent = "Location found.";
+            },
+            function(error) {
+                // Error callback: handles potential errors (e.g., user denies permission)
+                switch(error.code) {
+                    case error.PERMISSION_DENIED:
+                        messageElement.textContent = "User denied the request for Geolocation.";
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        messageElement.textContent = "Location information is unavailable.";
+                        break;
+                    case error.TIMEOUT:
+                        messageElement.textContent = "The request to get user location timed out.";
+                        break;
+                    case error.UNKNOWN_ERROR:
+                        messageElement.textContent = "An unknown error occurred.";
+                        break;
+                }
+            }
+        );
+    } else {
+        // Geolocation is not supported by the browser.
+        messageElement.textContent = "Geolocation is not supported by this browser.";
     }
 }
+  
 </script>
 
-   <p id="status">Locating...</p>
-<p id="coordinates"></p>
-   
- </body>
+</body>
 </html>
