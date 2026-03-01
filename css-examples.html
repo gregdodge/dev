@@ -97,7 +97,7 @@
   
   <style>
   /* 1. Base styles for the button */
-  .bouncing-btn {
+  .bouncing-btn1 {
     display: inline-block; /* Essential for transform to work correctly on all elements */
     padding: 15px 30px;
     margin: 35px 15px;
@@ -112,6 +112,21 @@
     cursor: pointer;
     transition: transform 0.2s ease; /* Smooth transition when the hover starts/stops */
   }
+  .bouncing-btn2 {
+    display: inline-block; /* Essential for transform to work correctly on all elements */
+    padding: 15px 30px;
+    margin: 35px 15px;
+    font-size: 16px;
+    color: white;
+    font-weight: bold;
+    font-family: verdana;
+    letter-spacing: 1.3px;
+    background-color: lightgreen;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: transform 0.2s ease; /* Smooth transition when the hover starts/stops */
+  }    
   /* 2. Apply the animation on hover */
   .bouncing-btn:hover {
     animation: bounce 1s infinite; /* Animation name, duration, and infinite loop */
@@ -129,9 +144,8 @@
   
   <div align="center">  
     
-  <a href="http://www.hover.com"><button class="bouncing-btn">Hover</button></a>
-  <a href="http://www.hover.com"><button class="bouncing-btn">Hover</button></a>
-  <a href="http://www.hover.com"><button class="bouncing-btn">Hover</button></a>
+  <a href="http://www.hover.com"><button class="bouncing-btn1">Hover</button></a>
+  <a href="http://www.hover.com"><button class="bouncing-btn2">Hover</button></a>
   
   </div>
   
