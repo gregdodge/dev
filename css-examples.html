@@ -121,16 +121,20 @@
     font-weight: bold;
     font-family: verdana;
     letter-spacing: 1.3px;
-    background-color: lightgreen;
+    background-color: lightred;
     border: none;
     border-radius: 5px;
     cursor: pointer;
     transition: transform 0.2s ease; /* Smooth transition when the hover starts/stops */
   }    
   /* 2. Apply the animation on hover */
-  .bouncing-btn:hover {
+  .bouncing-btn1:hover {
     animation: bounce 1s infinite; /* Animation name, duration, and infinite loop */
   }
+  /* 2. Apply the animation on hover */
+  .bouncing-btn2:hover {
+    animation: bounce 2s infinite; /* Animation name, duration, and infinite loop */
+  }    
   /* 3. Define the keyframe animation */
   @keyframes bounce {
     0%, 100% {
