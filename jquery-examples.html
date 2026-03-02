@@ -67,6 +67,23 @@
 	
 	<p><b>Example 3:</b></p>	
 
+	  <style>
+	  #draggable { width: 150px; height: 150px; padding: 0.5em; }
+	  </style>
+	  <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+	  <script src="https://code.jquery.com/ui/1.14.2/jquery-ui.js"></script>
+	  <script>
+	  $( function() {
+	    $( "#draggable" ).draggable();
+	  } );
+	  </script>
+	</head>
+	<body>
+	 
+	<div id="draggable" class="ui-widget-content">
+	  <p>Drag me around</p>
+	</div>
+	
 	<!--
 	<p></p>
 	  <hr style="border:none;height: 1px;background-color:grey;"/>
