@@ -1,178 +1,240 @@
 <!DOCTYPE html>
 <html lang="en">
-<link rel="shortcut icon" type="image/png" href="https://gregdodge.github.io/gdr-fav.png">  
 <head>
-<link rel="shortcut icon" type="image/png" href="gdr-fav.png"> 
-  <title>SliceFinder Dev</title>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1"> 
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SliceFinder - Find Your Slice</title>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-  <link href='https://fonts.googleapis.com/css?family=Alfa Slab One' rel='stylesheet'>
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Alfa%20Slab%20One">
   <style>
-    
-    body {font-family:Tahoma, sans-serif;}
-    
-    /* Remove the navbar's default margin-bottom and rounded borders */ 
-    .navbar {
-      margin-bottom: 0;
-      border-radius: 0;
-    }   
-    /* Set height of the grid so .sidenav can be 100% (adjust as needed) */
-    .row.content {height: 650px}
-    /* Set gray background color and 100% height */ 
-    .sidenav {
-      padding-top: 20px;
-      background-color: #f1f1f1;
-      height: 100%;
-    }
-    /* Set black background color, white text and some padding */
-    footer {
-      background-color: #555;
-      color: white;
-      padding: 15px;
-    }
-    /* On small screens, set height to 'auto' for sidenav and grid */
+    body { font-family: Tahoma, sans-serif; }
+    .navbar { margin-bottom: 0; border-radius: 0; }
+    .row.content { height: 650px; }
+    .sidenav { padding-top: 20px; background-color: #f1f1f1; height: 100%; }
+    footer { background-color: #555; color: white; padding: 15px; }
+
     @media screen and (max-width: 800px) {
-      .sidenav {
-        height: auto;
-        padding: 15px;
-      }
-      .row.content {height:auto;} 
-      .col-sm-2 {display:none !important;}
-      .col-sm-8 {width:100% !important;}
+      .sidenav { height: auto; padding: 15px; }
+      .row.content { height: auto; }
+      .col-sm-2 { display: none !important; }
+      .col-sm-8 { width: 100% !important; }
+    }
+
+    /* Branding */
+    .navbar-brand {
+      font-family: 'Alfa Slab One', serif;
+      color: #c0392b !important;
+      font-size: 24px;
+      letter-spacing: 1px;
+    }
+
+    /* Geolocation status message */
+    #geo-status {
+      font-size: 12px;
+      color: #888;
+      margin-top: 6px;
+      text-align: center;
+    }
+
+    /* Pizza near you button */
+    #btn-pizza-near-me {
+      margin-bottom: 6px;
     }
   </style>
 </head>
+
 <body>
-  
-<nav class="navbar navbar-inverse">
+
+  <!-- Navigation -->
+  <nav class="navbar navbar-inverse">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-navbar">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="#">SliceFinder</a>
+      </div>
+      <div class="collapse navbar-collapse" id="bs-navbar">
+        <ul class="nav navbar-nav">
+          <li><a href="#">Restaurants</a></li>
+          <li><a href="#">Frozen Pizza</a></li>
+          <li><a href="#">Pizza News</a></li>
+          <li><a href="#">My Profile</a></li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+          <li><a href="#">Login</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Page Content -->
   <div class="container-fluid">
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>                        
-      </button>
-      <a class="navbar-brand" href="https://gregdodge.github.io/dev/bs-sf.html" style="background-color:#fff;">
-        <span style="font-family: 'Alfa Slab One';font-size: 32px;letter-spacing:1px;color:#FF474C;">🍕 SliceFinder</span>
-        <!--<img src="https://gregdodge.github.io/slicefinder/logomirror.gif" style="width:200px;"/>-->
-      </a>  
-    </div>
-    <div class="collapse navbar-collapse" id="myNavbar">
-      <ul class="nav navbar-nav">
-        <!--<li class="active"><a href="https://gregdodge.github.io/dev/bs-sf.html">Home</a></li>-->
-        <li><a href="https://gregdodge.github.io/dev/bs-sf-restaurants.html">Restaurants</a></li>
-        <li><a href="https://gregdodge.github.io/dev/bs-sf-frozen.html">Frozen Pizza</a></li>
-        <li><a href="https://gregdodge.github.io/dev/bs-sf-news.html">Pizza News</a></li>
-        <li><a href="https://gregdodge.github.io/dev/bs-sf-profile.html">My Profile</a></li>
-      </ul>
-      <ul class="nav navbar-nav navbar-right">
-        <li><a href="https://gregdodge.github.io/dev/bs-sf-profile.html"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
-      </ul>
+    <div class="row content">
+
+      <!-- Left Sidebar -->
+      <div class="col-sm-2 sidenav">
+        <p>
+          <a href="https://twitter.com/slicefinder"
+             class="twitter-follow-button"
+             data-show-count="false"
+             data-lang="en">
+            Follow @slicefinder
+          </a>
+        </p>
+
+        <h5><strong>Most Reviewed</strong></h5>
+        <ul class="list-unstyled" style="font-size:13px;">
+          <li><a href="#">Tony's SF</a></li>
+          <li><a href="#">Arinell Pizza</a></li>
+          <li><a href="#">Goat Hill Pizza</a></li>
+          <li><a href="#">Golden Boy Pizza</a></li>
+        </ul>
+
+        <h5><strong>Top Reviewers</strong></h5>
+        <ul class="list-unstyled" style="font-size:13px;">
+          <li>gregdodge &nbsp;<span class="badge">85</span></li>
+          <li>fergusontj &nbsp;<span class="badge">77</span></li>
+          <li>KingTut &nbsp;<span class="badge">34</span></li>
+          <li>wintergreenta &nbsp;<span class="badge">32</span></li>
+        </ul>
+      </div>
+
+      <!-- Main Content -->
+      <div class="col-sm-8" style="padding:0;">
+
+        <!-- Pizza Near Me Button -->
+        <div style="padding: 10px; background: #fff; text-align:center;">
+          <a id="btn-pizza-near-me"
+             href="https://www.google.com/maps/search/pizza+near+me/@<span id='latitude'>37.7797</span>,<span id='longitude'>-122.4316</span>,13z"
+             target="_blank"
+             class="btn btn-danger">
+            🍕 Click for pizza near you
+          </a>
+          <div id="geo-status">Detecting your location…</div>
+        </div>
+
+        <!-- Map iframe -->
+        <iframe
+          id="map-frame"
+          src="https://www.google.com/maps/embed?pb=!1m16!1m12!1m3!1d25227.52705520998!2d-122.46159176285435!3d37.779706326369535!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!2m1!1spizza%20san%20francisco!5e0!3m2!1sen!2sus!4v1768365996220!5m2!1sen!2sus"
+          width="100%"
+          height="580"
+          style="border:0; display:block;"
+          allowfullscreen=""
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+          title="Pizza restaurants near you">
+        </iframe>
+
+      </div>
+
+      <!-- Right Sidebar -->
+      <div class="col-sm-2 sidenav">
+        <h5><strong>Find a Slice</strong></h5>
+        <form>
+          <div class="form-group">
+            <input type="text" class="form-control input-sm" placeholder="City or ZIP">
+          </div>
+          <button type="submit" class="btn btn-danger btn-sm btn-block">Search</button>
+        </form>
+
+        <hr>
+
+        <h5><strong>Add a Pizzeria</strong></h5>
+        <p style="font-size:12px;">Know a great spot that's missing? Help the community!</p>
+        <a href="#" class="btn btn-default btn-sm btn-block">+ Add Restaurant</a>
+      </div>
+
     </div>
   </div>
-</nav>
-  
-<div class="container-fluid text-center">    
-  <div class="row content">
-    <!--
-    <div class="col-sm-2 sidenav">
-      <p><a href="#">Left nav link 1</a></p>
-      <p><a href="#">Left nav link 2</a></p>
-      <p><a href="#">Left nav link 3</a></p>
-    </div>
-    -->
-    <div class="col-sm-8 text-left" style="width:75%;"> 
-      <h1 style="font-family: 'Alfa Slab One';font-size: 32px;letter-spacing:1px;">SliceFinder</h1>
-      <span style="font-family: 'Arial Black', Gadget, sans-serif;font-size:20px;color:#FF474C;">Find your slice...</span>
-      <hr>
-      
-      <div align="center">
-        <iframe src="https://www.google.com/maps/embed?pb=!1m16!1m12!1m3!1d25227.52705520998!2d-122.46159176285435!3d37.779706326369535!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!2m1!1spizza%20san%20francisco!5e0!3m2!1sen!2sus!4v1768365996220!5m2!1sen!2sus" width="95%" height="500" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-      </div>
-      
-      <div style="text-align:center;padding:20px 0px;font-weight:bold;">
-        <a href="https://www.google.com/maps/place/?q=pizza+restaurants&lt;span id=&quot;latitude&quot;&gt;&lt;/span&gt;+&lt;span id=&quot;longitude&quot;&gt;&lt;/span&gt;" style="text-decoration:none;"><button style="padding:15px;">Click for pizza near you</button></a>
-      </div>
 
-    </div>
+  <!-- Footer -->
+  <footer class="text-center">
+    <p>SliceFinder &copy;2026</p>
+  </footer>
 
-    <div class="col-sm-2 sidenav" style="width:25%;height:95vh;">
+  <!-- Scripts -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 
-      <div class="well" style="height:325px;">
-       <div align="left"><img src="https://png.pngtree.com/png-clipart/20230916/original/pngtree-twitter-logo-vector-png-image_12256691.png" style="width:75px;"/>
-         <br/><br/>
-         <a href="https://twitter.com/slicefinder?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @x</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-       </div>
-      </div>
+  <script>
+    // -------------------------------------------------------
+    // Geolocation — update map and "pizza near you" link
+    // -------------------------------------------------------
+    // NOTE: To use the Google Maps Embed API v1 (which supports
+    // the ?key= param and dynamic center), replace the placeholder
+    // below with your own Google Maps Embed API key:
+    //   https://developers.google.com/maps/documentation/embed/get-api-key
+    //
+    // If you don't have a key yet, the fallback SF map will stay
+    // visible and the "pizza near you" link will still open Google
+    // Maps correctly using the user's coordinates.
+    // -------------------------------------------------------
+    var MAPS_API_KEY = 'YOUR_GOOGLE_MAPS_EMBED_API_KEY';
 
-      <div class="well" align="left">
-        <p><b>Most reviewed:</b></p>
-          Tony's SF<br/>
-          Arinell Pizza<br/>
-          Goat Hill Pizza<br/>
-          Golden Boy Pizza<br/>
-      </div>
-      
-      <div class="well" align="left">
-        <p><b>Top reviewers:</b></p>
-          gregdodge (85 reviews)<br/>
-          fergusontj (77 reviews)<br/>
-          KingTut (34 reviews)<br/>
-          wintergreenta (32 reviews)<br/>
-      </div>
-      
-    </div>
-  </div>
-</div>
+    function updateMapToUserLocation() {
+      if (!navigator.geolocation) {
+        setGeoStatus('Geolocation not supported by your browser — showing San Francisco.');
+        return;
+      }
 
-<footer class="container-fluid text-center" style="background-color:#FF474C;height:50px;">
-  <p>SliceFinder &copy;<script>document.write(new Date().getFullYear());</script></p>
-</footer>
+      navigator.geolocation.getCurrentPosition(
+        function(position) {
+          var lat = position.coords.latitude.toFixed(6);
+          var lng = position.coords.longitude.toFixed(6);
 
-<script>
-function getLocation() {
-    const messageElement = document.getElementById("message");
-    const latElement = document.getElementById("latitude");
-    const lonElement = document.getElementById("longitude");
-    const url = `ttps://www.google.com/maps/place/${latElement}+${lonElement}`;
+          // Update the "pizza near you" button link
+          document.getElementById('latitude').textContent = lat;
+          document.getElementById('longitude').textContent = lng;
+          var btn = document.getElementById('btn-pizza-near-me');
+          btn.href = 'https://www.google.com/maps/search/pizza+near+me/@' + lat + ',' + lng + ',13z';
 
-    if (navigator.geolocation) {
-        messageElement.textContent = "Fetching location...";
-        // The getCurrentPosition method is asynchronous and takes success and optional error callbacks.
-        navigator.geolocation.getCurrentPosition(
-            function(position) {
-                // Success callback: updates the HTML elements with the coordinates
-                latElement.textContent = position.coords.latitude;
-                lonElement.textContent = position.coords.longitude;
-                messageElement.textContent = "Location found.";
-            },
-            function(error) {
-                // Error callback: handles potential errors (e.g., user denies permission)
-                switch(error.code) {
-                    case error.PERMISSION_DENIED:
-                        messageElement.textContent = "User denied the request for Geolocation.";
-                        break;
-                    case error.POSITION_UNAVAILABLE:
-                        messageElement.textContent = "Location information is unavailable.";
-                        break;
-                    case error.TIMEOUT:
-                        messageElement.textContent = "The request to get user location timed out.";
-                        break;
-                    case error.UNKNOWN_ERROR:
-                        messageElement.textContent = "An unknown error occurred.";
-                        break;
-                }
-            }
-        );
-    } else {
-        // Geolocation is not supported by the browser.
-        messageElement.textContent = "Geolocation is not supported by this browser.";
+          // Update the embedded map
+          if (MAPS_API_KEY && MAPS_API_KEY !== 'YOUR_GOOGLE_MAPS_EMBED_API_KEY') {
+            // Google Maps Embed API v1 with API key — supports dynamic center
+            var newSrc = 'https://www.google.com/maps/embed/v1/search'
+              + '?key=' + MAPS_API_KEY
+              + '&q=pizza+restaurants'
+              + '&center=' + lat + ',' + lng
+              + '&zoom=13';
+            document.getElementById('map-frame').src = newSrc;
+            setGeoStatus('📍 Showing pizza near you.');
+          } else {
+            // No API key — fall back to a pre-built embed URL with coordinates in the link
+            // The link button above will still open Google Maps at the user's location.
+            setGeoStatus('📍 Location found! Click the button above to see pizza near you. (Add an API key to update the map automatically.)');
+          }
+        },
+        function(error) {
+          var msg;
+          switch (error.code) {
+            case error.PERMISSION_DENIED:
+              msg = 'Location access denied — showing San Francisco.'; break;
+            case error.POSITION_UNAVAILABLE:
+              msg = 'Location unavailable — showing San Francisco.'; break;
+            case error.TIMEOUT:
+              msg = 'Location request timed out — showing San Francisco.'; break;
+            default:
+              msg = 'Could not get location — showing San Francisco.';
+          }
+          setGeoStatus(msg);
+        },
+        { timeout: 8000, maximumAge: 60000 }
+      );
     }
-}
-</script>
+
+    function setGeoStatus(msg) {
+      document.getElementById('geo-status').textContent = msg;
+    }
+
+    // Run on page load
+    updateMapToUserLocation();
+  </script>
 
 </body>
 </html>
