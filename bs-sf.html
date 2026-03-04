@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -109,7 +110,7 @@
         <!-- Pizza Near Me Button -->
         <div style="padding: 10px; background: #fff; text-align:center;">
           <a id="btn-pizza-near-me"
-             href="https://www.google.com/maps/search/pizza+near+me/@<span id='latitude'>37.7797</span>,<span id='longitude'>-122.4316</span>,13z"
+             href="https://www.google.com/maps/search/pizza+near+me/@37.7797,-122.4316,13z"
              target="_blank"
              class="btn btn-danger">
             🍕 Click for pizza near you
@@ -165,17 +166,9 @@
   <script>
     // -------------------------------------------------------
     // Geolocation — update map and "pizza near you" link
+    // No API key required. Uses the legacy Google Maps embed
+    // format: maps.google.com/maps?q=...&output=embed
     // -------------------------------------------------------
-    // NOTE: To use the Google Maps Embed API v1 (which supports
-    // the ?key= param and dynamic center), replace the placeholder
-    // below with your own Google Maps Embed API key:
-    //   https://developers.google.com/maps/documentation/embed/get-api-key
-    //
-    // If you don't have a key yet, the fallback SF map will stay
-    // visible and the "pizza near you" link will still open Google
-    // Maps correctly using the user's coordinates.
-    // -------------------------------------------------------
-    var MAPS_API_KEY = 'AIzaSyAkR9km-vDnmRNBx0IvHez12fhy92c_bDs';
 
     function updateMapToUserLocation() {
       if (!navigator.geolocation) {
@@ -188,27 +181,19 @@
           var lat = position.coords.latitude.toFixed(6);
           var lng = position.coords.longitude.toFixed(6);
 
+          // Update the embedded map — no API key needed with this URL format
+          var newSrc = 'https://maps.google.com/maps'
+            + '?q=pizza+near+' + lat + ',' + lng
+            + '&t=m'
+            + '&z=13'
+            + '&output=embed';
+          document.getElementById('map-frame').src = newSrc;
+
           // Update the "pizza near you" button link
-          document.getElementById('latitude').textContent = lat;
-          document.getElementById('longitude').textContent = lng;
           var btn = document.getElementById('btn-pizza-near-me');
           btn.href = 'https://www.google.com/maps/search/pizza+near+me/@' + lat + ',' + lng + ',13z';
 
-          // Update the embedded map
-          if (MAPS_API_KEY && MAPS_API_KEY !== 'AIzaSyAkR9km-vDnmRNBx0IvHez12fhy92c_bDs') {
-            // Google Maps Embed API v1 with API key — supports dynamic center
-            var newSrc = 'https://www.google.com/maps/embed/v1/search'
-              + '?key=' + AIzaSyAkR9km-vDnmRNBx0IvHez12fhy92c_bDs
-              + '&q=pizza+restaurants'
-              + '&center=' + lat + ',' + lng
-              + '&zoom=13';
-            document.getElementById('map-frame').src = newSrc;
-            setGeoStatus('📍 Showing pizza near you.');
-          } else {
-            // No API key — fall back to a pre-built embed URL with coordinates in the link
-            // The link button above will still open Google Maps at the user's location.
-            setGeoStatus('📍 Location found! Click the button above to see pizza near you. (Add an API key to update the map automatically.)');
-          }
+          setGeoStatus('📍 Showing pizza near you.');
         },
         function(error) {
           var msg;
