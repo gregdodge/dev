@@ -278,10 +278,10 @@
         function(error) {
           var msg;
           switch (error.code) {
-            case error.PERMISSION_DENIED:    msg = 'Location access denied — showing San Francisco.'; break;
-            case error.POSITION_UNAVAILABLE: msg = 'Location unavailable — showing San Francisco.'; break;
-            case error.TIMEOUT:              msg = 'Location timed out — showing San Francisco.'; break;
-            default:                         msg = 'Could not get location — showing San Francisco.';
+            case error.PERMISSION_DENIED:    msg = 'Location access denied — Please use search box >'; break;
+            case error.POSITION_UNAVAILABLE: msg = 'Location unavailable — Please use search box >'; break;
+            case error.TIMEOUT:              msg = 'Location timed out — Please use search box >'; break;
+            default:                         msg = 'Could not get location — Please use search box >';
           }
           setGeoStatus(msg);
         },
