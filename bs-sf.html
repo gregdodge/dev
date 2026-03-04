@@ -21,7 +21,6 @@
       .col-sm-8 { width: 100% !important; }
     }
 
-    /* Branding */
     .navbar-brand {
       font-family: 'Alfa Slab One', serif;
       color: #c0392b !important;
@@ -29,17 +28,19 @@
       letter-spacing: 1px;
     }
 
-    /* Geolocation status message */
     #geo-status {
       font-size: 12px;
       color: #888;
       margin-top: 6px;
       text-align: center;
+      min-height: 18px;
     }
 
-    /* Pizza near you button */
-    #btn-pizza-near-me {
-      margin-bottom: 6px;
+    #search-status {
+      font-size: 11px;
+      color: #888;
+      margin-top: 4px;
+      min-height: 16px;
     }
   </style>
 </head>
@@ -121,9 +122,9 @@
         <!-- Map iframe -->
         <iframe
           id="map-frame"
-          src="https://www.google.com/maps/embed?pb=!1m16!1m12!1m3!1d25227.52705520998!2d-122.46159176285435!3d37.779706326369535!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!2m1!1spizza%20san%20francisco!5e0!3m2!1sen!2sus!4v1768365996220!5m2!1sen!2sus"
+          src="https://maps.google.com/maps?q=pizza+near+37.7797,-122.4316&t=m&z=13&output=embed"
           width="100%"
-          height="580"
+          height="565"
           style="border:0; display:block;"
           allowfullscreen=""
           loading="lazy"
@@ -136,11 +137,17 @@
       <!-- Right Sidebar -->
       <div class="col-sm-2 sidenav">
         <h5><strong>Find a Slice</strong></h5>
-        <form>
+        <form id="search-form" onsubmit="searchByLocation(event)">
           <div class="form-group">
-            <input type="text" class="form-control input-sm" placeholder="City or ZIP">
+            <input
+              type="text"
+              id="location-input"
+              class="form-control input-sm"
+              placeholder="City or ZIP"
+              autocomplete="off">
           </div>
           <button type="submit" class="btn btn-danger btn-sm btn-block">Search</button>
+          <div id="search-status"></div>
         </form>
 
         <hr>
@@ -164,15 +171,52 @@
   <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 
   <script>
-    // -------------------------------------------------------
-    // Geolocation — update map and "pizza near you" link
-    // No API key required. Uses the legacy Google Maps embed
-    // format: maps.google.com/maps?q=...&output=embed
-    // -------------------------------------------------------
 
+    // -------------------------------------------------------
+    // Shared: update the map iframe and the "near you" button
+    // -------------------------------------------------------
+    function updateMap(query, label) {
+      var src = 'https://maps.google.com/maps?q=' + encodeURIComponent(query)
+        + '&t=m&z=13&output=embed';
+      document.getElementById('map-frame').src = src;
+
+      // Also update the "pizza near you" button to open full Maps for that location
+      document.getElementById('btn-pizza-near-me').href =
+        'https://www.google.com/maps/search/' + encodeURIComponent(query);
+
+      if (label) setGeoStatus('📍 ' + label);
+    }
+
+    function setGeoStatus(msg) {
+      document.getElementById('geo-status').textContent = msg;
+    }
+
+    function setSearchStatus(msg) {
+      document.getElementById('search-status').textContent = msg;
+    }
+
+    // -------------------------------------------------------
+    // "Find a Slice" search form — city name or ZIP code
+    // -------------------------------------------------------
+    function searchByLocation(e) {
+      e.preventDefault();
+      var raw = document.getElementById('location-input').value.trim();
+      if (!raw) { setSearchStatus('Please enter a city or ZIP.'); return; }
+
+      setSearchStatus('Searching…');
+
+      // Build query: "pizza restaurants in <input>"
+      var query = 'pizza restaurants in ' + raw;
+      updateMap(query, 'Showing pizza near ' + raw);
+      setSearchStatus('');
+    }
+
+    // -------------------------------------------------------
+    // Geolocation — auto-center on user's location on load
+    // -------------------------------------------------------
     function updateMapToUserLocation() {
       if (!navigator.geolocation) {
-        setGeoStatus('Geolocation not supported by your browser — showing San Francisco.');
+        setGeoStatus('Geolocation not supported — showing San Francisco.');
         return;
       }
 
@@ -181,31 +225,19 @@
           var lat = position.coords.latitude.toFixed(6);
           var lng = position.coords.longitude.toFixed(6);
 
-          // Update the embedded map — no API key needed with this URL format
-          var newSrc = 'https://maps.google.com/maps'
-            + '?q=pizza+near+' + lat + ',' + lng
-            + '&t=m'
-            + '&z=13'
-            + '&output=embed';
-          document.getElementById('map-frame').src = newSrc;
+          updateMap('pizza near ' + lat + ',' + lng, 'Showing pizza near you.');
 
-          // Update the "pizza near you" button link
-          var btn = document.getElementById('btn-pizza-near-me');
-          btn.href = 'https://www.google.com/maps/search/pizza+near+me/@' + lat + ',' + lng + ',13z';
-
-          setGeoStatus('📍 Showing pizza near you.');
+          // Update the "pizza near you" button link with real coords
+          document.getElementById('btn-pizza-near-me').href =
+            'https://www.google.com/maps/search/pizza+near+me/@' + lat + ',' + lng + ',13z';
         },
         function(error) {
           var msg;
           switch (error.code) {
-            case error.PERMISSION_DENIED:
-              msg = 'Location access denied — showing San Francisco.'; break;
-            case error.POSITION_UNAVAILABLE:
-              msg = 'Location unavailable — showing San Francisco.'; break;
-            case error.TIMEOUT:
-              msg = 'Location request timed out — showing San Francisco.'; break;
-            default:
-              msg = 'Could not get location — showing San Francisco.';
+            case error.PERMISSION_DENIED:    msg = 'Location access denied — showing San Francisco.'; break;
+            case error.POSITION_UNAVAILABLE: msg = 'Location unavailable — showing San Francisco.'; break;
+            case error.TIMEOUT:              msg = 'Location timed out — showing San Francisco.'; break;
+            default:                         msg = 'Could not get location — showing San Francisco.';
           }
           setGeoStatus(msg);
         },
@@ -213,12 +245,9 @@
       );
     }
 
-    function setGeoStatus(msg) {
-      document.getElementById('geo-status').textContent = msg;
-    }
-
-    // Run on page load
+    // Run geolocation on load
     updateMapToUserLocation();
+
   </script>
 
 </body>
