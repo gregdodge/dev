@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,18 +8,75 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Alfa%20Slab%20One">
   <style>
-    body { font-family: Tahoma, sans-serif; }
-    .navbar { margin-bottom: 0; border-radius: 0; }
-    .row.content { height: 650px; }
-    .sidenav { padding-top: 20px; background-color: #f1f1f1; height: 100%; }
-    footer { background-color: #555; color: white; padding: 15px; }
-
-    @media screen and (max-width: 800px) {
-      .sidenav { height: auto; padding: 15px; }
-      .row.content { height: auto; }
-      .col-sm-2 { display: none !important; }
-      .col-sm-8 { width: 100% !important; }
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      font-family: Tahoma, sans-serif;
     }
+
+    body {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Remove Bootstrap's default container padding */
+    .container-fluid {
+      padding-left: 0;
+      padding-right: 0;
+    }
+
+    /* Remove Bootstrap's default row gutters */
+    .row {
+      margin-left: 0;
+      margin-right: 0;
+    }
+
+    /* Remove column side padding so map and sidebars touch edges */
+    .col-sm-2,
+    .col-sm-8 {
+      padding-left: 0;
+      padding-right: 0;
+    }
+
+    /* Override Bootstrap's % width so the middle column truly fills remaining space */
+    .col-sm-8 {
+      width: auto;
+      flex: 1;
+    }
+
+    .navbar {
+      margin-bottom: 0;
+      border-radius: 0;
+    }
+
+    .page-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+    }
+
+    .row.content {
+      flex: 1;
+      min-height: 600px;
+      display: flex;
+    }
+
+    .sidenav {
+      padding: 20px 14px;
+      background-color: #f1f1f1;
+    }
+
+    footer {
+      background-color: #555;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    footer p { margin: 0; }
 
     .navbar-brand {
       font-family: 'Alfa Slab One', serif;
@@ -30,8 +88,8 @@
     #geo-status {
       font-size: 12px;
       color: #888;
-      margin-top: 6px;
       text-align: center;
+      padding: 4px 0 2px;
       min-height: 18px;
     }
 
@@ -40,6 +98,21 @@
       color: #888;
       margin-top: 4px;
       min-height: 16px;
+    }
+
+    #slices-header {
+      background-color: #c0392b;
+      color: #fff;
+      font-family: 'Alfa Slab One', serif;
+      font-size: 18px;
+      padding: 8px 14px;
+      letter-spacing: 0.5px;
+    }
+
+    @media screen and (max-width: 800px) {
+      .col-sm-2 { display: none !important; }
+      .col-sm-8 { width: 100% !important; }
+      .row.content { min-height: auto; }
     }
   </style>
 </head>
@@ -73,94 +146,90 @@
   </nav>
 
   <!-- Page Content -->
-  <div class="container-fluid">
-    <div class="row content">
+  <div class="page-wrapper">
+    <div class="container-fluid" style="flex:1; display:flex; flex-direction:column; width:100%;">
+      <div class="row content">
 
-      <!-- Left Sidebar -->
-      <div class="col-sm-2 sidenav">
-        <p>
-          <a href="https://twitter.com/slicefinder"
-             class="twitter-follow-button"
-             data-show-count="false"
-             data-lang="en">
-            Follow @slicefinder
-          </a>
-        </p>
+        <!-- Left Sidebar -->
+        <div class="col-sm-2 sidenav">
+          <p>
+            <a href="https://twitter.com/slicefinder"
+               class="twitter-follow-button"
+               data-show-count="false"
+               data-lang="en">
+              Follow @slicefinder
+            </a>
+          </p>
 
-        <h5><strong>Most Reviewed</strong></h5>
-        <ul class="list-unstyled" style="font-size:13px;">
-          <li><a href="#">Tony's SF</a></li>
-          <li><a href="#">Arinell Pizza</a></li>
-          <li><a href="#">Goat Hill Pizza</a></li>
-          <li><a href="#">Golden Boy Pizza</a></li>
-        </ul>
+          <h5><strong>Most Reviewed</strong></h5>
+          <ul class="list-unstyled" style="font-size:13px;">
+            <li><a href="#">Tony's SF</a></li>
+            <li><a href="#">Arinell Pizza</a></li>
+            <li><a href="#">Goat Hill Pizza</a></li>
+            <li><a href="#">Golden Boy Pizza</a></li>
+          </ul>
 
-        <h5><strong>Top Reviewers</strong></h5>
-        <ul class="list-unstyled" style="font-size:13px;">
-          <li>gregdodge &nbsp;<span class="badge">85</span></li>
-          <li>fergusontj &nbsp;<span class="badge">77</span></li>
-          <li>KingTut &nbsp;<span class="badge">34</span></li>
-          <li>wintergreenta &nbsp;<span class="badge">32</span></li>
-        </ul>
-      </div>
-
-      <!-- Main Content -->
-      <div class="col-sm-8" style="padding:0;">
-
-        <!-- Pizza Near Me Button -->
-        <div style="padding: 10px; background: #fff; text-align:center;">
-          <a id="btn-pizza-near-me"
-             href="https://www.google.com/maps/search/pizza+near+me/@37.7797,-122.4316,13z"
-             target="_blank"
-             class="btn btn-danger">
-            🍕 Click for pizza near you
-          </a>
-          <div id="geo-status">Detecting your location…</div>
+          <h5><strong>Top Reviewers</strong></h5>
+          <ul class="list-unstyled" style="font-size:13px;">
+            <li>gregdodge &nbsp;<span class="badge">85</span></li>
+            <li>fergusontj &nbsp;<span class="badge">77</span></li>
+            <li>KingTut &nbsp;<span class="badge">34</span></li>
+            <li>wintergreenta &nbsp;<span class="badge">32</span></li>
+          </ul>
         </div>
 
-        <!-- Map iframe -->
-        <iframe
-          id="map-frame"
-          src="https://maps.google.com/maps?q=pizza+near+37.7797,-122.4316&t=m&z=13&output=embed"
-          width="100%"
-          height="565"
-          style="border:0; display:block;"
-          allowfullscreen=""
-          loading="lazy"
-          referrerpolicy="no-referrer-when-downgrade"
-          title="Pizza restaurants near you">
-        </iframe>
+        <!-- Main Content -->
+        <div class="col-sm-8" style="display:flex; flex-direction:column; flex:1;">
+
+          <!-- "Slices found!" header -->
+          <div id="slices-header">Slices found!</div>
+
+          <!-- Geo status -->
+          <div id="geo-status">Detecting your location…</div>
+
+          <!-- Map iframe -->
+          <iframe
+            id="map-frame"
+            src="https://maps.google.com/maps?q=pizza+near+37.7797,-122.4316&t=m&z=13&output=embed"
+            width="100%"
+            style="border:0; display:block; flex:1; min-height:400px;"
+            allowfullscreen=""
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            title="Pizza restaurants near you">
+          </iframe>
+
+        </div>
+
+        <!-- Right Sidebar -->
+        <div class="col-sm-2 sidenav">
+          <h5><strong>Find your slice</strong></h5>
+          <form id="search-form" onsubmit="searchByLocation(event)">
+            <div class="form-group">
+              <input
+                type="text"
+                id="location-input"
+                class="form-control input-sm"
+                placeholder="City or ZIP"
+                autocomplete="off">
+            </div>
+            <button type="submit" class="btn btn-danger btn-sm btn-block">Search</button>
+            <div id="search-status"></div>
+          </form>
+
+          <hr>
+
+          <h5><strong>Add a Pizzeria</strong></h5>
+          <p style="font-size:12px;">Know a great spot that's missing? Help the community!</p>
+          <a href="#" class="btn btn-default btn-sm btn-block">+ Add Restaurant</a>
+        </div>
 
       </div>
-
-      <!-- Right Sidebar -->
-      <div class="col-sm-2 sidenav">
-        <h5><strong>Find a Slice</strong></h5>
-        <form id="search-form" onsubmit="searchByLocation(event)">
-          <div class="form-group">
-            <input
-              type="text"
-              id="location-input"
-              class="form-control input-sm"
-              placeholder="City or ZIP"
-              autocomplete="off">
-          </div>
-          <button type="submit" class="btn btn-danger btn-sm btn-block">Search</button>
-          <div id="search-status"></div>
-        </form>
-
-        <hr>
-
-        <h5><strong>Add a Pizzeria</strong></h5>
-        <p style="font-size:12px;">Know a great spot that's missing? Help the community!</p>
-        <a href="#" class="btn btn-default btn-sm btn-block">+ Add Restaurant</a>
-      </div>
-
     </div>
   </div>
 
   <!-- Footer -->
-  <footer class="text-center">
+  <footer>
     <p>SliceFinder &copy;2026</p>
   </footer>
 
@@ -171,18 +240,10 @@
 
   <script>
 
-    // -------------------------------------------------------
-    // Shared: update the map iframe and the "near you" button
-    // -------------------------------------------------------
     function updateMap(query, label) {
       var src = 'https://maps.google.com/maps?q=' + encodeURIComponent(query)
         + '&t=m&z=13&output=embed';
       document.getElementById('map-frame').src = src;
-
-      // Also update the "pizza near you" button to open full Maps for that location
-      document.getElementById('btn-pizza-near-me').href =
-        'https://www.google.com/maps/search/' + encodeURIComponent(query);
-
       if (label) setGeoStatus('📍 ' + label);
     }
 
@@ -194,41 +255,25 @@
       document.getElementById('search-status').textContent = msg;
     }
 
-    // -------------------------------------------------------
-    // "Find a Slice" search form — city name or ZIP code
-    // -------------------------------------------------------
     function searchByLocation(e) {
       e.preventDefault();
       var raw = document.getElementById('location-input').value.trim();
       if (!raw) { setSearchStatus('Please enter a city or ZIP.'); return; }
-
       setSearchStatus('Searching…');
-
-      // Build query: "pizza restaurants in <input>"
-      var query = 'pizza restaurants in ' + raw;
-      updateMap(query, 'Showing pizza near ' + raw);
+      updateMap('pizza restaurants in ' + raw, 'Showing pizza near ' + raw);
       setSearchStatus('');
     }
 
-    // -------------------------------------------------------
-    // Geolocation — auto-center on user's location on load
-    // -------------------------------------------------------
     function updateMapToUserLocation() {
       if (!navigator.geolocation) {
         setGeoStatus('Geolocation not supported — showing San Francisco.');
         return;
       }
-
       navigator.geolocation.getCurrentPosition(
         function(position) {
           var lat = position.coords.latitude.toFixed(6);
           var lng = position.coords.longitude.toFixed(6);
-
           updateMap('pizza near ' + lat + ',' + lng, 'Showing pizza near you.');
-
-          // Update the "pizza near you" button link with real coords
-          document.getElementById('btn-pizza-near-me').href =
-            'https://www.google.com/maps/search/pizza+near+me/@' + lat + ',' + lng + ',13z';
         },
         function(error) {
           var msg;
@@ -244,7 +289,6 @@
       );
     }
 
-    // Run geolocation on load
     updateMapToUserLocation();
 
   </script>
