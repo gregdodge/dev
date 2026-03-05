@@ -277,7 +277,7 @@
       var src = 'https://maps.google.com/maps?q=' + encodeURIComponent(query)
         + '&t=m&z=13&output=embed';
       document.getElementById('map-frame').src = src;
-      if (label) setGeoStatus('📍 ' + label);
+      if (label) setGeoStatus('🍕 ' + label);
     }
 
     function setGeoStatus(msg) {
@@ -304,22 +304,22 @@
     // Geolocation on load
     function updateMapToUserLocation() {
       if (!navigator.geolocation) {
-        setGeoStatus('Geolocation not supported — showing San Francisco.');
+        setGeoStatus('Showing pizza near you ... Not working? Try searching >');
         return;
       }
       navigator.geolocation.getCurrentPosition(
         function(position) {
           var lat = position.coords.latitude.toFixed(6);
           var lng = position.coords.longitude.toFixed(6);
-          updateMap('pizza near ' + lat + ',' + lng, 'Showing pizza near you.');
+          updateMap('pizza near ' + lat + ',' + lng, 'Showing pizza near you ... Not working? Try searching >');
         },
         function(error) {
           var msg;
           switch (error.code) {
-            case error.PERMISSION_DENIED:    msg = 'Location access denied — showing San Francisco.'; break;
-            case error.POSITION_UNAVAILABLE: msg = 'Location unavailable — showing San Francisco.'; break;
-            case error.TIMEOUT:              msg = 'Location timed out — showing San Francisco.'; break;
-            default:                         msg = 'Could not get location — showing San Francisco.';
+            case error.PERMISSION_DENIED:    msg = 'Showing pizza near you ... Not working? Try searching >'; break;
+            case error.POSITION_UNAVAILABLE: msg = 'Showing pizza near you ... Not working? Try searching >'; break;
+            case error.TIMEOUT:              msg = 'Showing pizza near you ... Not working? Try searching >'; break;
+            default:                         msg = 'Showing pizza near you ... Not working? Try searching >';
           }
           setGeoStatus(msg);
         },
