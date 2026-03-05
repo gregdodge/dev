@@ -306,7 +306,7 @@
     // Geolocation on load
     function updateMapToUserLocation() {
       if (!navigator.geolocation) {
-        setGeoStatus('Showing pizza near you ... <span style="display:none;" class="mobile"><br></span>Not looking right? Try search box.');
+        setGeoStatus('Showing pizza near you ... Not looking right? Try search');
         return;
       }
       navigator.geolocation.getCurrentPosition(
@@ -318,10 +318,10 @@
         function(error) {
           var msg;
           switch (error.code) {
-            case error.PERMISSION_DENIED:    msg = 'Showing pizza near you ... <span style="display:none;" class="mobile"><br></span>not looking right? Try search box.'; break;
-            case error.POSITION_UNAVAILABLE: msg = 'Showing pizza near you ... <span style="display:none;" class="mobile"><br></span>Not looking right? Try search box.'; break;
-            case error.TIMEOUT:              msg = 'Showing pizza near you ... <span style="display:none;" class="mobile"><br></span>not looking right? Try search box.'; break;
-            default:                         msg = 'Showing pizza near you ... <span style="display:none;" class="mobile"><br></span>not looking right? Try search box.';
+            case error.PERMISSION_DENIED:    msg = 'Showing pizza near you ... Not looking right? Try search'; break;
+            case error.POSITION_UNAVAILABLE: msg = 'Showing pizza near you ... Not looking right? Try search'; break;
+            case error.TIMEOUT:              msg = 'Showing pizza near you ... Not looking right? Try search'; break;
+            default:                         msg = 'Showing pizza near you ... Not looking right? Try search';
           }
           setGeoStatus(msg);
         },
