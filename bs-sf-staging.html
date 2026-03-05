@@ -1,12 +1,11 @@
-
 <!DOCTYPE html>
-<html lang="en">
-<head>
+<html lang="en"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>SliceFinder - Find Your Slice</title>
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Alfa%20Slab%20One">
+  <link rel="stylesheet" href="SliceFinder%20-%20Find%20Your%20Slice_files/bootstrap.min.css">
+  <link rel="stylesheet" href="SliceFinder%20-%20Find%20Your%20Slice_files/css.css">
   <style>
     html, body {
       height: 100%;
@@ -20,26 +19,22 @@
       flex-direction: column;
     }
 
-    /* Remove Bootstrap's default container padding */
     .container-fluid {
       padding-left: 0;
       padding-right: 0;
     }
 
-    /* Remove Bootstrap's default row gutters */
     .row {
       margin-left: 0;
       margin-right: 0;
     }
 
-    /* Remove column side padding so map and sidebars touch edges */
     .col-sm-2,
     .col-sm-8 {
       padding-left: 0;
       padding-right: 0;
     }
 
-    /* Override Bootstrap's % width so the middle column truly fills remaining space */
     .col-sm-8 {
       width: auto;
       flex: 1;
@@ -48,6 +43,13 @@
     .navbar {
       margin-bottom: 0;
       border-radius: 0;
+    }
+
+    .navbar-brand {
+      font-family: 'Alfa Slab One', serif;
+      color: #c0392b !important;
+      font-size: 24px;
+      letter-spacing: 1px;
     }
 
     .page-wrapper {
@@ -78,29 +80,6 @@
 
     footer p { margin: 0; }
 
-    .navbar-brand {
-      font-family: 'Alfa Slab One', serif;
-      color: #c0392b !important;
-      font-size: 24px;
-      letter-spacing: 1px;
-    }
-
-    #geo-status {
-      font-size: 16px;
-      font-weight: bold;
-      color: #888;
-      text-align: center;
-      padding: 5px 0 5px;
-      min-height: 18px;
-    }
-
-    #search-status {
-      font-size: 11px;
-      color: #888;
-      margin-top: 4px;
-      min-height: 16px;
-    }
-
     #slices-header {
       background-color: #c0392b;
       color: #fff;
@@ -110,19 +89,58 @@
       letter-spacing: 0.5px;
     }
 
+    #geo-status {
+      font-size: 12px;
+      color: #888;
+      text-align: center;
+      padding: 4px 0 2px;
+      min-height: 18px;
+    }
+
+    #search-status,
+    #mobile-search-status {
+      font-size: 11px;
+      color: #888;
+      margin-top: 4px;
+      min-height: 16px;
+    }
+
+    /* Mobile search bar — hidden on desktop, shown on mobile */
+    #mobile-search {
+      display: none;
+      padding: 10px 12px 6px;
+      background-color: #f1f1f1;
+      border-bottom: 1px solid #ddd;
+    }
+
+    #mobile-search .input-group {
+      display: flex;
+    }
+
+    #mobile-search input {
+      flex: 1;
+      border-radius: 4px 0 0 4px;
+    }
+
+    #mobile-search button {
+      border-radius: 0 4px 4px 0;
+    }
+
     @media screen and (max-width: 800px) {
-      .col-sm-2 { display: none !important; }
-      .col-sm-8 { width: 100% !important; }
-      .row.content { min-height: auto; }
+      /* Show mobile search, hide sidebars */
+      #mobile-search        { display: block; }
+      .col-sm-2             { display: none !important; }
+      .col-sm-8             { width: 100% !important; }
+      .row.content          { min-height: auto; }
     }
   </style>
-</head>
+<script charset="utf-8" src="SliceFinder%20-%20Find%20Your%20Slice_files/button.856debeac157d9669cf51e73a08fbc93.js"></script></head>
 
 <body>
 
   <!-- Navigation -->
   <nav class="navbar navbar-inverse">
-   <div class="container-fluid" style="margin:0px 10px;">
+    <div class="container-fluid">
       <div class="navbar-header">
         <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-navbar">
           <span class="sr-only">Toggle navigation</span>
@@ -146,6 +164,17 @@
     </div>
   </nav>
 
+  <!-- Mobile search bar (visible only at ≤800px, above the map) -->
+  <div id="mobile-search">
+    <div class="input-group">
+      <input type="text" id="mobile-location-input" class="form-control input-sm" placeholder="City or ZIP — find your slice" autocomplete="off" onkeydown="if(event.key==='Enter'){mobileSearch();event.preventDefault();}">
+      <span class="input-group-btn">
+        <button class="btn btn-danger btn-sm" type="button" onclick="mobileSearch()">Search</button>
+      </span>
+    </div>
+    <div id="mobile-search-status"></div>
+  </div>
+
   <!-- Page Content -->
   <div class="page-wrapper">
     <div class="container-fluid" style="flex:1; display:flex; flex-direction:column; width:100%;">
@@ -154,12 +183,7 @@
         <!-- Left Sidebar -->
         <div class="col-sm-2 sidenav">
           <p>
-            <a href="https://twitter.com/slicefinder"
-               class="twitter-follow-button"
-               data-show-count="false"
-               data-lang="en">
-              Follow @slicefinder
-            </a>
+            <iframe id="twitter-widget-0" scrolling="no" frameborder="0" allowtransparency="true" allowfullscreen="true" class="twitter-follow-button twitter-follow-button-rendered" style="position: static; visibility: visible; width: 148px; height: 20px;" title="Twitter Follow Button" src="SliceFinder%20-%20Find%20Your%20Slice_files/follow_button.html" data-screen-name="slicefinder"></iframe>
           </p>
 
           <h5><strong>Most Reviewed</strong></h5>
@@ -182,22 +206,10 @@
         <!-- Main Content -->
         <div class="col-sm-8" style="display:flex; flex-direction:column; flex:1;">
 
-          <!-- "Slices found!" header -->
           <div id="slices-header">Slices found!</div>
+          <div id="geo-status">📍 Showing pizza near you.</div>
 
-          <!-- Geo status -->
-          <div id="geo-status">Detecting your location…</div>
-
-          <!-- Map iframe -->
-          <iframe
-            id="map-frame"
-            src="https://maps.google.com/maps?q=pizza+near+37.7797,-122.4316&t=m&z=13&output=embed"
-            width="100%"
-            style="border:0; display:block; flex:1; min-height:400px;"
-            allowfullscreen=""
-            loading="lazy"
-            referrerpolicy="no-referrer-when-downgrade"
-            title="Pizza restaurants near you">
+          <iframe id="map-frame" src="https://maps.google.com/maps?q=pizza%20near%2036.180419%2C-86.788458&amp;t=m&amp;z=13&amp;output=embed" width="100%" style="border:0; display:block; flex:1; min-height:400px;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Pizza restaurants near you">
           </iframe>
 
         </div>
@@ -205,14 +217,9 @@
         <!-- Right Sidebar -->
         <div class="col-sm-2 sidenav">
           <h5><strong>Find your slice</strong></h5>
-          <form id="search-form" onsubmit="searchByLocation(event)">
+          <form id="search-form" onsubmit="desktopSearch(event)">
             <div class="form-group">
-              <input
-                type="text"
-                id="location-input"
-                class="form-control input-sm"
-                placeholder="City or ZIP"
-                autocomplete="off">
+              <input type="text" id="location-input" class="form-control input-sm" placeholder="City or ZIP" autocomplete="off">
             </div>
             <button type="submit" class="btn btn-danger btn-sm btn-block">Search</button>
             <div id="search-status"></div>
@@ -231,13 +238,13 @@
 
   <!-- Footer -->
   <footer>
-    <p>SliceFinder &copy;2026</p>
+    <p>SliceFinder ©2026</p>
   </footer>
 
   <!-- Scripts -->
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-  <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+  <script src="SliceFinder%20-%20Find%20Your%20Slice_files/jquery.min.js"></script>
+  <script src="SliceFinder%20-%20Find%20Your%20Slice_files/bootstrap.min.js"></script>
+  <script async="" src="SliceFinder%20-%20Find%20Your%20Slice_files/widgets.js" charset="utf-8"></script>
 
   <script>
 
@@ -245,26 +252,31 @@
       var src = 'https://maps.google.com/maps?q=' + encodeURIComponent(query)
         + '&t=m&z=13&output=embed';
       document.getElementById('map-frame').src = src;
-      if (label) setGeoStatus('🍕 ' + label);
+      if (label) setGeoStatus('📍 ' + label);
     }
 
     function setGeoStatus(msg) {
       document.getElementById('geo-status').textContent = msg;
     }
 
-    function setSearchStatus(msg) {
-      document.getElementById('search-status').textContent = msg;
-    }
-
-    function searchByLocation(e) {
+    // Desktop search (right sidebar)
+    function desktopSearch(e) {
       e.preventDefault();
       var raw = document.getElementById('location-input').value.trim();
-      if (!raw) { setSearchStatus('Please enter a city or ZIP.'); return; }
-      setSearchStatus('Searching…');
+      if (!raw) { document.getElementById('search-status').textContent = 'Please enter a city or ZIP.'; return; }
+      document.getElementById('search-status').textContent = '';
       updateMap('pizza restaurants in ' + raw, 'Showing pizza near ' + raw);
-      setSearchStatus('');
     }
 
+    // Mobile search (above map)
+    function mobileSearch() {
+      var raw = document.getElementById('mobile-location-input').value.trim();
+      if (!raw) { document.getElementById('mobile-search-status').textContent = 'Please enter a city or ZIP.'; return; }
+      document.getElementById('mobile-search-status').textContent = '';
+      updateMap('pizza restaurants in ' + raw, 'Showing pizza near ' + raw);
+    }
+
+    // Geolocation on load
     function updateMapToUserLocation() {
       if (!navigator.geolocation) {
         setGeoStatus('Geolocation not supported — showing San Francisco.');
@@ -274,15 +286,15 @@
         function(position) {
           var lat = position.coords.latitude.toFixed(6);
           var lng = position.coords.longitude.toFixed(6);
-          updateMap('pizza near ' + lat + ',' + lng, 'Showing pizza near you ... Not working? Try searching >');
+          updateMap('pizza near ' + lat + ',' + lng, 'Showing pizza near you.');
         },
         function(error) {
           var msg;
           switch (error.code) {
-            case error.PERMISSION_DENIED:    msg = 'Location access denied — Please use search box >'; break;
-            case error.POSITION_UNAVAILABLE: msg = 'Location unavailable — Please use search box >'; break;
-            case error.TIMEOUT:              msg = 'Location timed out — Please use search box >'; break;
-            default:                         msg = 'Could not get location — Please use search box >';
+            case error.PERMISSION_DENIED:    msg = 'Location access denied — showing San Francisco.'; break;
+            case error.POSITION_UNAVAILABLE: msg = 'Location unavailable — showing San Francisco.'; break;
+            case error.TIMEOUT:              msg = 'Location timed out — showing San Francisco.'; break;
+            default:                         msg = 'Could not get location — showing San Francisco.';
           }
           setGeoStatus(msg);
         },
@@ -294,5 +306,6 @@
 
   </script>
 
-</body>
-</html>
+
+
+<iframe id="rufous-sandbox" scrolling="no" frameborder="0" allowtransparency="true" allowfullscreen="true" style="position: absolute; visibility: hidden; display: none; width: 0px; height: 0px; padding: 0px; border: medium;" title="Twitter analytics iframe"></iframe></body></html>
