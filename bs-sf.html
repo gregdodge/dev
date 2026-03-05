@@ -19,26 +19,22 @@
       flex-direction: column;
     }
 
-    /* Remove Bootstrap's default container padding */
     .container-fluid {
       padding-left: 0;
       padding-right: 0;
     }
 
-    /* Remove Bootstrap's default row gutters */
     .row {
       margin-left: 0;
       margin-right: 0;
     }
 
-    /* Remove column side padding so map and sidebars touch edges */
     .col-sm-2,
     .col-sm-8 {
       padding-left: 0;
       padding-right: 0;
     }
 
-    /* Override Bootstrap's % width so the middle column truly fills remaining space */
     .col-sm-8 {
       width: auto;
       flex: 1;
@@ -47,6 +43,13 @@
     .navbar {
       margin-bottom: 0;
       border-radius: 0;
+    }
+
+    .navbar-brand {
+      font-family: 'Alfa Slab One', serif;
+      color: #c0392b !important;
+      font-size: 24px;
+      letter-spacing: 1px;
     }
 
     .page-wrapper {
@@ -77,11 +80,13 @@
 
     footer p { margin: 0; }
 
-    .navbar-brand {
+    #slices-header {
+      background-color: #c0392b;
+      color: #fff;
       font-family: 'Alfa Slab One', serif;
-      color: #c0392b !important;
-      font-size: 24px;
-      letter-spacing: 1px;
+      font-size: 18px;
+      padding: 8px 14px;
+      letter-spacing: 0.5px;
     }
 
     #geo-status {
@@ -93,26 +98,41 @@
       min-height: 18px;
     }
 
-    #search-status {
+    #search-status,
+    #mobile-search-status {
       font-size: 11px;
       color: #888;
       margin-top: 4px;
       min-height: 16px;
     }
 
-    #slices-header {
-      background-color: #c0392b;
-      color: #fff;
-      font-family: 'Alfa Slab One', serif;
-      font-size: 18px;
-      padding: 8px 14px;
-      letter-spacing: 0.5px;
+    /* Mobile search bar — hidden on desktop, shown on mobile */
+    #mobile-search {
+      display: none;
+      padding: 10px 12px 6px;
+      background-color: #f1f1f1;
+      border-bottom: 1px solid #ddd;
+    }
+
+    #mobile-search .input-group {
+      display: flex;
+    }
+
+    #mobile-search input {
+      flex: 1;
+      border-radius: 4px 0 0 4px;
+    }
+
+    #mobile-search button {
+      border-radius: 0 4px 4px 0;
     }
 
     @media screen and (max-width: 800px) {
-      .col-sm-2 { display: none !important; }
-      .col-sm-8 { width: 100% !important; }
-      .row.content { min-height: auto; }
+      /* Show mobile search, hide sidebars */
+      #mobile-search        { display: block; }
+      .col-sm-2             { display: none !important; }
+      .col-sm-8             { width: 100% !important; }
+      .row.content          { min-height: auto; }
     }
   </style>
 </head>
@@ -144,6 +164,24 @@
       </div>
     </div>
   </nav>
+
+  <!-- Mobile search bar (visible only at ≤800px, above the map) -->
+  <div id="mobile-search">
+    <div class="input-group">
+      <input
+        type="text"
+        id="mobile-location-input"
+        class="form-control input-sm"
+        placeholder="City or ZIP — find your slice"
+        autocomplete="off"
+        style="width:75%;"
+        onkeydown="if(event.key==='Enter'){mobileSearch();event.preventDefault();}">
+      <span class="input-group-btn">
+        <button class="btn btn-danger btn-sm" type="button" onclick="mobileSearch()">Search</button>
+      </span>
+    </div>
+    <div id="mobile-search-status"></div>
+  </div>
 
   <!-- Page Content -->
   <div class="page-wrapper">
@@ -181,13 +219,9 @@
         <!-- Main Content -->
         <div class="col-sm-8" style="display:flex; flex-direction:column; flex:1;">
 
-          <!-- "Slices found!" header -->
           <div id="slices-header">Slices found!</div>
-
-          <!-- Geo status -->
           <div id="geo-status">Detecting your location…</div>
 
-          <!-- Map iframe -->
           <iframe
             id="map-frame"
             src="https://maps.google.com/maps?q=pizza+near+37.7797,-122.4316&t=m&z=13&output=embed"
@@ -204,7 +238,7 @@
         <!-- Right Sidebar -->
         <div class="col-sm-2 sidenav">
           <h5><strong>Find your slice</strong></h5>
-          <form id="search-form" onsubmit="searchByLocation(event)">
+          <form id="search-form" onsubmit="desktopSearch(event)">
             <div class="form-group">
               <input
                 type="text"
@@ -251,22 +285,27 @@
       document.getElementById('geo-status').textContent = msg;
     }
 
-    function setSearchStatus(msg) {
-      document.getElementById('search-status').textContent = msg;
-    }
-
-    function searchByLocation(e) {
+    // Desktop search (right sidebar)
+    function desktopSearch(e) {
       e.preventDefault();
       var raw = document.getElementById('location-input').value.trim();
-      if (!raw) { setSearchStatus('Please enter a city or ZIP.'); return; }
-      setSearchStatus('Searching…');
+      if (!raw) { document.getElementById('search-status').textContent = 'Please enter a city or ZIP.'; return; }
+      document.getElementById('search-status').textContent = '';
       updateMap('pizza restaurants in ' + raw, 'Showing pizza near ' + raw);
-      setSearchStatus('');
     }
 
+    // Mobile search (above map)
+    function mobileSearch() {
+      var raw = document.getElementById('mobile-location-input').value.trim();
+      if (!raw) { document.getElementById('mobile-search-status').textContent = 'Please enter a city or ZIP.'; return; }
+      document.getElementById('mobile-search-status').textContent = '';
+      updateMap('pizza restaurants in ' + raw, 'Showing pizza near ' + raw);
+    }
+
+    // Geolocation on load
     function updateMapToUserLocation() {
       if (!navigator.geolocation) {
-        setGeoStatus('Geolocation not supported — showing San Francisco.');
+        setGeoStatus('Showing pizza near you ... Not working? Try searching >');
         return;
       }
       navigator.geolocation.getCurrentPosition(
@@ -278,10 +317,10 @@
         function(error) {
           var msg;
           switch (error.code) {
-            case error.PERMISSION_DENIED:    msg = 'Location access denied — Please use search box >'; break;
-            case error.POSITION_UNAVAILABLE: msg = 'Location unavailable — Please use search box >'; break;
-            case error.TIMEOUT:              msg = 'Location timed out — Please use search box >'; break;
-            default:                         msg = 'Could not get location — Please use search box >';
+            case error.PERMISSION_DENIED:    msg = 'Showing pizza near you ... Not working? Try searching >'; break;
+            case error.POSITION_UNAVAILABLE: msg = 'Showing pizza near you ... Not working? Try searching >'; break;
+            case error.TIMEOUT:              msg = 'Showing pizza near you ... Not working? Try searching >'; break;
+            default:                         msg = 'Showing pizza near you ... Not working? Try searching >';
           }
           setGeoStatus(msg);
         },
