@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="en"><head>
-<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<html lang="en">
+<head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>SliceFinder - Find Your Slice</title>
-  <link rel="stylesheet" href="SliceFinder%20-%20Find%20Your%20Slice_files/bootstrap.min.css">
-  <link rel="stylesheet" href="SliceFinder%20-%20Find%20Your%20Slice_files/css.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Alfa%20Slab%20One">
   <style>
     html, body {
       height: 100%;
@@ -134,7 +134,7 @@
       .row.content          { min-height: auto; }
     }
   </style>
-<script charset="utf-8" src="SliceFinder%20-%20Find%20Your%20Slice_files/button.856debeac157d9669cf51e73a08fbc93.js"></script></head>
+</head>
 
 <body>
 
@@ -167,7 +167,13 @@
   <!-- Mobile search bar (visible only at ≤800px, above the map) -->
   <div id="mobile-search">
     <div class="input-group">
-      <input type="text" id="mobile-location-input" class="form-control input-sm" placeholder="City or ZIP — find your slice" autocomplete="off" onkeydown="if(event.key==='Enter'){mobileSearch();event.preventDefault();}">
+      <input
+        type="text"
+        id="mobile-location-input"
+        class="form-control input-sm"
+        placeholder="City or ZIP — find your slice"
+        autocomplete="off"
+        onkeydown="if(event.key==='Enter'){mobileSearch();event.preventDefault();}">
       <span class="input-group-btn">
         <button class="btn btn-danger btn-sm" type="button" onclick="mobileSearch()">Search</button>
       </span>
@@ -183,7 +189,12 @@
         <!-- Left Sidebar -->
         <div class="col-sm-2 sidenav">
           <p>
-            <iframe id="twitter-widget-0" scrolling="no" frameborder="0" allowtransparency="true" allowfullscreen="true" class="twitter-follow-button twitter-follow-button-rendered" style="position: static; visibility: visible; width: 148px; height: 20px;" title="Twitter Follow Button" src="SliceFinder%20-%20Find%20Your%20Slice_files/follow_button.html" data-screen-name="slicefinder"></iframe>
+            <a href="https://twitter.com/slicefinder"
+               class="twitter-follow-button"
+               data-show-count="false"
+               data-lang="en">
+              Follow @slicefinder
+            </a>
           </p>
 
           <h5><strong>Most Reviewed</strong></h5>
@@ -207,9 +218,17 @@
         <div class="col-sm-8" style="display:flex; flex-direction:column; flex:1;">
 
           <div id="slices-header">Slices found!</div>
-          <div id="geo-status">📍 Showing pizza near you.</div>
+          <div id="geo-status">Detecting your location…</div>
 
-          <iframe id="map-frame" src="https://maps.google.com/maps?q=pizza%20near%2036.180419%2C-86.788458&amp;t=m&amp;z=13&amp;output=embed" width="100%" style="border:0; display:block; flex:1; min-height:400px;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Pizza restaurants near you">
+          <iframe
+            id="map-frame"
+            src="https://maps.google.com/maps?q=pizza+near+37.7797,-122.4316&t=m&z=13&output=embed"
+            width="100%"
+            style="border:0; display:block; flex:1; min-height:400px;"
+            allowfullscreen=""
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            title="Pizza restaurants near you">
           </iframe>
 
         </div>
@@ -219,7 +238,12 @@
           <h5><strong>Find your slice</strong></h5>
           <form id="search-form" onsubmit="desktopSearch(event)">
             <div class="form-group">
-              <input type="text" id="location-input" class="form-control input-sm" placeholder="City or ZIP" autocomplete="off">
+              <input
+                type="text"
+                id="location-input"
+                class="form-control input-sm"
+                placeholder="City or ZIP"
+                autocomplete="off">
             </div>
             <button type="submit" class="btn btn-danger btn-sm btn-block">Search</button>
             <div id="search-status"></div>
@@ -238,13 +262,13 @@
 
   <!-- Footer -->
   <footer>
-    <p>SliceFinder ©2026</p>
+    <p>SliceFinder &copy;2026</p>
   </footer>
 
   <!-- Scripts -->
-  <script src="SliceFinder%20-%20Find%20Your%20Slice_files/jquery.min.js"></script>
-  <script src="SliceFinder%20-%20Find%20Your%20Slice_files/bootstrap.min.js"></script>
-  <script async="" src="SliceFinder%20-%20Find%20Your%20Slice_files/widgets.js" charset="utf-8"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 
   <script>
 
@@ -306,6 +330,5 @@
 
   </script>
 
-
-
-<iframe id="rufous-sandbox" scrolling="no" frameborder="0" allowtransparency="true" allowfullscreen="true" style="position: absolute; visibility: hidden; display: none; width: 0px; height: 0px; padding: 0px; border: medium;" title="Twitter analytics iframe"></iframe></body></html>
+</body>
+</html>
