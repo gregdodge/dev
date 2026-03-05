@@ -112,7 +112,7 @@
       padding: 10px 12px 6px;
       background-color: #f1f1f1;
       border-bottom: 1px solid #ddd;
-      width: 75%;
+      width: 90%;
     }
 
     #mobile-search .input-group {
@@ -134,6 +134,7 @@
       .col-sm-2             { display: none !important; }
       .col-sm-8             { width: 100% !important; }
       .row.content          { min-height: auto; }
+      .mobile               { display: block; }
     }
   </style>
 </head>
@@ -305,22 +306,22 @@
     // Geolocation on load
     function updateMapToUserLocation() {
       if (!navigator.geolocation) {
-        setGeoStatus('Showing pizza near you ... Not working? Try searching >');
+        setGeoStatus('Showing pizza near you ... <span style="display:none;"><br></span>Not working? Try search >');
         return;
       }
       navigator.geolocation.getCurrentPosition(
         function(position) {
           var lat = position.coords.latitude.toFixed(6);
           var lng = position.coords.longitude.toFixed(6);
-          updateMap('pizza near ' + lat + ',' + lng, 'Showing pizza near you ... Not working? Try searching >');
+          updateMap('pizza near ' + lat + ',' + lng, 'Showing pizza near you ... Not working? Try search >');
         },
         function(error) {
           var msg;
           switch (error.code) {
-            case error.PERMISSION_DENIED:    msg = 'Showing pizza near you ... Not working? Try searching >'; break;
-            case error.POSITION_UNAVAILABLE: msg = 'Showing pizza near you ... Not working? Try searching >'; break;
-            case error.TIMEOUT:              msg = 'Showing pizza near you ... Not working? Try searching >'; break;
-            default:                         msg = 'Showing pizza near you ... Not working? Try searching >';
+            case error.PERMISSION_DENIED:    msg = 'Showing pizza near you ... Not working? Try search >'; break;
+            case error.POSITION_UNAVAILABLE: msg = 'Showing pizza near you ... Not working? Try search >'; break;
+            case error.TIMEOUT:              msg = 'Showing pizza near you ... Not working? Try search >'; break;
+            default:                         msg = 'Showing pizza near you ... Not working? Try search >';
           }
           setGeoStatus(msg);
         },
