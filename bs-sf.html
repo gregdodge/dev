@@ -262,7 +262,7 @@
 
           <iframe
             id="map-frame"
-            src="https://maps.google.com/maps/search/pizza+near+San+Francisco+CA/?t=m&z=13&output=embed"
+            src="https://maps.google.com/maps?q=pizza+near+37.7797,-122.4316&t=m&z=13&output=embed"
             width="100%"
             style="border:0; display:block; flex:1; min-height:400px;"
             allowfullscreen=""
@@ -319,8 +319,8 @@
   <script>
 
     function updateMap(query, label) {
-      var src = 'https://maps.google.com/maps/search/' + encodeURIComponent(query)
-        + '/?t=m&z=13&output=embed';
+      var src = 'https://maps.google.com/maps?q=' + encodeURIComponent(query)
+        + '&t=m&z=13&output=embed';
       document.getElementById('map-frame').src = src;
       if (label) setGeoStatus(label);
     }
@@ -344,7 +344,7 @@
       if (!city) { document.getElementById('search-status').textContent = 'Please enter a city or ZIP.'; return; }
       document.getElementById('search-status').textContent = '';
       var loc = buildQuery(city, state);
-      updateMap('pizza restaurants in ' + loc, 'Showing pizza near ' + loc);
+      updateMap('pizza ' + loc, 'Showing pizza near ' + loc);
     }
 
     // Mobile search (above map)
@@ -354,7 +354,7 @@
       if (!city) { document.getElementById('mobile-search-status').textContent = 'Please enter a city or ZIP.'; return; }
       document.getElementById('mobile-search-status').textContent = '';
       var loc = buildQuery(city, state);
-      updateMap('pizza restaurants in ' + loc, 'Showing pizza near ' + loc);
+      updateMap('pizza ' + loc, 'Showing pizza near ' + loc);
     }
 
     // Geolocation on load
