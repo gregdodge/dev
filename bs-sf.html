@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -194,17 +195,29 @@
 
   <!-- Mobile search bar (visible only at ≤800px, above the map) -->
   <div id="mobile-search">
-    <div class="input-group">
-      <input
-        type="text"
-        id="mobile-location-input"
-        class="form-control input-sm"
-        placeholder="City or ZIP — find your slice"
-        autocomplete="off"
-        onkeydown="if(event.key==='Enter'){mobileSearch();event.preventDefault();}">
-      <span class="input-group-btn">
+    <div style="display:flex; gap:6px; align-items:flex-start;">
+      <div style="flex:2;">
+        <input
+          type="text"
+          id="mobile-city-input"
+          class="form-control input-sm"
+          placeholder="City or ZIP"
+          autocomplete="off"
+          onkeydown="if(event.key==='Enter'){mobileSearch();event.preventDefault();}">
+      </div>
+      <div style="flex:1;">
+        <input
+          type="text"
+          id="mobile-state-input"
+          class="form-control input-sm"
+          placeholder="State (opt.)"
+          autocomplete="off"
+          maxlength="2"
+          onkeydown="if(event.key==='Enter'){mobileSearch();event.preventDefault();}">
+      </div>
+      <div>
         <button class="btn btn-danger btn-sm" type="button" onclick="mobileSearch()">Search</button>
-      </span>
+      </div>
     </div>
     <div id="mobile-search-status"></div>
   </div>
@@ -265,13 +278,22 @@
         <div class="col-sm-2 sidenav">
           <h5><strong>Find your slice</strong></h5>
           <form id="search-form" onsubmit="desktopSearch(event)">
-            <div class="form-group">
+            <div class="form-group" style="margin-bottom:6px;">
               <input
                 type="text"
                 id="location-input"
                 class="form-control input-sm"
                 placeholder="City or ZIP"
                 autocomplete="off">
+            </div>
+            <div class="form-group" style="margin-bottom:6px;">
+              <input
+                type="text"
+                id="state-input"
+                class="form-control input-sm"
+                placeholder="State (optional)"
+                autocomplete="off"
+                maxlength="2">
             </div>
             <button type="submit" class="btn btn-danger btn-sm btn-block">Search</button>
             <div id="search-status"></div>
@@ -301,35 +323,39 @@
       var src = 'https://maps.google.com/maps?q=' + encodeURIComponent(query)
         + '&t=m&z=13&output=embed';
       document.getElementById('map-frame').src = src;
-      if (label) setGeoStatus(msg);
+      if (label) setGeoStatus(label);
     }
 
     function setGeoStatus(msg) {
       document.getElementById('geo-status').textContent = msg;
     }
 
-    function updateMap(query, label) {
-      var src = 'https://maps.google.com/maps?q=' + encodeURIComponent(query)
-        + '&t=m&z=13&output=embed';
-      document.getElementById('map-frame').src = src;
-      if (label) setGeoStatus(label);
+    function buildQuery(city, state) {
+      var q = city.trim();
+      var s = state.trim();
+      if (s) q += ', ' + s;
+      return q;
     }
 
     // Desktop search (right sidebar)
     function desktopSearch(e) {
       e.preventDefault();
-      var raw = document.getElementById('location-input').value.trim();
-      if (!raw) { document.getElementById('search-status').textContent = 'Please enter a city or ZIP.'; return; }
+      var city = document.getElementById('location-input').value.trim();
+      var state = document.getElementById('state-input').value.trim();
+      if (!city) { document.getElementById('search-status').textContent = 'Please enter a city or ZIP.'; return; }
       document.getElementById('search-status').textContent = '';
-      updateMap('pizza restaurants in ' + raw, 'Showing pizza near ' + raw);
+      var loc = buildQuery(city, state);
+      updateMap('pizza restaurants in ' + loc, 'Showing pizza near ' + loc);
     }
 
     // Mobile search (above map)
     function mobileSearch() {
-      var raw = document.getElementById('mobile-location-input').value.trim();
-      if (!raw) { document.getElementById('mobile-search-status').textContent = 'Please enter a city or ZIP.'; return; }
+      var city = document.getElementById('mobile-city-input').value.trim();
+      var state = document.getElementById('mobile-state-input').value.trim();
+      if (!city) { document.getElementById('mobile-search-status').textContent = 'Please enter a city or ZIP.'; return; }
       document.getElementById('mobile-search-status').textContent = '';
-      updateMap('pizza restaurants in ' + raw, 'Showing pizza near ' + raw);
+      var loc = buildQuery(city, state);
+      updateMap('pizza restaurants in ' + loc, 'Showing pizza near ' + loc);
     }
 
     // Geolocation on load
