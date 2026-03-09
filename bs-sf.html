@@ -46,26 +46,12 @@
       border-radius: 0;
     }
 
-    /* Fix: ensure navbar collapse is not flex-affected */
-    .navbar-collapse {
-      display: block !important; /* override any flex interference */
-    }
-
-    .navbar-collapse.collapse {
-      display: none !important;
-    }
-
-    .navbar-collapse.collapse.in {
-      display: block !important;
-    }
-
-    /* Only apply the block override on desktop */
+    /* Let Bootstrap handle collapse toggle natively */
     @media (min-width: 768px) {
-      .navbar-collapse.collapse {
+      .navbar-collapse {
         display: block !important;
       }
     }
-
     .navbar-brand {
       font-family: 'Alfa Slab One', serif;
       color: #c0392b !important;
