@@ -46,9 +46,29 @@
       border-radius: 0;
     }
 
-    /* ✅ FIXED: removed all the conflicting display:block !important overrides.
-       Bootstrap 3 manages .collapse / .in classes via JS — don't fight it.
-       Only force-show on desktop where it should always be visible. */
+    /* Navbar sits above page content */
+    .navbar {
+      position: relative;
+      z-index: 1000;
+    }
+
+    /* Collapse is in normal document flow — pushes content DOWN, never overlaps */
+    .navbar-collapse {
+      position: relative !important;
+      float: none !important;
+    }
+
+    /* Fix link colors inside the open mobile menu */
+    .navbar-inverse .navbar-collapse .nav > li > a {
+      color: #fff !important;
+    }
+    .navbar-inverse .navbar-collapse .nav > li > a:hover,
+    .navbar-inverse .navbar-collapse .nav > li > a:focus {
+      color: #ddd !important;
+      background-color: rgba(255,255,255,0.1) !important;
+    }
+
+    /* Let Bootstrap handle collapse toggle natively on desktop */
     @media (min-width: 768px) {
       .navbar-collapse {
         display: block !important;
