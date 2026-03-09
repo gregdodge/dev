@@ -44,34 +44,37 @@
     .navbar {
       margin-bottom: 0;
       border-radius: 0;
+      width: 100%;
+      flex-shrink: 0;
     }
 
-    /* Navbar sits above page content */
-    .navbar {
-      position: relative;
-      z-index: 1000;
-    }
-
-    /* Collapse is in normal document flow — pushes content DOWN, never overlaps */
-    .navbar-collapse {
-      position: relative !important;
-      float: none !important;
-    }
-
-    /* Fix link colors inside the open mobile menu */
-    .navbar-inverse .navbar-collapse .nav > li > a {
-      color: #fff !important;
-    }
-    .navbar-inverse .navbar-collapse .nav > li > a:hover,
-    .navbar-inverse .navbar-collapse .nav > li > a:focus {
-      color: #ddd !important;
-      background-color: rgba(255,255,255,0.1) !important;
-    }
-
-    /* Let Bootstrap handle collapse toggle natively on desktop */
-    @media (min-width: 768px) {
-      .navbar-collapse {
+    /* Mobile: hidden by default, block when .open is toggled */
+    @media (max-width: 767px) {
+      #bs-navbar {
+        display: none;
+        width: 100%;
+      }
+      #bs-navbar.open {
+        display: block;
+      }
+      #bs-navbar .nav > li > a {
+        color: #fff !important;
+      }
+      #bs-navbar .nav > li > a:hover {
+        background-color: #333 !important;
+      }
+      #nav-toggle {
         display: block !important;
+      }
+    }
+
+    /* Desktop: Bootstrap handles everything, just ensure visibility */
+    @media (min-width: 768px) {
+      #bs-navbar {
+        display: block !important;
+      }
+      #nav-toggle {
+        display: none !important;
       }
     }
 
@@ -177,10 +180,9 @@
 
   <!-- Navigation -->
   <nav class="navbar navbar-inverse">
-    <div class="container-fluid" style="margin:0px 10px;">
+    <div class="container-fluid" style="margin:0 10px;">
       <div class="navbar-header">
-        <!-- ✅ data-toggle and data-target must match the collapse div's id exactly -->
-        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-navbar" aria-expanded="false" aria-controls="bs-navbar">
+        <button id="nav-toggle" type="button" class="navbar-toggle" aria-expanded="false" aria-controls="bs-navbar">
           <span class="sr-only">Toggle navigation</span>
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
@@ -188,8 +190,7 @@
         </button>
         <a class="navbar-brand" href="#">SliceFinder</a>
       </div>
-      <!-- ✅ id="bs-navbar" matches data-target="#bs-navbar" above -->
-      <div class="collapse navbar-collapse" id="bs-navbar">
+      <div id="bs-navbar">
         <ul class="nav navbar-nav">
           <li><a href="#">Restaurants</a></li>
           <li><a href="#">Frozen Pizza</a></li>
@@ -388,6 +389,13 @@
     }
 
     updateMapToUserLocation();
+
+    // Hamburger toggle
+    document.getElementById('nav-toggle').addEventListener('click', function() {
+      var nav = document.getElementById('bs-navbar');
+      nav.classList.toggle('open');
+      this.setAttribute('aria-expanded', nav.classList.contains('open'));
+    });
 
   </script>
 
