@@ -46,12 +46,15 @@
       border-radius: 0;
     }
 
-    /* Let Bootstrap handle collapse toggle natively */
+    /* ✅ FIXED: removed all the conflicting display:block !important overrides.
+       Bootstrap 3 manages .collapse / .in classes via JS — don't fight it.
+       Only force-show on desktop where it should always be visible. */
     @media (min-width: 768px) {
       .navbar-collapse {
         display: block !important;
       }
     }
+
     .navbar-brand {
       font-family: 'Alfa Slab One', serif;
       color: #c0392b !important;
@@ -148,15 +151,16 @@
 
 <body>
 
-  <!-- Scripts loaded FIRST so Bootstrap collapse JS is available immediately -->
+  <!-- ✅ jQuery MUST load before Bootstrap JS for collapse to work -->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 
   <!-- Navigation -->
   <nav class="navbar navbar-inverse">
-   <div class="container-fluid" style="margin:0px 10px;">
+    <div class="container-fluid" style="margin:0px 10px;">
       <div class="navbar-header">
-        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-navbar" aria-expanded="false">
+        <!-- ✅ data-toggle and data-target must match the collapse div's id exactly -->
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-navbar" aria-expanded="false" aria-controls="bs-navbar">
           <span class="sr-only">Toggle navigation</span>
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
@@ -164,6 +168,7 @@
         </button>
         <a class="navbar-brand" href="#">SliceFinder</a>
       </div>
+      <!-- ✅ id="bs-navbar" matches data-target="#bs-navbar" above -->
       <div class="collapse navbar-collapse" id="bs-navbar">
         <ul class="nav navbar-nav">
           <li><a href="#">Restaurants</a></li>
