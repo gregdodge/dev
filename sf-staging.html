@@ -254,6 +254,24 @@
       });
     }
 
+    // Geocode an address and place a marker
+    function geocodeAndAddMarker(docId, r) {
+      var address = [r.address, r.city, r.state, r.zip].filter(Boolean).join(', ');
+      var url = 'https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(address);
+      fetch(url)
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          if (data && data.length > 0) {
+            r.lat = +data[0].lat;
+            r.lng = +data[0].lon;
+            addMarker(docId, r);
+          } else {
+            console.warn('Could not geocode:', r.name);
+          }
+        })
+        .catch(function(e) { console.warn('Geocode failed:', r.name, e); });
+    }
+
     // Place a single marker on the map
     function addMarker(docId, r) {
       if (!r.lat || !r.lng) return;
@@ -348,7 +366,11 @@
 
       snapshot.forEach(function(docSnap) {
         const r = docSnap.data();
-        addMarker(docSnap.id, r);
+        if (r.lat && r.lng) {
+          addMarker(docSnap.id, r);
+        } else {
+          geocodeAndAddMarker(docSnap.id, r);
+        }
         count++;
       });
 
