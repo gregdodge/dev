@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🍕</text></svg>'>
+  <title>SliceFinder – Restaurant</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Alfa%20Slab%20One">
+  <style>
+    html, body { margin: 0; padding: 0; font-family: Tahoma, sans-serif; background: #f5f5f5; overflow-x: hidden; }
+
+    /* ── Navbar ── */
+    .navbar { margin-bottom: 0; border-radius: 0; width: 100%; }
+    .navbar-brand { font-family: 'Alfa Slab One', serif; color: #c0392b !important; font-size: 24px; letter-spacing: 1px; }
+    @media (max-width: 767px) {
+      #bs-navbar { display: none; width: 100%; }
+      #bs-navbar.open { display: block; }
+      #bs-navbar .nav > li > a { color: #fff !important; padding: 10px 16px; }
+      #bs-navbar .nav > li > a:hover { background: #333 !important; }
+      #nav-toggle { display: block !important; }
+    }
+    @media (min-width: 768px) {
+      #bs-navbar { display: block !important; }
+      #nav-toggle { display: none !important; }
+    }
+
+    /* ── Layout ── */
+    .page-container { max-width: 900px; margin: 30px auto; padding: 0 16px 40px; }
+
+    /* ── Hero ── */
+    .restaurant-hero {
+      background: #222;
+      color: #fff;
+      border-radius: 8px 8px 0 0;
+      padding: 28px 28px 20px;
+      position: relative;
+    }
+    .restaurant-hero h1 {
+      font-family: 'Alfa Slab One', serif;
+      font-size: 28px;
+      margin: 0 0 8px;
+      color: #fff;
+    }
+    .back-link {
+      font-size: 12px;
+      color: #aaa;
+      text-decoration: none;
+      display: inline-block;
+      margin-bottom: 12px;
+    }
+    .back-link:hover { color: #fff; }
+
+    /* ── Detail card ── */
+    .detail-card {
+      background: #fff;
+      border-radius: 0 0 8px 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      padding: 24px 28px;
+      margin-bottom: 24px;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 24px;
+      margin-bottom: 16px;
+    }
+    @media (max-width: 600px) { .info-grid { grid-template-columns: 1fr; } }
+
+    .info-item label {
+      display: block;
+      font-size: 10px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #999;
+      margin-bottom: 2px;
+    }
+    .info-item span, .info-item a {
+      font-size: 14px;
+      color: #333;
+    }
+    .info-item a { color: #c0392b; text-decoration: none; }
+    .info-item a:hover { text-decoration: underline; }
+
+    /* ── Tags ── */
+    .tag-chip {
+      display: inline-block;
+      background: #f0e6e6;
+      color: #c0392b;
+      border-radius: 12px;
+      padding: 3px 12px;
+      font-size: 12px;
+      margin: 3px 3px 3px 0;
+    }
+
+    /* ── Map ── */
+    #detail-map {
+      width: 100%;
+      height: 280px;
+      border-radius: 6px;
+      border: 1px solid #e0e0e0;
+      margin-bottom: 24px;
+      background: #eee;
+    }
+    .map-fallback {
+      width: 100%;
+      height: 280px;
+      border-radius: 6px;
+      border: 0;
+      display: block;
+      margin-bottom: 24px;
+    }
+
+    /* ── Section headers ── */
+    .section-title {
+      font-family: 'Alfa Slab One', serif;
+      color: #c0392b;
+      font-size: 18px;
+      margin: 0 0 14px;
+      padding-bottom: 6px;
+      border-bottom: 2px solid #f0e6e6;
+    }
+
+    /* ── Photos ── */
+    .photo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+    .photo-grid .photo-slot {
+      height: 120px;
+      background: #f0e6e6;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #c0392b;
+      font-size: 28px;
+      border: 2px dashed #e0c8c8;
+    }
+    .photo-grid img {
+      width: 100%;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 6px;
+    }
+
+    /* ── Reviews ── */
+    .review-card {
+      border: 1px solid #eee;
+      border-radius: 6px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+      background: #fafafa;
+    }
+    .review-card .reviewer {
+      font-weight: bold;
+      font-size: 13px;
+      color: #333;
+    }
+    .review-card .review-date {
+      font-size: 11px;
+      color: #aaa;
+      margin-left: 8px;
+    }
+    .review-card .review-text {
+      font-size: 13px;
+      color: #555;
+      margin: 6px 0 0;
+    }
+    .stars { color: #e67e22; font-size: 15px; letter-spacing: 1px; }
+    .stars-empty { color: #ddd; }
+
+    /* ── Write review form ── */
+    .review-form-card {
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 20px;
+      margin-top: 20px;
+    }
+    .review-form-card h4 {
+      font-family: 'Alfa Slab One', serif;
+      color: #c0392b;
+      font-size: 16px;
+      margin: 0 0 14px;
+    }
+    .star-picker { font-size: 28px; cursor: pointer; letter-spacing: 4px; user-select: none; }
+    .star-picker span { color: #ddd; transition: color 0.1s; }
+    .star-picker span.on { color: #e67e22; }
+
+    /* ── Loading/error states ── */
+    #loading { text-align: center; padding: 60px 0; color: #888; font-size: 18px; }
+    #error-msg { display: none; text-align: center; padding: 60px 0; color: #c0392b; }
+
+    footer { background: #555; color: #fff; padding: 15px; text-align: center; margin-top: 20px; }
+    footer p { margin: 0; }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar navbar-inverse">
+    <div class="container-fluid" style="padding:0 10px;">
+      <div class="navbar-header">
+        <button id="nav-toggle" type="button" class="navbar-toggle" aria-expanded="false">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="bs-sf.html">SliceFinder</a>
+      </div>
+      <div id="bs-navbar">
+        <ul class="nav navbar-nav">
+          <li class="active"><a href="bs-sf.html">Restaurants</a></li>
+          <li><a href="#">Frozen Pizza</a></li>
+          <li><a href="#">Pizza News</a></li>
+          <li><a href="#">My Profile</a></li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+          <li><a href="#">Login</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div id="loading">🍕 Loading restaurant…</div>
+  <div id="error-msg"><h3>Restaurant not found.</h3><a href="bs-sf.html">← Back to map</a></div>
+
+  <div id="page-content" style="display:none;">
+    <div class="page-container">
+
+      <!-- Hero + Detail Card -->
+      <div class="restaurant-hero">
+        <a href="bs-sf.html" class="back-link">← Back to map</a>
+        <h1 id="r-name"></h1>
+        <div id="r-tags"></div>
+      </div>
+      <div class="detail-card">
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Address</label>
+            <span id="r-address"></span>
+          </div>
+          <div class="info-item">
+            <label>Phone</label>
+            <span id="r-phone"></span>
+          </div>
+          <div class="info-item">
+            <label>Hours</label>
+            <span id="r-hours"></span>
+          </div>
+          <div class="info-item">
+            <label>Website</label>
+            <a id="r-url" href="#" target="_blank" rel="noopener"></a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Map -->
+      <div class="section-title">📍 Location</div>
+      <div id="detail-map"></div>
+
+      <!-- Photos -->
+      <div class="section-title">📸 Photos</div>
+      <div class="photo-grid" id="photo-grid">
+        <!-- placeholder slots -->
+        <div class="photo-slot">🍕</div>
+        <div class="photo-slot">🍕</div>
+        <div class="photo-slot">🍕</div>
+        <div class="photo-slot" style="font-size:13px; color:#c0392b;">+ Add photo<br><span style="font-size:10px;">(coming soon)</span></div>
+      </div>
+
+      <!-- Reviews -->
+      <div class="section-title">⭐ Reviews</div>
+      <div id="reviews-list">
+        <p style="color:#aaa; font-size:13px;">No reviews yet. Be the first!</p>
+      </div>
+
+      <!-- Write a Review -->
+      <div class="review-form-card">
+        <h4>✍️ Write a Review</h4>
+        <div class="form-group">
+          <label style="font-size:13px;">Your Name</label>
+          <input type="text" id="rv-username" class="form-control input-sm" placeholder="e.g. gregdodge" style="max-width:220px;">
+        </div>
+        <div class="form-group">
+          <label style="font-size:13px;">Rating</label><br>
+          <div class="star-picker" id="star-picker">
+            <span data-val="1">★</span>
+            <span data-val="2">★</span>
+            <span data-val="3">★</span>
+            <span data-val="4">★</span>
+            <span data-val="5">★</span>
+          </div>
+          <input type="hidden" id="rv-rating" value="0">
+        </div>
+        <div class="form-group">
+          <label style="font-size:13px;">Review</label>
+          <textarea id="rv-text" class="form-control" rows="3" placeholder="What did you think of the pizza?"></textarea>
+        </div>
+        <button class="btn btn-danger btn-sm" onclick="submitReview()">Submit Review</button>
+        <span id="review-status" style="margin-left:10px; font-size:13px;"></span>
+      </div>
+
+    </div>
+  </div>
+
+  <footer><p>SliceFinder &copy;2026</p></footer>
+
+  <!-- Firebase config stored in sessionStorage from previous pages; or prompt inline -->
+  <script type="module">
+    // ── Helpers ──────────────────────────────────────────────────────────
+    function parseConfig(raw) {
+      let s = raw.trim();
+      s = s.replace(/^(const|let|var)\s+\w+\s*=\s*/, '').replace(/;?\s*$/, '');
+      s = s.replace(/([{,]\s*)([a-zA-Z_]\w*)\s*:/g, '$1"$2":');
+      s = s.replace(/[\u201C\u201D]/g, '"').replace(/[\u2018\u2019]/g, "'");
+      return JSON.parse(s);
+    }
+
+    function stars(n, total = 5) {
+      return '★'.repeat(n) + '☆'.repeat(total - n);
+    }
+
+    function formatDate(ts) {
+      if (!ts) return '';
+      const d = ts.toDate ? ts.toDate() : new Date(ts);
+      return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    }
+
+    // ── Init Firebase ─────────────────────────────────────────────────
+    const savedConfig = sessionStorage.getItem('sf-firebase-config');
+    if (!savedConfig) {
+      document.getElementById('loading').innerHTML =
+        '⚙️ Firebase not configured.<br><a href="bs-sf.html">← Back to map</a>';
+      throw new Error('No Firebase config');
+    }
+
+    const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js');
+    const { getFirestore, doc, getDoc, collection, query, where, orderBy, addDoc, serverTimestamp, getDocs }
+      = await import('https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js');
+
+    const apps = getApps();
+    const app = apps.length ? apps[0] : initializeApp(parseConfig(savedConfig));
+    const db = getFirestore(app);
+
+    // ── Get restaurant ID from URL ────────────────────────────────────
+    const params = new URLSearchParams(window.location.search);
+    const restaurantId = params.get('id');
+    if (!restaurantId) {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('error-msg').style.display = 'block';
+      throw new Error('No id param');
+    }
+
+    // ── Load restaurant ───────────────────────────────────────────────
+    const snap = await getDoc(doc(db, 'restaurants', restaurantId));
+    if (!snap.exists()) {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('error-msg').style.display = 'block';
+      throw new Error('Not found');
+    }
+
+    const r = snap.data();
+
+    // ── Populate page ─────────────────────────────────────────────────
+    document.title = r.name + ' – SliceFinder';
+    document.getElementById('r-name').textContent = r.name;
+
+    const fullAddress = [r.address, r.city, r.state, r.zip].filter(Boolean).join(', ');
+    document.getElementById('r-address').textContent = fullAddress || '—';
+    document.getElementById('r-phone').textContent = r.phone || '—';
+    document.getElementById('r-hours').textContent = r.hours || '—';
+
+    const urlEl = document.getElementById('r-url');
+    if (r.url) { urlEl.href = r.url; urlEl.textContent = r.url.replace(/^https?:\/\//, ''); }
+    else { urlEl.parentElement.style.display = 'none'; }
+
+    // Tags
+    const tagsEl = document.getElementById('r-tags');
+    if (r.tags && r.tags.length) {
+      tagsEl.innerHTML = r.tags.map(t => `<span class="tag-chip">${t}</span>`).join('');
+    }
+
+    // ── Map ───────────────────────────────────────────────────────────
+    const mapEl = document.getElementById('detail-map');
+    if (r.lat && r.lng) {
+      // Use embed map (no API key needed); JS API map shown if key available
+      const embedSrc = `https://maps.google.com/maps?q=${r.lat},${r.lng}&t=m&z=16&output=embed&markers=${r.lat},${r.lng}`;
+      mapEl.outerHTML = `<iframe src="${embedSrc}" class="map-fallback" style="height:280px; margin-bottom:24px; border-radius:6px; border:1px solid #e0e0e0;" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>`;
+    } else {
+      const addr = encodeURIComponent(fullAddress);
+      const embedSrc = `https://maps.google.com/maps?q=${addr}&t=m&z=15&output=embed`;
+      mapEl.outerHTML = `<iframe src="${embedSrc}" class="map-fallback" style="height:280px; margin-bottom:24px; border-radius:6px; border:1px solid #e0e0e0;" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>`;
+    }
+
+    // ── Show page ─────────────────────────────────────────────────────
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('page-content').style.display = 'block';
+
+    // ── Load reviews ──────────────────────────────────────────────────
+    async function loadReviews() {
+      const q = query(
+        collection(db, 'reviews'),
+        where('restaurantId', '==', restaurantId),
+        orderBy('createdAt', 'desc')
+      );
+      const reviewSnaps = await getDocs(q);
+      const listEl = document.getElementById('reviews-list');
+
+      if (reviewSnaps.empty) {
+        listEl.innerHTML = '<p style="color:#aaa; font-size:13px;">No reviews yet. Be the first!</p>';
+        return;
+      }
+
+      listEl.innerHTML = '';
+      reviewSnaps.forEach(s => {
+        const rv = s.data();
+        const div = document.createElement('div');
+        div.className = 'review-card';
+        div.innerHTML = `
+          <div>
+            <span class="reviewer">${rv.username || 'Anonymous'}</span>
+            <span class="review-date">${formatDate(rv.createdAt)}</span>
+            <span class="stars" style="float:right;">${stars(rv.rating || 0)}</span>
+          </div>
+          <div class="review-text">${rv.text || ''}</div>
+        `;
+        listEl.appendChild(div);
+      });
+    }
+
+    await loadReviews();
+
+    // ── Star picker ───────────────────────────────────────────────────
+    let selectedRating = 0;
+    const starSpans = document.querySelectorAll('#star-picker span');
+
+    starSpans.forEach(s => {
+      s.addEventListener('mouseover', () => highlightStars(+s.dataset.val));
+      s.addEventListener('mouseout',  () => highlightStars(selectedRating));
+      s.addEventListener('click', () => {
+        selectedRating = +s.dataset.val;
+        document.getElementById('rv-rating').value = selectedRating;
+        highlightStars(selectedRating);
+      });
+    });
+
+    function highlightStars(n) {
+      starSpans.forEach(s => s.classList.toggle('on', +s.dataset.val <= n));
+    }
+
+    // ── Submit review ─────────────────────────────────────────────────
+    window.submitReview = async function() {
+      const statusEl = document.getElementById('review-status');
+      const username = document.getElementById('rv-username').value.trim();
+      const rating   = +document.getElementById('rv-rating').value;
+      const text     = document.getElementById('rv-text').value.trim();
+
+      if (!username) { statusEl.textContent = '❌ Please enter your name.'; statusEl.style.color='red'; return; }
+      if (!rating)   { statusEl.textContent = '❌ Please select a star rating.'; statusEl.style.color='red'; return; }
+      if (!text)     { statusEl.textContent = '❌ Please write a review.'; statusEl.style.color='red'; return; }
+
+      statusEl.textContent = 'Saving…';
+      statusEl.style.color = '#888';
+
+      try {
+        await addDoc(collection(db, 'reviews'), {
+          restaurantId,
+          username,
+          rating,
+          text,
+          createdAt: serverTimestamp()
+        });
+        statusEl.textContent = '✅ Review submitted!';
+        statusEl.style.color = 'green';
+        document.getElementById('rv-username').value = '';
+        document.getElementById('rv-text').value = '';
+        selectedRating = 0;
+        document.getElementById('rv-rating').value = 0;
+        highlightStars(0);
+        await loadReviews();
+      } catch(e) {
+        statusEl.textContent = '❌ ' + e.message;
+        statusEl.style.color = 'red';
+      }
+    };
+
+  </script>
+
+  <script>
+    document.getElementById('nav-toggle').addEventListener('click', function() {
+      var nav = document.getElementById('bs-navbar');
+      nav.classList.toggle('open');
+      this.setAttribute('aria-expanded', nav.classList.contains('open'));
+    });
+  </script>
+
+</body>
+</html>
