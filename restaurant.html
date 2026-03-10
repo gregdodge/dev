@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -211,11 +212,11 @@
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
         </button>
-        <a class="navbar-brand" href="bs-sf.html">SliceFinder</a>
+        <a class="navbar-brand" href="sf-staging.html">SliceFinder</a>
       </div>
       <div id="bs-navbar">
         <ul class="nav navbar-nav">
-          <li class="active"><a href="bs-sf.html">Restaurants</a></li>
+          <li class="active"><a href="sf-staging.html">Restaurants</a></li>
           <li><a href="#">Frozen Pizza</a></li>
           <li><a href="#">Pizza News</a></li>
           <li><a href="#">My Profile</a></li>
@@ -228,14 +229,14 @@
   </nav>
 
   <div id="loading">🍕 Loading restaurant…</div>
-  <div id="error-msg"><h3>Restaurant not found.</h3><a href="bs-sf.html">← Back to map</a></div>
+  <div id="error-msg"><h3>Restaurant not found.</h3><a href="sf-staging.html">← Back to map</a></div>
 
   <div id="page-content" style="display:none;">
     <div class="page-container">
 
       <!-- Hero + Detail Card -->
       <div class="restaurant-hero">
-        <a href="bs-sf.html" class="back-link">← Back to map</a>
+        <a href="sf-staging.html" class="back-link">← Back to map</a>
         <h1 id="r-name"></h1>
         <div id="r-tags"></div>
       </div>
@@ -333,19 +334,21 @@
     }
 
     // ── Init Firebase ─────────────────────────────────────────────────
-    const savedConfig = sessionStorage.getItem('sf-firebase-config');
-    if (!savedConfig) {
-      document.getElementById('loading').innerHTML =
-        '⚙️ Firebase not configured.<br><a href="bs-sf.html">← Back to map</a>';
-      throw new Error('No Firebase config');
-    }
-
     const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js');
     const { getFirestore, doc, getDoc, collection, query, where, orderBy, addDoc, serverTimestamp, getDocs }
       = await import('https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js');
 
+    const firebaseConfig = {
+      apiKey: "AIzaSyB-5Bz4rpHehUbxX7kP__-ap0xSuSdwZ0E",
+      authDomain: "slicefinder-afd7f.firebaseapp.com",
+      projectId: "slicefinder-afd7f",
+      storageBucket: "slicefinder-afd7f.firebasestorage.app",
+      messagingSenderId: "103165329059",
+      appId: "1:103165329059:web:721f516c20d701ebe98916"
+    };
+
     const apps = getApps();
-    const app = apps.length ? apps[0] : initializeApp(parseConfig(savedConfig));
+    const app = apps.length ? apps[0] : initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
     // ── Get restaurant ID from URL ────────────────────────────────────
