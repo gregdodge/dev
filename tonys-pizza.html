@@ -1,0 +1,321 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🍕</text></svg>'>
+  <title>Tony's Pizza Napoletana – SliceFinder</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Alfa%20Slab%20One">
+  <style>
+    html, body { margin:0; padding:0; font-family:Tahoma,sans-serif; background:#f5f5f5; overflow-x:hidden; }
+
+    /* Navbar */
+    .navbar { margin-bottom:0; border-radius:0; width:100%; }
+    .navbar-brand { font-family:'Alfa Slab One',serif; color:#c0392b !important; font-size:24px; letter-spacing:1px; }
+    @media (max-width:767px) {
+      #bs-navbar { display:none; width:100%; }
+      #bs-navbar.open { display:block; }
+      #bs-navbar .nav > li > a { color:#fff !important; padding:10px 16px; }
+      #bs-navbar .nav > li > a:hover { background:#333 !important; }
+      #nav-toggle { display:block !important; }
+    }
+    @media (min-width:768px) {
+      #bs-navbar { display:block !important; }
+      #nav-toggle { display:none !important; }
+    }
+
+    /* Layout */
+    .page-container { max-width:900px; margin:30px auto; padding:0 16px 40px; }
+
+    /* Hero */
+    .restaurant-hero {
+      background:linear-gradient(135deg, #1a1a1a 0%, #2c0a0a 100%);
+      color:#fff;
+      border-radius:8px 8px 0 0;
+      padding:28px 28px 22px;
+    }
+    .back-link { font-size:12px; color:#aaa; text-decoration:none; display:inline-block; margin-bottom:12px; }
+    .back-link:hover { color:#fff; }
+    .restaurant-hero h1 { font-family:'Alfa Slab One',serif; font-size:30px; margin:0 0 6px; color:#fff; }
+    .restaurant-hero .subtitle { font-size:13px; color:#bbb; margin:0 0 12px; }
+
+    /* Tag chips */
+    .tag-chip {
+      display:inline-block; background:rgba(255,255,255,0.15); color:#fff;
+      border-radius:12px; padding:3px 12px; font-size:12px; margin:3px 3px 3px 0;
+    }
+
+    /* Detail card */
+    .detail-card {
+      background:#fff; border-radius:0 0 8px 8px;
+      box-shadow:0 2px 10px rgba(0,0,0,0.08);
+      padding:24px 28px; margin-bottom:24px;
+    }
+    .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px 28px; margin-bottom:4px; }
+    @media (max-width:600px) { .info-grid { grid-template-columns:1fr; } }
+    .info-item label { display:block; font-size:10px; font-weight:bold; text-transform:uppercase; letter-spacing:1px; color:#999; margin-bottom:3px; }
+    .info-item span { font-size:14px; color:#333; }
+    .info-item a { font-size:14px; color:#c0392b; text-decoration:none; }
+    .info-item a:hover { text-decoration:underline; }
+
+    /* Section title */
+    .section-title { font-family:'Alfa Slab One',serif; color:#c0392b; font-size:18px; margin:0 0 14px; padding-bottom:6px; border-bottom:2px solid #f0e6e6; }
+
+    /* Map */
+    .map-embed { width:100%; height:300px; border-radius:6px; border:1px solid #e0e0e0; display:block; margin-bottom:28px; }
+
+    /* Photos */
+    .photo-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:10px; margin-bottom:28px; }
+    .photo-grid img { width:100%; height:130px; object-fit:cover; border-radius:6px; cursor:pointer; transition:opacity .15s; }
+    .photo-grid img:hover { opacity:.85; }
+    .photo-slot { height:130px; background:#f0e6e6; border-radius:6px; display:flex; align-items:center; justify-content:center; color:#c0392b; font-size:12px; border:2px dashed #e0c8c8; text-align:center; padding:8px; }
+
+    /* Awards banner */
+    .awards-bar {
+      background:linear-gradient(90deg,#c0392b,#922b21);
+      color:#fff; border-radius:6px; padding:12px 18px;
+      margin-bottom:24px; font-size:13px; display:flex; flex-wrap:wrap; gap:12px; align-items:center;
+    }
+    .awards-bar .award { display:flex; align-items:center; gap:6px; }
+
+    /* Reviews */
+    .review-card { border:1px solid #eee; border-radius:6px; padding:14px 16px; margin-bottom:12px; background:#fafafa; }
+    .review-card .reviewer { font-weight:bold; font-size:13px; color:#333; }
+    .review-card .review-date { font-size:11px; color:#aaa; margin-left:8px; }
+    .review-card .review-text { font-size:13px; color:#555; margin:6px 0 0; line-height:1.5; }
+    .stars { color:#e67e22; font-size:15px; letter-spacing:1px; }
+
+    /* Write review */
+    .review-form-card { background:#fff; border:1px solid #e0e0e0; border-radius:8px; padding:20px; margin-top:20px; }
+    .review-form-card h4 { font-family:'Alfa Slab One',serif; color:#c0392b; font-size:16px; margin:0 0 14px; }
+    .star-picker { font-size:28px; cursor:pointer; letter-spacing:4px; user-select:none; }
+    .star-picker span { color:#ddd; transition:color .1s; }
+    .star-picker span.on { color:#e67e22; }
+
+    footer { background:#555; color:#fff; padding:15px; text-align:center; margin-top:20px; }
+    footer p { margin:0; }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar navbar-inverse">
+    <div class="container-fluid" style="padding:0 10px;">
+      <div class="navbar-header">
+        <button id="nav-toggle" type="button" class="navbar-toggle" aria-expanded="false">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="bs-sf.html">SliceFinder</a>
+      </div>
+      <div id="bs-navbar">
+        <ul class="nav navbar-nav">
+          <li class="active"><a href="bs-sf.html">Restaurants</a></li>
+          <li><a href="#">Frozen Pizza</a></li>
+          <li><a href="#">Pizza News</a></li>
+          <li><a href="#">My Profile</a></li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+          <li><a href="#">Login</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-container">
+
+    <!-- Hero -->
+    <div class="restaurant-hero">
+      <a href="bs-sf.html" class="back-link">← Back to map</a>
+      <h1>Tony's Pizza Napoletana</h1>
+      <div class="subtitle">1570 Stockton St, San Francisco, CA 94133 &nbsp;·&nbsp; North Beach</div>
+      <div>
+        <span class="tag-chip">Neapolitan</span>
+        <span class="tag-chip">Coal-fired</span>
+        <span class="tag-chip">Award-winning</span>
+        <span class="tag-chip">World Champion</span>
+      </div>
+    </div>
+
+    <!-- Info -->
+    <div class="detail-card">
+      <div class="info-grid">
+        <div class="info-item">
+          <label>Address</label>
+          <span>1570 Stockton St, San Francisco, CA 94133</span>
+        </div>
+        <div class="info-item">
+          <label>Phone</label>
+          <span>(415) 835-9888</span>
+        </div>
+        <div class="info-item">
+          <label>Hours</label>
+          <span>Wed–Mon 12pm–10pm &nbsp;·&nbsp; Closed Tue</span>
+        </div>
+        <div class="info-item">
+          <label>Website</label>
+          <a href="https://tonyspizzanapoletana.com" target="_blank" rel="noopener">tonyspizzanapoletana.com</a>
+        </div>
+        <div class="info-item">
+          <label>Neighborhood</label>
+          <span>North Beach</span>
+        </div>
+        <div class="info-item">
+          <label>Price Range</label>
+          <span>$$ – $$$</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Awards -->
+    <div class="awards-bar">
+      <span style="font-size:15px; font-weight:bold;">🏆 Awards</span>
+      <span class="award">🥇 World Pizza Champion (Napoli, 2007)</span>
+      <span class="award">⭐ James Beard Nominated</span>
+      <span class="award">🍕 SF's Best Pizza – multiple years</span>
+    </div>
+
+    <!-- Map -->
+    <div class="section-title">📍 Location</div>
+    <iframe
+      class="map-embed"
+      src="https://maps.google.com/maps?q=37.800091,-122.408234&t=m&z=16&output=embed"
+      allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+    </iframe>
+
+    <!-- Photos -->
+    <div class="section-title">📸 Photos</div>
+    <div class="photo-grid">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Eq_it-na_pizza-margherita_sep2005_sml.jpg/320px-Eq_it-na_pizza-margherita_sep2005_sml.jpg" alt="Margherita pizza" onerror="this.parentElement.innerHTML='<div class=\'photo-slot\'>🍕 Photo<br>unavailable</div>'">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Pizza_Margherita_2.jpg/320px-Pizza_Margherita_2.jpg" alt="Pizza" onerror="this.parentElement.innerHTML='<div class=\'photo-slot\'>🍕 Photo<br>unavailable</div>'">
+      <div class="photo-slot">🍕 Add your photo<br><span style="font-size:10px;">(coming soon)</span></div>
+    </div>
+
+    <!-- Reviews -->
+    <div class="section-title">⭐ Reviews <span id="review-count" style="font-size:14px;color:#999;font-family:Tahoma,sans-serif;font-weight:normal;"></span></div>
+    <div id="reviews-list">
+      <div class="review-card">
+        <div>
+          <span class="reviewer">gregdodge</span>
+          <span class="review-date">Feb 12, 2026</span>
+          <span class="stars" style="float:right;">★★★★★</span>
+        </div>
+        <div class="review-text">Best pizza in the city, full stop. The Margherita DOP is perfect — blistered crust, creamy buffalo mozzarella, bright San Marzano tomatoes. Get there early or expect a wait, but it's 100% worth it.</div>
+      </div>
+      <div class="review-card">
+        <div>
+          <span class="reviewer">fergusontj</span>
+          <span class="review-date">Jan 28, 2026</span>
+          <span class="stars" style="float:right;">★★★★★</span>
+        </div>
+        <div class="review-text">Tony Gemignani is a legend. The coal-fired NY slice is incredible — crispy bottom, great char on the edges. This is the real deal. Multiple styles done perfectly.</div>
+      </div>
+      <div class="review-card">
+        <div>
+          <span class="reviewer">KingTut</span>
+          <span class="review-date">Jan 5, 2026</span>
+          <span class="stars" style="float:right;">★★★★☆</span>
+        </div>
+        <div class="review-text">Amazing pizza, world class really. Only knocking one star because the wait can be brutal on weekends. Go on a Wednesday or Thursday and you'll walk right in.</div>
+      </div>
+    </div>
+
+    <!-- Write a review -->
+    <div class="review-form-card">
+      <h4>✍️ Write a Review</h4>
+      <div class="form-group">
+        <label style="font-size:13px;">Your Name</label>
+        <input type="text" id="rv-username" class="form-control input-sm" placeholder="e.g. gregdodge" style="max-width:220px;">
+      </div>
+      <div class="form-group">
+        <label style="font-size:13px;">Rating</label><br>
+        <div class="star-picker" id="star-picker">
+          <span data-val="1">★</span><span data-val="2">★</span><span data-val="3">★</span>
+          <span data-val="4">★</span><span data-val="5">★</span>
+        </div>
+        <input type="hidden" id="rv-rating" value="0">
+      </div>
+      <div class="form-group">
+        <label style="font-size:13px;">Review</label>
+        <textarea id="rv-text" class="form-control" rows="3" placeholder="What did you think of the pizza?"></textarea>
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="submitReview()">Submit Review</button>
+      <span id="review-status" style="margin-left:10px; font-size:13px;"></span>
+    </div>
+
+  </div>
+
+  <footer><p>SliceFinder &copy;2026</p></footer>
+
+  <script>
+    // Hamburger
+    document.getElementById('nav-toggle').addEventListener('click', function() {
+      var nav = document.getElementById('bs-navbar');
+      nav.classList.toggle('open');
+      this.setAttribute('aria-expanded', nav.classList.contains('open'));
+    });
+
+    // Review count
+    function updateReviewCount() {
+      var n = document.querySelectorAll('#reviews-list .review-card').length;
+      document.getElementById('review-count').textContent = '(' + n + ')';
+    }
+    updateReviewCount();
+
+    // Star picker
+    var selectedRating = 0;
+    var starSpans = document.querySelectorAll('#star-picker span');
+    starSpans.forEach(function(s) {
+      s.addEventListener('mouseover', function() { highlightStars(+s.dataset.val); });
+      s.addEventListener('mouseout',  function() { highlightStars(selectedRating); });
+      s.addEventListener('click', function() {
+        selectedRating = +s.dataset.val;
+        document.getElementById('rv-rating').value = selectedRating;
+        highlightStars(selectedRating);
+      });
+    });
+    function highlightStars(n) {
+      starSpans.forEach(function(s) { s.classList.toggle('on', +s.dataset.val <= n); });
+    }
+
+    // Submit review (client-side only demo — wire to Firebase when ready)
+    function submitReview() {
+      var statusEl = document.getElementById('review-status');
+      var username = document.getElementById('rv-username').value.trim();
+      var rating   = +document.getElementById('rv-rating').value;
+      var text     = document.getElementById('rv-text').value.trim();
+
+      if (!username) { statusEl.textContent = '❌ Please enter your name.'; statusEl.style.color='red'; return; }
+      if (!rating)   { statusEl.textContent = '❌ Please select a star rating.'; statusEl.style.color='red'; return; }
+      if (!text)     { statusEl.textContent = '❌ Please write a review.'; statusEl.style.color='red'; return; }
+
+      // Add review card to the list
+      var filled = '★'.repeat(rating) + '☆'.repeat(5 - rating);
+      var today  = new Date().toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' });
+      var card   = document.createElement('div');
+      card.className = 'review-card';
+      card.innerHTML =
+        '<div><span class="reviewer">' + username + '</span>' +
+        '<span class="review-date">' + today + '</span>' +
+        '<span class="stars" style="float:right;">' + filled + '</span></div>' +
+        '<div class="review-text">' + text + '</div>';
+
+      var list = document.getElementById('reviews-list');
+      list.insertBefore(card, list.firstChild);
+
+      statusEl.textContent = '✅ Review added!';
+      statusEl.style.color = 'green';
+      document.getElementById('rv-username').value = '';
+      document.getElementById('rv-text').value = '';
+      selectedRating = 0;
+      document.getElementById('rv-rating').value = 0;
+      highlightStars(0);
+      updateReviewCount();
+
+      setTimeout(function() { statusEl.textContent = ''; }, 3000);
+    }
+  </script>
+
+</body>
+</html>
