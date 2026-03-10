@@ -8,194 +8,121 @@
   <title>SliceFinder - Find Your Slice</title>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Alfa%20Slab%20One">
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <style>
     html, body {
-      height: 100%;
-      margin: 0;
-      padding: 0;
+      height: 100%; margin: 0; padding: 0;
       font-family: Tahoma, sans-serif;
-      overflow-x: hidden;
-      max-width: 100%;
+      overflow-x: hidden; max-width: 100%;
+    }
+    body { display: flex; flex-direction: column; }
+
+    .container-fluid { padding-left:0; padding-right:0; }
+    .row { margin-left:0; margin-right:0; }
+    .col-sm-2, .col-sm-8 { padding-left:0; padding-right:0; }
+    .col-sm-8 { width:auto; flex:1; }
+
+    .navbar { margin-bottom:0; border-radius:0; width:100%; flex-shrink:0; }
+    .navbar-brand { font-family:'Alfa Slab One',serif; color:#c0392b !important; font-size:24px; letter-spacing:1px; }
+
+    @media (max-width:767px) {
+      #bs-navbar { display:none; width:100%; }
+      #bs-navbar.open { display:block; }
+      #bs-navbar .nav > li > a { color:#fff !important; padding:10px 16px; }
+      #bs-navbar .nav > li > a:hover { background:#333 !important; }
+      #nav-toggle { display:block !important; }
+    }
+    @media (min-width:768px) {
+      #bs-navbar { display:block !important; }
+      #nav-toggle { display:none !important; }
     }
 
-    body {
-      display: flex;
-      flex-direction: column;
-    }
+    .page-wrapper { flex:1; display:flex; flex-direction:column; width:100%; }
+    .row.content { flex:1; min-height:600px; display:flex; }
 
-    .container-fluid {
-      padding-left: 0;
-      padding-right: 0;
-    }
+    .sidenav { padding:20px 14px; background-color:#f1f1f1; }
 
-    .row {
-      margin-left: 0;
-      margin-right: 0;
-    }
-
-    .col-sm-2,
-    .col-sm-8 {
-      padding-left: 0;
-      padding-right: 0;
-    }
-
-    .col-sm-8 {
-      width: auto;
-      flex: 1;
-    }
-
-    .navbar {
-      margin-bottom: 0;
-      border-radius: 0;
-      width: 100%;
-      flex-shrink: 0;
-    }
-
-    /* Mobile: hidden by default, block when .open is toggled */
-    @media (max-width: 767px) {
-      #bs-navbar {
-        display: none;
-        width: 100%;
-      }
-      #bs-navbar.open {
-        display: block;
-      }
-      #bs-navbar .nav > li > a {
-        color: #fff !important;
-      }
-      #bs-navbar .nav > li > a:hover {
-        background-color: #333 !important;
-      }
-      #nav-toggle {
-        display: block !important;
-      }
-    }
-
-    /* Desktop: Bootstrap handles everything, just ensure visibility */
-    @media (min-width: 768px) {
-      #bs-navbar {
-        display: block !important;
-      }
-      #nav-toggle {
-        display: none !important;
-      }
-    }
-
-    .navbar-brand {
-      font-family: 'Alfa Slab One', serif;
-      color: #c0392b !important;
-      font-size: 24px;
-      letter-spacing: 1px;
-    }
-
-    .page-wrapper {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      width: 100%;
-    }
-
-    .row.content {
-      flex: 1;
-      min-height: 600px;
-      display: flex;
-    }
-
-    .sidenav {
-      padding: 20px 14px;
-      background-color: #f1f1f1;
-    }
-
-    footer {
-      background-color: #555;
-      color: white;
-      padding: 15px;
-      text-align: center;
-      flex-shrink: 0;
-    }
-
-    footer p { margin: 0; }
+    footer { background:#555; color:#fff; padding:15px; text-align:center; flex-shrink:0; }
+    footer p { margin:0; }
 
     #slices-header {
-      background-color: #c0392b;
-      color: #fff;
-      font-family: 'Alfa Slab One', serif;
-      font-size: 18px;
-      padding: 8px 14px;
-      letter-spacing: 0.5px;
+      background-color:#c0392b; color:#fff;
+      font-family:'Alfa Slab One',serif; font-size:18px;
+      padding:8px 14px; letter-spacing:0.5px;
     }
-
     #geo-status {
-      font-size: 16px;
-      font-weight: bold;
-      color: #888;
-      text-align: center;
-      padding: 5px 0 5px;
-      min-height: 18px;
+      font-size:14px; font-weight:bold; color:#888;
+      text-align:center; padding:5px 0; min-height:18px;
     }
 
-    #search-status,
-    #mobile-search-status {
-      font-size: 11px;
-      color: #888;
-      margin-top: 4px;
-      min-height: 16px;
+    /* Leaflet map container */
+    #map-frame { flex:1; min-height:400px; display:block; z-index:1; }
+
+    /* Custom pizza marker */
+    .pizza-marker {
+      width:38px; height:38px;
+      background:#c0392b; border:3px solid #fff;
+      border-radius:50%; display:flex; align-items:center;
+      justify-content:center; font-size:18px;
+      box-shadow:0 2px 6px rgba(0,0,0,0.35);
+      cursor:pointer;
     }
 
-    /* Mobile search bar — hidden on desktop, shown on mobile */
+    /* Info popup */
+    .leaflet-popup-content-wrapper { border-radius:8px; padding:0; overflow:hidden; }
+    .leaflet-popup-content { margin:0; min-width:200px; }
+    .popup-inner { padding:14px 16px; font-family:Tahoma,sans-serif; }
+    .popup-inner h4 { margin:0 0 4px; font-size:14px; color:#222; }
+    .popup-inner .popup-addr { font-size:12px; color:#666; margin-bottom:4px; }
+    .popup-inner .popup-hours { font-size:11px; color:#888; margin-bottom:8px; }
+    .popup-inner .popup-tags span {
+      display:inline-block; background:#f0e6e6; color:#c0392b;
+      border-radius:10px; padding:2px 8px; font-size:11px; margin:2px 2px 6px 0;
+    }
+    .popup-btn {
+      display:block; background:#c0392b; color:#fff !important;
+      padding:7px 14px; border-radius:4px; font-size:12px;
+      text-decoration:none !important; text-align:center;
+      margin-top:4px; font-weight:bold;
+    }
+    .popup-btn:hover { background:#a93226; }
+
+    /* Mobile search */
     #mobile-search {
-      display: none;
-      padding: 10px 12px 6px;
-      background-color: #f1f1f1;
-      border-bottom: 1px solid #ddd;
-      width: 100%;
+      display:none; padding:10px 12px 6px;
+      background:#f1f1f1; border-bottom:1px solid #ddd; width:100%;
     }
+    #mobile-search-status { font-size:11px; color:#888; margin-top:4px; min-height:16px; }
+    #search-status { font-size:11px; color:#888; margin-top:4px; min-height:16px; }
 
-    #mobile-search .input-group {
-      display: flex;
-    }
-
-    #mobile-search input {
-      flex: 1;
-      border-radius: 4px 0 0 4px;
-    }
-
-    #mobile-search button {
-      border-radius: 0 4px 4px 0;
-    }
-
-    @media screen and (max-width: 800px) {
-      /* Show mobile search, hide sidebars */
-      #mobile-search        { display: block; }
-      .col-sm-2             { display: none !important; }
-      .col-sm-8             { width: 100% !important; }
-      .row.content          { min-height: auto; }
-      .mobile               { display: block !important; }
+    @media screen and (max-width:800px) {
+      #mobile-search { display:block; }
+      .col-sm-2 { display:none !important; }
+      .col-sm-8 { width:100% !important; }
+      .row.content { min-height:auto; }
     }
   </style>
 </head>
-
 <body>
 
-  <!-- ✅ jQuery MUST load before Bootstrap JS for collapse to work -->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <!-- Navigation -->
   <nav class="navbar navbar-inverse">
     <div class="container-fluid" style="padding:0 10px;">
       <div class="navbar-header">
-        <button id="nav-toggle" type="button" class="navbar-toggle" aria-expanded="false" aria-controls="bs-navbar">
+        <button id="nav-toggle" type="button" class="navbar-toggle" aria-expanded="false">
           <span class="sr-only">Toggle navigation</span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
+          <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
         </button>
         <a class="navbar-brand" href="#">SliceFinder</a>
       </div>
       <div id="bs-navbar">
         <ul class="nav navbar-nav">
-          <li><a href="#">Restaurants</a></li>
+          <li class="active"><a href="#">Restaurants</a></li>
           <li><a href="#">Frozen Pizza</a></li>
           <li><a href="#">Pizza News</a></li>
           <li><a href="#">My Profile</a></li>
@@ -207,69 +134,44 @@
     </div>
   </nav>
 
-  <!-- Mobile search bar (visible only at ≤800px, above the map) -->
+  <!-- Mobile search -->
   <div id="mobile-search">
     <div style="display:flex; gap:6px; align-items:flex-start;">
       <div style="flex:2;">
-        <input
-          type="text"
-          id="mobile-city-input"
-          class="form-control input-sm"
-          placeholder="City or ZIP"
-          autocomplete="off"
+        <input type="text" id="mobile-city-input" class="form-control input-sm"
+          placeholder="City or ZIP" autocomplete="off"
           onkeydown="if(event.key==='Enter'){mobileSearch();event.preventDefault();}">
       </div>
       <div style="flex:1;">
-        <input
-          type="text"
-          id="mobile-state-input"
-          class="form-control input-sm"
-          placeholder="State (opt.)"
-          autocomplete="off"
-          maxlength="2"
+        <input type="text" id="mobile-state-input" class="form-control input-sm"
+          placeholder="State (opt.)" autocomplete="off" maxlength="2"
           onkeydown="if(event.key==='Enter'){mobileSearch();event.preventDefault();}">
       </div>
       <div>
-        <button class="btn btn-danger btn-sm" type="button" onclick="mobileSearch()">Search</button>
+        <button class="btn btn-danger btn-sm" onclick="mobileSearch()">Search</button>
       </div>
     </div>
     <div id="mobile-search-status"></div>
   </div>
 
-  <!-- Firebase config banner (hidden once configured) -->
-  <div id="firebase-config-banner" style="display:none; background:#fff8f8; border-bottom:1px solid #f5c6c6; padding:10px 16px;">
-    <strong style="font-size:13px; color:#c0392b;">⚙️ Connect Firebase to show restaurant pins</strong>
-    <div style="display:flex; gap:8px; align-items:center; margin-top:6px; flex-wrap:wrap;">
-      <input type="text" id="firebase-config-input" placeholder='Paste your Firebase config here…'
-        style="flex:1; min-width:200px; font-size:12px; padding:5px 8px; border:1px solid #ddd; border-radius:4px; font-family:monospace;">
-      <button class="btn btn-danger btn-xs" onclick="saveFirebaseConfig()">Connect</button>
-    </div>
-  </div>
-
   <!-- Page Content -->
   <div class="page-wrapper">
-    <div class="container-fluid" style="flex:1; display:flex; flex-direction:column; width:100%;">
+    <div class="container-fluid" style="flex:1;display:flex;flex-direction:column;width:100%;">
       <div class="row content">
 
         <!-- Left Sidebar -->
         <div class="col-sm-2 sidenav">
           <p>
-            <a href="https://twitter.com/slicefinder"
-               class="twitter-follow-button"
-               data-show-count="false"
-               data-lang="en">
-              Follow @slicefinder
-            </a>
+            <a href="https://twitter.com/slicefinder" class="twitter-follow-button"
+               data-show-count="false" data-lang="en">Follow @slicefinder</a>
           </p>
-
           <h5><strong>Most Reviewed</strong></h5>
           <ul class="list-unstyled" style="font-size:13px;">
-            <li><a href="#">Tony's SF</a></li>
+            <li><a href="tonys-pizza.html">Tony's SF</a></li>
             <li><a href="#">Arinell Pizza</a></li>
             <li><a href="#">Goat Hill Pizza</a></li>
             <li><a href="#">Golden Boy Pizza</a></li>
           </ul>
-
           <h5><strong>Top Reviewers</strong></h5>
           <ul class="list-unstyled" style="font-size:13px;">
             <li>gregdodge &nbsp;<span class="badge">85</span></li>
@@ -280,43 +182,28 @@
         </div>
 
         <!-- Main Content -->
-        <div class="col-sm-8" style="display:flex; flex-direction:column; flex:1;">
-
-          <div id="slices-header">🍕 Slices found!</div>
+        <div class="col-sm-8" style="display:flex;flex-direction:column;flex:1;">
+          <div id="slices-header">🍕 10 slices found!</div>
           <div id="geo-status">Detecting your location…</div>
-
-          <!-- Map renders here via Google Maps JS API -->
-          <div id="map-frame" style="flex:1; min-height:400px; display:block;"></div>
-
+          <div id="map-frame"></div>
         </div>
 
         <!-- Right Sidebar -->
         <div class="col-sm-2 sidenav">
           <h5><strong>Find your slice</strong></h5>
-          <form id="search-form" onsubmit="desktopSearch(event)">
+          <form onsubmit="desktopSearch(event)">
             <div class="form-group" style="margin-bottom:6px;">
-              <input
-                type="text"
-                id="location-input"
-                class="form-control input-sm"
-                placeholder="City or ZIP"
-                autocomplete="off">
+              <input type="text" id="location-input" class="form-control input-sm"
+                placeholder="City or ZIP" autocomplete="off">
             </div>
             <div class="form-group" style="margin-bottom:6px;">
-              <input
-                type="text"
-                id="state-input"
-                class="form-control input-sm"
-                placeholder="State (optional)"
-                autocomplete="off"
-                maxlength="2">
+              <input type="text" id="state-input" class="form-control input-sm"
+                placeholder="State (optional)" autocomplete="off" maxlength="2">
             </div>
             <button type="submit" class="btn btn-danger btn-sm btn-block">Search</button>
             <div id="search-status"></div>
           </form>
-
           <hr>
-
           <h5><strong>Add a Pizzeria</strong></h5>
           <p style="font-size:12px;">Know a great spot that's missing? Help the community!</p>
           <a href="add-restaurant.html" class="btn btn-default btn-sm btn-block">+ Add Restaurant</a>
@@ -326,206 +213,138 @@
     </div>
   </div>
 
-  <!-- Footer -->
-  <footer>
-    <p>SliceFinder &copy;2026</p>
-  </footer>
+  <footer><p>SliceFinder &copy;2026</p></footer>
 
   <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 
-  <!--
-    ══════════════════════════════════════════════════════
-    GOOGLE MAPS API KEY — replace YOUR_API_KEY below.
-    Get one at: https://console.cloud.google.com/
-    Enable: Maps JavaScript API
-    ══════════════════════════════════════════════════════
-  -->
   <script>
-    var SF_LAT = 37.7797, SF_LNG = -122.4316;
-    var gMap = null, gMarkers = [];
+    // ── Restaurant data ───────────────────────────────────────────────
+    // This list is hardcoded for the demo.
+    // When Firebase is connected, this gets replaced by Firestore data.
+    var restaurants = [
+      { id:'tonys',       name:"Tony's Pizza Napoletana", address:"1570 Stockton St", city:"San Francisco", state:"CA", lat:37.800091, lng:-122.408234, hours:"Wed–Mon 12pm–10pm", tags:["Neapolitan","Coal-fired","Award-winning"], page:"tonys-pizza.html" },
+      { id:'arinell',     name:"Arinell Pizza",           address:"509 Valencia St",  city:"San Francisco", state:"CA", lat:37.7643,  lng:-122.4214,   hours:"Daily 11am–11pm",   tags:["NY-style","By the slice"],                  page:"restaurant.html?id=arinell" },
+      { id:'goathill',    name:"Goat Hill Pizza",         address:"300 Connecticut St",city:"San Francisco",state:"CA", lat:37.7629,  lng:-122.3983,   hours:"Tue–Sun 5pm–10pm",  tags:["Classic","Neighborhood"],                   page:"restaurant.html?id=goathill" },
+      { id:'goldenboy',   name:"Golden Boy Pizza",        address:"542 Green St",     city:"San Francisco", state:"CA", lat:37.7993,  lng:-122.4089,   hours:"Sun–Thu 11:30am–1am",tags:["Focaccia-style","Late night"],              page:"restaurant.html?id=goldenboy" },
+      { id:'delfina',     name:"Pizzeria Delfina",        address:"3611 18th St",     city:"San Francisco", state:"CA", lat:37.7614,  lng:-122.4262,   hours:"Mon–Thu 5:30pm–10pm",tags:["Neapolitan","Upscale"],                     page:"restaurant.html?id=delfina" },
+      { id:'beretta',     name:"Beretta",                 address:"1199 Valencia St", city:"San Francisco", state:"CA", lat:37.7526,  lng:-122.4205,   hours:"Daily 5pm–12am",    tags:["Wood-fired","Craft cocktails"],             page:"restaurant.html?id=beretta" },
+      { id:'littlestar',  name:"Little Star Pizza",       address:"846 Divisadero St",city:"San Francisco", state:"CA", lat:37.7749,  lng:-122.4388,   hours:"Tue–Sun 5pm–10pm",  tags:["Deep dish","Chicago-style"],                page:"restaurant.html?id=littlestar" },
+      { id:'flourwater',  name:"Flour + Water Pizzeria",  address:"2401 Harrison St", city:"San Francisco", state:"CA", lat:37.7593,  lng:-122.4121,   hours:"Daily 11:30am–10pm",tags:["Neapolitan","Fast casual"],                 page:"restaurant.html?id=flourwater" },
+      { id:'pizzetta211', name:"Pizzetta 211",            address:"211 23rd Ave",     city:"San Francisco", state:"CA", lat:37.7841,  lng:-122.4841,   hours:"Wed–Sun 5pm–9pm",   tags:["Artisan","Richmond"],                       page:"restaurant.html?id=pizzetta211" },
+      { id:'delpopolo',   name:"Del Popolo",              address:"855 Bush St",      city:"San Francisco", state:"CA", lat:37.7891,  lng:-122.4148,   hours:"Wed–Sun 5pm–10pm",  tags:["Wood-fired","Nob Hill"],                    page:"restaurant.html?id=delpopolo" },
+    ];
 
-    // ── Firebase config parser ────────────────────────────────────────
-    function parseConfig(raw) {
-      var s = raw.trim();
-      s = s.replace(/^(const|let|var)\s+\w+\s*=\s*/, '').replace(/;?\s*$/, '');
-      s = s.replace(/([{,]\s*)([a-zA-Z_]\w*)\s*:/g, '$1"$2":');
-      s = s.replace(/[\u201C\u201D]/g, '"').replace(/[\u2018\u2019]/g, "'");
-      return JSON.parse(s);
+    // ── Init Leaflet map ──────────────────────────────────────────────
+    var map = L.map('map-frame', {
+      center: [37.7749, -122.4194],
+      zoom: 13,
+      zoomControl: true,
+    });
+
+    // OpenStreetMap tiles — free, no API key
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      maxZoom: 19,
+    }).addTo(map);
+
+    // ── Pizza marker icon ─────────────────────────────────────────────
+    function makePizzaIcon(highlight) {
+      return L.divIcon({
+        className: '',
+        html: '<div class="pizza-marker" style="' + (highlight ? 'background:#922b21;transform:scale(1.15);' : '') + '">🍕</div>',
+        iconSize: [38, 38],
+        iconAnchor: [19, 19],
+        popupAnchor: [0, -22],
+      });
     }
 
-    // ── Status helpers ────────────────────────────────────────────────
+    // ── Place markers ─────────────────────────────────────────────────
+    restaurants.forEach(function(r) {
+      var marker = L.marker([r.lat, r.lng], { icon: makePizzaIcon(false) }).addTo(map);
+
+      var tagsHtml = (r.tags || []).map(function(t) {
+        return '<span>' + t + '</span>';
+      }).join('');
+
+      var popupHtml =
+        '<div class="popup-inner">' +
+        '<h4>' + r.name + '</h4>' +
+        '<div class="popup-addr">📍 ' + r.address + ', ' + r.city + '</div>' +
+        (r.hours ? '<div class="popup-hours">⏰ ' + r.hours + '</div>' : '') +
+        (tagsHtml ? '<div class="popup-tags">' + tagsHtml + '</div>' : '') +
+        '<a href="' + r.page + '" class="popup-btn">View Restaurant →</a>' +
+        '</div>';
+
+      marker.bindPopup(popupHtml, { maxWidth: 240 });
+
+      marker.on('mouseover', function() { this.setIcon(makePizzaIcon(true)); });
+      marker.on('mouseout',  function() { this.setIcon(makePizzaIcon(false)); });
+      marker.on('click',     function() { this.openPopup(); });
+    });
+
+    // ── Geolocation ───────────────────────────────────────────────────
     function setGeoStatus(msg) {
       document.getElementById('geo-status').textContent = msg;
     }
 
-    function buildQuery(city, state) {
-      var q = city.trim();
-      if (state.trim()) q += ', ' + state.trim();
-      return q;
-    }
-
-    // ── Google Maps init (called by Maps script callback) ─────────────
-    window.initMap = function() {
-      gMap = new google.maps.Map(document.getElementById('map-frame'), {
-        center: { lat: SF_LAT, lng: SF_LNG },
-        zoom: 13,
-        mapTypeId: 'roadmap',
-        streetViewControl: false,
-        fullscreenControl: false,
-      });
-      loadRestaurantMarkers();
-      updateMapToUserLocation();
-    };
-
-    // ── Load restaurant markers from Firestore ────────────────────────
-    async function loadRestaurantMarkers() {
-      var saved = sessionStorage.getItem('sf-firebase-config');
-      if (!saved) return; // Firebase not configured yet — skip markers
-
-      var { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js');
-      var { getFirestore, collection, getDocs } = await import('https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js');
-
-      var apps = getApps();
-      var app = apps.length ? apps[0] : initializeApp(parseConfig(saved));
-      var db = getFirestore(app);
-
-      var snap = await getDocs(collection(db, 'restaurants'));
-      var count = 0;
-
-      snap.forEach(function(docSnap) {
-        var r = docSnap.data();
-        if (!r.lat || !r.lng) return;
-
-        var marker = new google.maps.Marker({
-          position: { lat: r.lat, lng: r.lng },
-          map: gMap,
-          title: r.name,
-          icon: {
-            url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(
-              '<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36">' +
-              '<circle cx="18" cy="18" r="16" fill="#c0392b" stroke="#fff" stroke-width="2"/>' +
-              '<text x="18" y="23" text-anchor="middle" font-size="18">🍕</text></svg>'
-            ),
-            scaledSize: new google.maps.Size(36, 36),
-            anchor: new google.maps.Point(18, 18),
-          }
-        });
-
-        var tags = (r.tags || []).map(function(t) {
-          return '<span style="background:#f0e6e6;color:#c0392b;border-radius:10px;padding:2px 8px;font-size:11px;margin-right:3px;">' + t + '</span>';
-        }).join('');
-
-        var infoContent =
-          '<div style="font-family:Tahoma,sans-serif;max-width:220px;padding:4px;">' +
-          '<strong style="font-size:14px;">' + r.name + '</strong><br>' +
-          '<span style="font-size:12px;color:#666;">' + (r.address || '') + ', ' + (r.city || '') + '</span><br>' +
-          (r.hours ? '<span style="font-size:11px;color:#888;">⏰ ' + r.hours + '</span><br>' : '') +
-          (tags ? '<div style="margin:5px 0;">' + tags + '</div>' : '') +
-          '<a href="restaurant.html?id=' + docSnap.id + '" ' +
-          'style="display:inline-block;margin-top:8px;background:#c0392b;color:#fff;' +
-          'padding:5px 12px;border-radius:4px;font-size:12px;text-decoration:none;">' +
-          'View Restaurant →</a>' +
-          '</div>';
-
-        var infoWindow = new google.maps.InfoWindow({ content: infoContent });
-
-        marker.addListener('click', function() {
-          gMarkers.forEach(function(m) { if (m.iw) m.iw.close(); });
-          infoWindow.open(gMap, marker);
-        });
-
-        marker.iw = infoWindow;
-        gMarkers.push(marker);
-        count++;
-      });
-
-      if (count > 0) {
-        document.getElementById('slices-header').textContent = '🍕 ' + count + ' slice' + (count !== 1 ? 's' : '') + ' found!';
-      }
-    }
-
-    // ── Pan map to search result ──────────────────────────────────────
-    function panMapTo(query, label) {
-      if (!gMap) return;
-      var geocoder = new google.maps.Geocoder();
-      geocoder.geocode({ address: query }, function(results, status) {
-        if (status === 'OK' && results[0]) {
-          gMap.setCenter(results[0].geometry.location);
-          gMap.setZoom(13);
-        }
-      });
-      if (label) setGeoStatus(label);
-    }
-
-    // ── Desktop search ────────────────────────────────────────────────
-    function desktopSearch(e) {
-      e.preventDefault();
-      var city  = document.getElementById('location-input').value.trim();
-      var state = document.getElementById('state-input').value.trim();
-      if (!city) { document.getElementById('search-status').textContent = 'Please enter a city or ZIP.'; return; }
-      document.getElementById('search-status').textContent = '';
-      var loc = buildQuery(city, state);
-      panMapTo('pizza ' + loc, 'Showing pizza near ' + loc);
-    }
-
-    // ── Mobile search ─────────────────────────────────────────────────
-    function mobileSearch() {
-      var city  = document.getElementById('mobile-city-input').value.trim();
-      var state = document.getElementById('mobile-state-input').value.trim();
-      if (!city) { document.getElementById('mobile-search-status').textContent = 'Please enter a city or ZIP.'; return; }
-      document.getElementById('mobile-search-status').textContent = '';
-      var loc = buildQuery(city, state);
-      panMapTo('pizza ' + loc, 'Showing pizza near ' + loc);
-    }
-
-    // ── Geolocation ───────────────────────────────────────────────────
-    function updateMapToUserLocation() {
-      if (!navigator.geolocation) {
-        setGeoStatus('Showing pizza near you … Not right? Try search.');
-        return;
-      }
+    if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         function(pos) {
-          var lat = pos.coords.latitude, lng = pos.coords.longitude;
-          if (gMap) gMap.setCenter({ lat: lat, lng: lng });
+          map.setView([pos.coords.latitude, pos.coords.longitude], 13);
           setGeoStatus('Showing pizza near you … Not right? Try search.');
         },
         function() { setGeoStatus('Showing pizza near you … Not right? Try search.'); },
         { timeout: 8000, maximumAge: 60000 }
       );
+    } else {
+      setGeoStatus('Showing pizza near you … Not right? Try search.');
     }
 
-    // ── Firebase config prompt (shown if not yet set) ─────────────────
-    window.saveFirebaseConfig = function() {
-      var raw = document.getElementById('firebase-config-input').value.trim();
-      try {
-        parseConfig(raw); // validate
-        sessionStorage.setItem('sf-firebase-config', raw);
-        document.getElementById('firebase-config-banner').style.display = 'none';
-        loadRestaurantMarkers();
-      } catch(e) {
-        alert('Could not parse Firebase config: ' + e.message);
-      }
-    };
+    // ── Search ────────────────────────────────────────────────────────
+    function geocodeAndPan(query, statusEl, label) {
+      var url = 'https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(query);
+      fetch(url)
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data && data.length > 0) {
+            map.setView([+data[0].lat, +data[0].lon], 13);
+            setGeoStatus(label);
+          } else {
+            statusEl.textContent = 'Location not found. Try a different search.';
+          }
+        })
+        .catch(function() { statusEl.textContent = 'Search failed. Try again.'; });
+    }
+
+    function desktopSearch(e) {
+      e.preventDefault();
+      var city  = document.getElementById('location-input').value.trim();
+      var state = document.getElementById('state-input').value.trim();
+      var statusEl = document.getElementById('search-status');
+      if (!city) { statusEl.textContent = 'Please enter a city or ZIP.'; return; }
+      statusEl.textContent = 'Searching…';
+      var q = city + (state ? ', ' + state : '') + ', USA';
+      geocodeAndPan(q, statusEl, 'Showing pizza near ' + city);
+      statusEl.textContent = '';
+    }
+
+    function mobileSearch() {
+      var city  = document.getElementById('mobile-city-input').value.trim();
+      var state = document.getElementById('mobile-state-input').value.trim();
+      var statusEl = document.getElementById('mobile-search-status');
+      if (!city) { statusEl.textContent = 'Please enter a city or ZIP.'; return; }
+      statusEl.textContent = 'Searching…';
+      var q = city + (state ? ', ' + state : '') + ', USA';
+      geocodeAndPan(q, statusEl, 'Showing pizza near ' + city);
+      statusEl.textContent = '';
+    }
 
     // ── Hamburger ─────────────────────────────────────────────────────
-    document.addEventListener('DOMContentLoaded', function() {
-      document.getElementById('nav-toggle').addEventListener('click', function() {
-        var nav = document.getElementById('bs-navbar');
-        nav.classList.toggle('open');
-        this.setAttribute('aria-expanded', nav.classList.contains('open'));
-      });
-
-      // Show Firebase config banner if not yet configured
-      if (!sessionStorage.getItem('sf-firebase-config')) {
-        document.getElementById('firebase-config-banner').style.display = 'block';
-      }
+    document.getElementById('nav-toggle').addEventListener('click', function() {
+      var nav = document.getElementById('bs-navbar');
+      nav.classList.toggle('open');
+      this.setAttribute('aria-expanded', nav.classList.contains('open'));
     });
-  </script>
-
-  <!-- Load Google Maps JS API — replace YOUR_API_KEY -->
-  <script async defer
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAkR9km-vDnmRNBx0IvHez12fhy92c_bDs&callback=initMap">
   </script>
 
 </body>
