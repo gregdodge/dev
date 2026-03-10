@@ -1,0 +1,412 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🍕</text></svg>'>
+  <title>SliceFinder – Add a Pizzeria</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Alfa%20Slab%20One">
+  <style>
+    html, body { height: 100%; margin: 0; padding: 0; font-family: Tahoma, sans-serif; background: #f5f5f5; }
+
+    .navbar { margin-bottom: 0; border-radius: 0; }
+    .navbar-brand { font-family: 'Alfa Slab One', serif; color: #c0392b !important; font-size: 24px; }
+
+    .form-card {
+      background: #fff;
+      border-radius: 6px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 30px;
+      margin: 30px auto;
+      max-width: 640px;
+    }
+
+    .form-card h3 {
+      font-family: 'Alfa Slab One', serif;
+      color: #c0392b;
+      margin-top: 0;
+      margin-bottom: 20px;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #999;
+      margin: 20px 0 8px;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 4px;
+    }
+
+    #submit-btn { min-width: 160px; }
+
+    #form-status {
+      margin-top: 16px;
+      font-weight: bold;
+      font-size: 14px;
+      min-height: 20px;
+    }
+
+    .tag-input-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding: 6px 8px;
+      background: #fff;
+      min-height: 38px;
+      cursor: text;
+    }
+
+    .tag-chip {
+      background: #c0392b;
+      color: #fff;
+      border-radius: 12px;
+      padding: 2px 10px 2px 10px;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+
+    .tag-chip button {
+      background: none;
+      border: none;
+      color: #fff;
+      cursor: pointer;
+      font-size: 13px;
+      padding: 0;
+      line-height: 1;
+    }
+
+    #tag-input {
+      border: none;
+      outline: none;
+      flex: 1;
+      min-width: 100px;
+      font-size: 13px;
+      font-family: Tahoma, sans-serif;
+    }
+
+    /* Config panel */
+    #config-panel {
+      background: #fff8f8;
+      border: 1px solid #f5c6c6;
+      border-radius: 6px;
+      padding: 16px;
+      margin: 20px auto;
+      max-width: 640px;
+    }
+    #config-panel h5 { margin-top: 0; color: #c0392b; }
+    #config-panel.hidden { display: none; }
+
+    footer { background: #555; color: #fff; padding: 15px; text-align: center; margin-top: 40px; }
+    footer p { margin: 0; }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar navbar-inverse">
+    <div class="container-fluid" style="padding: 0 10px;">
+      <div class="navbar-header">
+        <button id="nav-toggle" type="button" class="navbar-toggle" aria-expanded="false">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="bs-sf.html">SliceFinder</a>
+      </div>
+      <div id="bs-navbar">
+        <ul class="nav navbar-nav">
+          <li><a href="bs-sf.html">Restaurants</a></li>
+          <li><a href="#">Frozen Pizza</a></li>
+          <li><a href="#">Pizza News</a></li>
+          <li><a href="#">My Profile</a></li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+          <li><a href="#">Login</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Firebase Config Panel (shown until configured) -->
+  <div id="config-panel" class="container">
+    <h5>⚙️ Firebase Configuration Required</h5>
+    <p style="font-size:13px; margin-bottom:10px;">Paste your Firebase config JSON to connect this form to your database. This only needs to be done once — after saving it will be remembered in this session.</p>
+    <textarea id="config-input" class="form-control" rows="7" placeholder='{
+  "apiKey": "AIzaSy...",
+  "authDomain": "your-app.firebaseapp.com",
+  "projectId": "your-project-id",
+  "storageBucket": "your-app.appspot.com",
+  "messagingSenderId": "123456789",
+  "appId": "1:123456789:web:abcdef"
+}'></textarea>
+    <button class="btn btn-danger btn-sm" style="margin-top:10px;" onclick="saveConfig()">Save Config</button>
+    <span id="config-status" style="margin-left:10px; font-size:13px;"></span>
+  </div>
+
+  <!-- Add Restaurant Form -->
+  <div class="form-card container">
+    <h3>🍕 Add a Pizzeria</h3>
+    <p style="font-size:13px; color:#666;">Know a great slice spot that's missing from SliceFinder? Add it to the community map!</p>
+
+    <div class="section-label">Restaurant Info</div>
+
+    <div class="form-group">
+      <label>Restaurant Name <span style="color:#c0392b">*</span></label>
+      <input type="text" id="f-name" class="form-control" placeholder="e.g. Tony's Pizza Napoletana">
+    </div>
+
+    <div class="form-group">
+      <label>Phone</label>
+      <input type="tel" id="f-phone" class="form-control" placeholder="(415) 555-1234">
+    </div>
+
+    <div class="form-group">
+      <label>Hours</label>
+      <input type="text" id="f-hours" class="form-control" placeholder="e.g. Mon-Sat 11am-10pm">
+    </div>
+
+    <div class="form-group">
+      <label>Website URL</label>
+      <input type="url" id="f-url" class="form-control" placeholder="e.g. https://tonyspizzanapoletana.com">
+    </div>
+
+    <div class="section-label">Location</div>
+
+    <div class="form-group">
+      <label>Street Address <span style="color:#c0392b">*</span></label>
+      <input type="text" id="f-address" class="form-control" placeholder="e.g. 1570 Stockton St">
+    </div>
+
+    <div class="row">
+      <div class="col-sm-5">
+        <div class="form-group">
+          <label>City <span style="color:#c0392b">*</span></label>
+          <input type="text" id="f-city" class="form-control" placeholder="San Francisco">
+        </div>
+      </div>
+      <div class="col-sm-3">
+        <div class="form-group">
+          <label>State <span style="color:#c0392b">*</span></label>
+          <input type="text" id="f-state" class="form-control" placeholder="CA" maxlength="2">
+        </div>
+      </div>
+      <div class="col-sm-4">
+        <div class="form-group">
+          <label>ZIP <span style="color:#c0392b">*</span></label>
+          <input type="text" id="f-zip" class="form-control" placeholder="94133" maxlength="10">
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-sm-6">
+        <div class="form-group">
+          <label>Latitude <span style="color:#888; font-size:11px;">(optional)</span></label>
+          <input type="number" id="f-lat" class="form-control" placeholder="37.7997" step="0.0001">
+        </div>
+      </div>
+      <div class="col-sm-6">
+        <div class="form-group">
+          <label>Longitude <span style="color:#888; font-size:11px;">(optional)</span></label>
+          <input type="number" id="f-lng" class="form-control" placeholder="-122.4082" step="0.0001">
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label">Tags</div>
+    <div class="form-group">
+      <label>Pizza Style Tags <span style="color:#888; font-size:11px;">(type and press Enter or comma)</span></label>
+      <div class="tag-input-wrap" id="tag-wrap" onclick="document.getElementById('tag-input').focus()">
+        <input type="text" id="tag-input" placeholder="e.g. NY-style, Neapolitan...">
+      </div>
+    </div>
+
+    <button id="submit-btn" class="btn btn-danger" onclick="submitRestaurant()">
+      + Add Restaurant
+    </button>
+
+    <div id="form-status"></div>
+  </div>
+
+  <footer><p>SliceFinder &copy;2026</p></footer>
+
+  <script type="module">
+    // ── Firebase setup ──────────────────────────────────────────────────
+    let db = null;
+
+    window.saveConfig = async function() {
+      const raw = document.getElementById('config-input').value.trim();
+      const statusEl = document.getElementById('config-status');
+      let config;
+      try {
+        let jsonStr = raw;
+        jsonStr = jsonStr.replace(/^(const|let|var)\s+\w+\s*=\s*/, '').replace(/;?\s*$/, '');
+        jsonStr = jsonStr.replace(/([{,]\s*)([a-zA-Z_]\w*)\s*:/g, '$1"$2":');
+        jsonStr = jsonStr.replace(/[\u201C\u201D]/g, '"').replace(/[\u2018\u2019]/g, "'");
+        config = JSON.parse(jsonStr);
+      } catch(e) {
+        statusEl.textContent = '❌ Could not parse config — paste the firebaseConfig object from your Firebase console.';
+        statusEl.style.color = 'red';
+        return;
+      }
+      try {
+        const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js');
+        const { getFirestore } = await import('https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js');
+        const apps = getApps();
+        const app = apps.length ? apps[0] : initializeApp(config);
+        db = getFirestore(app);
+        sessionStorage.setItem('sf-firebase-config', raw);
+        document.getElementById('config-panel').classList.add('hidden');
+        statusEl.textContent = '✅ Connected!';
+      } catch(e) {
+        statusEl.textContent = '❌ ' + e.message;
+        statusEl.style.color = 'red';
+      }
+    };
+
+    // Auto-load config from session if available
+    const saved = sessionStorage.getItem('sf-firebase-config');
+    if (saved) {
+      document.getElementById('config-input').value = saved;
+      window.saveConfig();
+    }
+
+    // ── Tag chip UI ─────────────────────────────────────────────────────
+    const tags = [];
+
+    function renderTags() {
+      const wrap = document.getElementById('tag-wrap');
+      const input = document.getElementById('tag-input');
+      wrap.querySelectorAll('.tag-chip').forEach(c => c.remove());
+      tags.forEach((tag, i) => {
+        const chip = document.createElement('span');
+        chip.className = 'tag-chip';
+        chip.innerHTML = `${tag} <button type="button" onclick="removeTag(${i})">&times;</button>`;
+        wrap.insertBefore(chip, input);
+      });
+    }
+
+    window.removeTag = function(i) {
+      tags.splice(i, 1);
+      renderTags();
+    };
+
+    document.getElementById('tag-input').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ',') {
+        e.preventDefault();
+        const val = this.value.replace(/,/g, '').trim();
+        if (val && !tags.includes(val)) { tags.push(val); renderTags(); }
+        this.value = '';
+      }
+      if (e.key === 'Backspace' && this.value === '' && tags.length) {
+        tags.pop();
+        renderTags();
+      }
+    });
+
+    // ── Form submit ─────────────────────────────────────────────────────
+    window.submitRestaurant = async function() {
+      const statusEl = document.getElementById('form-status');
+      const btn = document.getElementById('submit-btn');
+
+      if (!db) {
+        statusEl.textContent = '❌ Firebase not configured. Please add your Firebase config above.';
+        statusEl.style.color = 'red';
+        return;
+      }
+
+      const name    = document.getElementById('f-name').value.trim();
+      const address = document.getElementById('f-address').value.trim();
+      const city    = document.getElementById('f-city').value.trim();
+      const state   = document.getElementById('f-state').value.trim().toUpperCase();
+      const zip     = document.getElementById('f-zip').value.trim();
+
+      if (!name || !address || !city || !state || !zip) {
+        statusEl.textContent = '❌ Please fill in all required fields (marked with *).';
+        statusEl.style.color = 'red';
+        return;
+      }
+
+      // Flush any typed-but-not-entered tag
+      const tagInput = document.getElementById('tag-input');
+      const pending = tagInput.value.replace(/,/g, '').trim();
+      if (pending && !tags.includes(pending)) { tags.push(pending); tagInput.value = ''; renderTags(); }
+
+      const lat = parseFloat(document.getElementById('f-lat').value) || null;
+      const lng = parseFloat(document.getElementById('f-lng').value) || null;
+
+      const data = {
+        name,
+        address,
+        city,
+        state,
+        zip,
+        phone:  document.getElementById('f-phone').value.trim() || null,
+        hours:  document.getElementById('f-hours').value.trim() || null,
+        url:    document.getElementById('f-url').value.trim() || null,
+        lat,
+        lng,
+        tags:   [...tags],
+      };
+
+      btn.disabled = true;
+      btn.textContent = 'Saving…';
+      statusEl.textContent = '';
+
+      try {
+        const { collection, addDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js');
+        const ref = await addDoc(collection(db, 'restaurants'), { ...data, createdAt: serverTimestamp() });
+        statusEl.textContent = `✅ "${name}" added successfully! (ID: ${ref.id})`;
+        statusEl.style.color = 'green';
+        // Clear form
+        ['f-name','f-phone','f-hours','f-url','f-address','f-city','f-state','f-zip','f-lat','f-lng'].forEach(id => {
+          document.getElementById(id).value = '';
+        });
+        tags.length = 0;
+        renderTags();
+      } catch(e) {
+        statusEl.textContent = '❌ Error saving: ' + e.message;
+        statusEl.style.color = 'red';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '+ Add Restaurant';
+      }
+    };
+  </script>
+
+  <script>
+    // Hamburger toggle (same pattern as bs-sf.html)
+    document.getElementById('nav-toggle').addEventListener('click', function() {
+      var nav = document.getElementById('bs-navbar');
+      nav.classList.toggle('open');
+      this.setAttribute('aria-expanded', nav.classList.contains('open'));
+    });
+  </script>
+
+  <style>
+    @media (max-width: 767px) {
+      #bs-navbar { display: none; width: 100%; }
+      #bs-navbar.open { display: block; }
+      #bs-navbar .nav > li > a { color: #fff !important; padding: 10px 16px; }
+      #bs-navbar .nav > li > a:hover { background: #333 !important; }
+      #nav-toggle { display: block !important; }
+    }
+    @media (min-width: 768px) {
+      #bs-navbar { display: block !important; }
+      #nav-toggle { display: none !important; }
+    }
+  </style>
+
+</body>
+</html>
