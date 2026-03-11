@@ -292,10 +292,24 @@
       </div>
 
       <div class="form-group">
-        <label style="font-size:12px; font-weight:bold; color:#999; text-transform:uppercase; letter-spacing:1px;">Avatar Image URL <span style="font-weight:normal; text-transform:none; letter-spacing:0;">(paste any image link)</span></label>
-        <input type="url" id="modal-avatar-url" class="form-control input-sm" placeholder="https://example.com/photo.jpg"
-          oninput="previewAvatar(this.value)">
-        <div style="font-size:11px; color:#aaa; margin-top:4px;">Tip: right-click any profile photo online → Copy image address</div>
+        <label style="font-size:12px; font-weight:bold; color:#999; text-transform:uppercase; letter-spacing:1px;">Profile Photo</label>
+        <div id="drop-zone"
+          ondragover="event.preventDefault(); this.classList.add('drag-over')"
+          ondragleave="this.classList.remove('drag-over')"
+          ondrop="handleDrop(event)"
+          onclick="document.getElementById('avatar-file-input').click()"
+          style="border:2px dashed #ddd; border-radius:6px; padding:18px; text-align:center; cursor:pointer; font-size:13px; color:#aaa; transition:border-color 0.15s, background 0.15s;">
+          <div>📁 Drag & drop a photo here, or <span style="color:#c0392b; font-weight:bold;">click to browse</span></div>
+          <div style="font-size:11px; margin-top:4px;">JPG, PNG, GIF up to 10MB</div>
+        </div>
+        <input type="file" id="avatar-file-input" accept="image/*" style="display:none" onchange="handleFileSelect(this.files[0])">
+        <div id="upload-progress" style="display:none; margin-top:8px;">
+          <div style="background:#eee; border-radius:4px; height:6px; overflow:hidden;">
+            <div id="upload-bar" style="background:#c0392b; height:100%; width:0; transition:width 0.2s;"></div>
+          </div>
+          <div id="upload-status" style="font-size:11px; color:#888; margin-top:4px;">Uploading…</div>
+        </div>
+        <input type="hidden" id="modal-avatar-url">
       </div>
 
       <div style="display:flex; gap:8px; margin-top:20px;">
@@ -538,17 +552,21 @@
 
     // ── Edit profile modal ──────────────────────────────────────────
     window.openEditModal = function() {
-      const name    = document.getElementById('profile-displayname').textContent;
+      const name     = document.getElementById('profile-displayname').textContent;
       const avatarEl = document.getElementById('profile-avatar');
       document.getElementById('modal-displayname').value = name;
       document.getElementById('modal-avatar-url').value = '';
       document.getElementById('modal-status').textContent = '';
+      document.getElementById('upload-progress').style.display = 'none';
+      document.getElementById('upload-bar').style.width = '0';
+      document.getElementById('drop-zone').classList.remove('drag-over');
 
       // Mirror current avatar into preview
       const preview = document.getElementById('modal-avatar-preview');
       const img = avatarEl.querySelector('img');
       if (img) {
         preview.innerHTML = `<img src="${img.src}" alt="avatar">`;
+        document.getElementById('modal-avatar-url').value = img.src;
       } else {
         preview.textContent = name.charAt(0).toUpperCase();
         preview.style.background = '#c0392b';
@@ -561,7 +579,10 @@
       document.getElementById('edit-modal').classList.remove('open');
     };
 
-    window.previewAvatar = function(url) {
+    const CLOUDINARY_CLOUD  = 'dj5n4gwwa';
+    const CLOUDINARY_PRESET = 'jmp5bdjn';
+
+    function previewAvatarUrl(url) {
       const preview = document.getElementById('modal-avatar-preview');
       if (url) {
         preview.innerHTML = `<img src="${url}" alt="avatar" onerror="this.parentElement.textContent='?'">`;
@@ -570,6 +591,62 @@
         preview.innerHTML = '';
         preview.textContent = name.charAt(0).toUpperCase();
       }
+    }
+
+    async function uploadToCloudinary(file) {
+      const progressEl = document.getElementById('upload-progress');
+      const barEl      = document.getElementById('upload-bar');
+      const statusEl   = document.getElementById('upload-status');
+      progressEl.style.display = 'block';
+      barEl.style.width = '10%';
+      statusEl.textContent = 'Uploading…';
+
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', CLOUDINARY_PRESET);
+
+      try {
+        // Simulate progress since fetch doesn't support upload progress
+        let pct = 10;
+        const ticker = setInterval(() => {
+          pct = Math.min(pct + 10, 85);
+          barEl.style.width = pct + '%';
+        }, 200);
+
+        const res  = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, {
+          method: 'POST', body: formData
+        });
+        clearInterval(ticker);
+
+        if (!res.ok) throw new Error('Upload failed (' + res.status + ')');
+        const data = await res.json();
+
+        barEl.style.width = '100%';
+        statusEl.textContent = '✅ Uploaded!';
+        statusEl.style.color = 'green';
+
+        document.getElementById('modal-avatar-url').value = data.secure_url;
+        previewAvatarUrl(data.secure_url);
+
+        setTimeout(() => { progressEl.style.display = 'none'; }, 1500);
+        return data.secure_url;
+      } catch(e) {
+        barEl.style.width = '0';
+        statusEl.textContent = '❌ ' + e.message;
+        statusEl.style.color = 'red';
+        return null;
+      }
+    }
+
+    window.handleDrop = async function(e) {
+      e.preventDefault();
+      document.getElementById('drop-zone').classList.remove('drag-over');
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith('image/')) await uploadToCloudinary(file);
+    };
+
+    window.handleFileSelect = async function(file) {
+      if (file && file.type.startsWith('image/')) await uploadToCloudinary(file);
     };
 
     window.saveEditProfile = async function() {
