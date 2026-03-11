@@ -269,16 +269,14 @@
           if (data && data.length > 0) {
             r.lat = +data[0].lat;
             r.lng = +data[0].lon;
-            addMarker(docId, r);
+            var m = addMarker(docId, r);
+            if (m) allMarkers.push(m);
           } else {
             console.warn('Could not geocode:', r.name);
           }
         })
         .catch(function(e) { console.warn('Geocode failed:', r.name, e); });
     }
-
-    // Store all markers for filtering
-    var allMarkers = [];
 
     // Place a single marker on the map
     function addMarker(docId, r) {
@@ -305,37 +303,9 @@
       marker.on('mouseout',  function() { this.setIcon(makePizzaIcon(false)); });
       marker.on('click',     function() { this.openPopup(); });
 
-      allMarkers.push(marker);
     }
 
-    // Filter markers by restaurant name and pan map to show all matches
-    function filterMarkersByName(query) {
-      var q = query.toLowerCase().trim();
-      var matchedMarkers = [];
 
-      allMarkers.forEach(function(m) {
-        if (!q || m._restaurantName.indexOf(q) !== -1) {
-          if (!map.hasLayer(m)) map.addLayer(m);
-          matchedMarkers.push(m);
-        } else {
-          if (map.hasLayer(m)) map.removeLayer(m);
-        }
-      });
-
-      var total = allMarkers.length;
-      var headerEl = document.getElementById('slices-header');
-
-      if (q && matchedMarkers.length > 0) {
-        // Fit map to show all matching pins
-        var group = L.featureGroup(matchedMarkers);
-        map.fitBounds(group.getBounds().pad(0.3));
-        headerEl.textContent = '🍕 ' + matchedMarkers.length + ' match' + (matchedMarkers.length !== 1 ? 'es' : '') + ' for "' + query + '"';
-      } else if (q && matchedMarkers.length === 0) {
-        headerEl.textContent = '🍕 No matches for "' + query + '"';
-      } else {
-        headerEl.textContent = '🍕 ' + total + ' slice' + (total !== 1 ? 's' : '') + ' found!';
-      }
-    }
 
     // Search helpers
     function geocodeAndPan(query, statusEl, label) {
@@ -418,6 +388,36 @@
     // Also store in sessionStorage so restaurant.html can use it
     sessionStorage.setItem('sf-firebase-config', JSON.stringify(firebaseConfig));
 
+    // ── Marker registry for name filtering ───────────────────────────
+    const allMarkers = [];
+
+    window.filterMarkersByName = function(query) {
+      var q = query.toLowerCase().trim();
+      var matchedMarkers = [];
+
+      allMarkers.forEach(function(m) {
+        if (!q || m._restaurantName.indexOf(q) !== -1) {
+          if (!map.hasLayer(m)) map.addLayer(m);
+          matchedMarkers.push(m);
+        } else {
+          if (map.hasLayer(m)) map.removeLayer(m);
+        }
+      });
+
+      var total = allMarkers.length;
+      var headerEl = document.getElementById('slices-header');
+
+      if (q && matchedMarkers.length > 0) {
+        var group = L.featureGroup(matchedMarkers);
+        map.fitBounds(group.getBounds().pad(0.3));
+        headerEl.textContent = '🍕 ' + matchedMarkers.length + ' match' + (matchedMarkers.length !== 1 ? 'es' : '') + ' for "' + query + '"';
+      } else if (q && matchedMarkers.length === 0) {
+        headerEl.textContent = '🍕 No matches for "' + query + '"';
+      } else {
+        headerEl.textContent = '🍕 ' + total + ' slice' + (total !== 1 ? 's' : '') + ' found!';
+      }
+    };
+
     try {
       const snapshot = await getDocs(collection(db, 'restaurants'));
       let count = 0;
@@ -425,7 +425,8 @@
       snapshot.forEach(function(docSnap) {
         const r = docSnap.data();
         if (r.lat && r.lng) {
-          addMarker(docSnap.id, r);
+          const m = addMarker(docSnap.id, r);
+          if (m) allMarkers.push(m);
         } else {
           geocodeAndAddMarker(docSnap.id, r);
         }
