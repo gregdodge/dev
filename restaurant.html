@@ -222,7 +222,7 @@
           <li><a href="#">My Profile</a></li>
         </ul>
         <ul class="nav navbar-nav navbar-right">
-          <li><a href="#">Login</a></li>
+          <li><a href="profile.html" id="nav-auth-btn">Login</a></li>
         </ul>
       </div>
     </div>
@@ -240,6 +240,11 @@
         <h1 id="r-name"></h1>
         <div id="r-avg-rating" style="margin-bottom:8px; font-size:15px; color:#f0a500; min-height:20px;"></div>
         <div id="r-tags"></div>
+        <div style="margin-top:12px;">
+          <button id="fav-btn" onclick="toggleFavorite()" class="btn btn-sm" style="background:rgba(255,255,255,0.15); color:#fff; border:1px solid rgba(255,255,255,0.3);">
+            ❤️ Save as Favorite
+          </button>
+        </div>
       </div>
       <div class="detail-card">
         <div class="info-grid">
@@ -285,27 +290,36 @@
       <!-- Write a Review -->
       <div class="review-form-card">
         <h4>✍️ Write a Review</h4>
-        <div class="form-group">
-          <label style="font-size:13px;">Your Name</label>
-          <input type="text" id="rv-username" class="form-control input-sm" placeholder="e.g. gregdodge" style="max-width:220px;">
+
+        <!-- Logged out state -->
+        <div id="review-login-prompt" style="display:none; text-align:center; padding:16px 0;">
+          <p style="color:#888; font-size:13px; margin-bottom:12px;">You must be signed in to write a review.</p>
+          <a href="profile.html" class="btn btn-danger btn-sm">Sign In / Create Account</a>
         </div>
-        <div class="form-group">
-          <label style="font-size:13px;">Rating</label><br>
-          <div class="star-picker" id="star-picker">
-            <span data-val="1">★</span>
-            <span data-val="2">★</span>
-            <span data-val="3">★</span>
-            <span data-val="4">★</span>
-            <span data-val="5">★</span>
+
+        <!-- Logged in state -->
+        <div id="review-form-inner" style="display:none;">
+          <div class="form-group">
+            <label style="font-size:13px;">Reviewing as: <strong id="rv-username-display" style="color:#c0392b;"></strong></label>
           </div>
-          <input type="hidden" id="rv-rating" value="0">
+          <div class="form-group">
+            <label style="font-size:13px;">Rating</label><br>
+            <div class="star-picker" id="star-picker">
+              <span data-val="1">★</span>
+              <span data-val="2">★</span>
+              <span data-val="3">★</span>
+              <span data-val="4">★</span>
+              <span data-val="5">★</span>
+            </div>
+            <input type="hidden" id="rv-rating" value="0">
+          </div>
+          <div class="form-group">
+            <label style="font-size:13px;">Review</label>
+            <textarea id="rv-text" class="form-control" rows="3" placeholder="What did you think of the pizza?"></textarea>
+          </div>
+          <button class="btn btn-danger btn-sm" onclick="submitReview()">Submit Review</button>
+          <span id="review-status" style="margin-left:10px; font-size:13px;"></span>
         </div>
-        <div class="form-group">
-          <label style="font-size:13px;">Review</label>
-          <textarea id="rv-text" class="form-control" rows="3" placeholder="What did you think of the pizza?"></textarea>
-        </div>
-        <button class="btn btn-danger btn-sm" onclick="submitReview()">Submit Review</button>
-        <span id="review-status" style="margin-left:10px; font-size:13px;"></span>
       </div>
 
     </div>
@@ -336,8 +350,9 @@
 
     // ── Init Firebase ─────────────────────────────────────────────────
     const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js');
-    const { getFirestore, doc, getDoc, collection, query, where, orderBy, addDoc, serverTimestamp, getDocs }
+    const { getFirestore, doc, getDoc, collection, query, where, orderBy, addDoc, serverTimestamp, getDocs, updateDoc, arrayUnion, arrayRemove }
       = await import('https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js');
+    const { getAuth, onAuthStateChanged } = await import('https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js');
 
     const firebaseConfig = {
       apiKey: "AIzaSyB-5Bz4rpHehUbxX7kP__-ap0xSuSdwZ0E",
@@ -351,6 +366,7 @@
     const apps = getApps();
     const app = apps.length ? apps[0] : initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    const auth = getAuth(app);
 
     // ── Get restaurant ID from URL ────────────────────────────────────
     const params = new URLSearchParams(window.location.search);
@@ -479,6 +495,61 @@
 
     await loadReviews();
 
+    // ── Auth state: show/hide review form ────────────────────────────
+    let currentUser = null;
+    onAuthStateChanged(auth, async (user) => {
+      currentUser = user;
+      const loginPrompt = document.getElementById('review-login-prompt');
+      const formInner   = document.getElementById('review-form-inner');
+      const navBtn      = document.getElementById('nav-auth-btn');
+      if (user) {
+        loginPrompt.style.display = 'none';
+        formInner.style.display = 'block';
+        const displayName = user.displayName || user.email.split('@')[0];
+        document.getElementById('rv-username-display').textContent = displayName;
+        if (navBtn) { navBtn.textContent = 'My Profile'; navBtn.href = 'profile.html'; }
+        // Check if already favorited
+        try {
+          const userSnap = await getDoc(doc(db, 'users', user.uid));
+          if (userSnap.exists()) {
+            const favs = userSnap.data().favorites || [];
+            if (favs.includes(restaurantId)) setFavBtn(true);
+          }
+        } catch(e) {}
+      } else {
+        loginPrompt.style.display = 'block';
+        formInner.style.display = 'none';
+        if (navBtn) { navBtn.textContent = 'Login'; navBtn.href = 'profile.html'; }
+      }
+    });
+
+    // ── Favorite toggle ───────────────────────────────────────────────
+    function setFavBtn(isFav) {
+      const btn = document.getElementById('fav-btn');
+      btn.textContent = isFav ? '❤️ Favorited' : '❤️ Save as Favorite';
+      btn.style.background = isFav ? 'rgba(192,57,43,0.6)' : 'rgba(255,255,255,0.15)';
+      btn.dataset.faved = isFav ? '1' : '0';
+    }
+
+    window.toggleFavorite = async function() {
+      if (!currentUser) { window.location.href = 'profile.html'; return; }
+      const isFaved = document.getElementById('fav-btn').dataset.faved === '1';
+      try {
+        const userRef = doc(db, 'users', currentUser.uid);
+        if (isFaved) {
+          await updateDoc(userRef, { favorites: arrayRemove(restaurantId) });
+          setFavBtn(false);
+        } else {
+          await updateDoc(userRef, { favorites: arrayUnion(restaurantId) }).catch(async () => {
+            // user doc might not exist yet
+            const { setDoc } = await import('https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js');
+            await setDoc(userRef, { favorites: [restaurantId] }, { merge: true });
+          });
+          setFavBtn(true);
+        }
+      } catch(e) { console.error('Favorite error:', e); }
+    };
+
     // ── Star picker ───────────────────────────────────────────────────
     let selectedRating = 0;
     const starSpans = document.querySelectorAll('#star-picker span');
@@ -500,11 +571,11 @@
     // ── Submit review ─────────────────────────────────────────────────
     window.submitReview = async function() {
       const statusEl = document.getElementById('review-status');
-      const username = document.getElementById('rv-username').value.trim();
+      if (!currentUser) { statusEl.textContent = '❌ Please sign in to review.'; statusEl.style.color='red'; return; }
+      const username = currentUser.displayName || currentUser.email.split('@')[0];
       const rating   = +document.getElementById('rv-rating').value;
       const text     = document.getElementById('rv-text').value.trim();
 
-      if (!username) { statusEl.textContent = '❌ Please enter your name.'; statusEl.style.color='red'; return; }
       if (!rating)   { statusEl.textContent = '❌ Please select a star rating.'; statusEl.style.color='red'; return; }
       if (!text)     { statusEl.textContent = '❌ Please write a review.'; statusEl.style.color='red'; return; }
 
@@ -515,6 +586,7 @@
         await addDoc(collection(db, 'reviews'), {
           restaurantId,
           username,
+          uid: currentUser.uid,
           rating,
           text,
           createdAt: serverTimestamp()
