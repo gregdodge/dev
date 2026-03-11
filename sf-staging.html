@@ -120,10 +120,10 @@
           <li class="active"><a href="#">Restaurants</a></li>
           <li><a href="#">Frozen Pizza</a></li>
           <li><a href="#">Pizza News</a></li>
-          <li><a href="#">My Profile</a></li>
+          <li><a href="profile.html">My Profile</a></li>
         </ul>
         <ul class="nav navbar-nav navbar-right">
-          <li><a href="#">Login</a></li>
+          <li><a href="profile.html" id="nav-auth-btn">Login</a></li>
         </ul>
       </div>
     </div>
@@ -162,7 +162,7 @@
           </p>
           <h5><strong>Most Reviewed</strong></h5>
           <ul class="list-unstyled" style="font-size:13px;">
-            <li><a href="restaurant.html?id=RKms8lEdpo09eDWkajNv">Tony's SF</a></li>
+            <li><a href="restaurant.html?id=tp2XYlZzZiDQbpFzKC7od">Tony's SF</a></li>
             <li><a href="restaurant.html?id=LbwJwdku1teLPuVdJPcy">Arinell Pizza</a></li>
             <li><a href="restaurant.html?id=22pmp2wIqI8MBwAv4WNm">Goat Hill Pizza</a></li>
             <li><a href="restaurant.html?id=Wg4q8KSMRnL04voEppE2">Golden Boy Pizza</a></li>
@@ -331,6 +331,24 @@
       statusEl.textContent = '';
       geocodeAndPan(city + (state ? ', ' + state : '') + ', USA', statusEl, 'Showing pizza near ' + city);
     }
+
+    // Update nav auth button based on auth state
+    import('https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js').then(({ getAuth, onAuthStateChanged }) => {
+      import('https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js').then(({ getApps }) => {
+        const auth = getAuth(getApps()[0]);
+        onAuthStateChanged(auth, (user) => {
+          const btn = document.getElementById('nav-auth-btn');
+          if (!btn) return;
+          if (user) {
+            btn.textContent = user.displayName || 'My Profile';
+            btn.href = 'profile.html';
+          } else {
+            btn.textContent = 'Login';
+            btn.href = 'profile.html';
+          }
+        });
+      });
+    });
 
     // Hamburger
     document.getElementById('nav-toggle').addEventListener('click', function() {
