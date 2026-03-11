@@ -237,6 +237,10 @@
               <div class="profile-badge">🍕 <strong id="badge-reviews">0</strong> reviews</div>
               <div class="profile-badge">❤️ <strong id="badge-favs">0</strong> favorites</div>
             </div>
+            <button id="edit-profile-btn" onclick="openEditModal()"
+              style="display:none; margin-top:12px; background:rgba(255,255,255,0.15); color:#fff; border:1px solid rgba(255,255,255,0.3); border-radius:4px; padding:5px 14px; font-size:12px; cursor:pointer;">
+              ✏️ Edit Profile
+            </button>
           </div>
         </div>
 
@@ -272,6 +276,34 @@
       </div>
     </div>
 
+  </div>
+
+  <!-- Edit Profile Modal -->
+  <div class="modal-overlay" id="edit-modal">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeEditModal()">✕</button>
+      <h4>✏️ Edit Profile</h4>
+
+      <div class="avatar-preview" id="modal-avatar-preview">?</div>
+
+      <div class="form-group">
+        <label style="font-size:12px; font-weight:bold; color:#999; text-transform:uppercase; letter-spacing:1px;">Display Name</label>
+        <input type="text" id="modal-displayname" class="form-control input-sm" placeholder="Your display name">
+      </div>
+
+      <div class="form-group">
+        <label style="font-size:12px; font-weight:bold; color:#999; text-transform:uppercase; letter-spacing:1px;">Avatar Image URL <span style="font-weight:normal; text-transform:none; letter-spacing:0;">(paste any image link)</span></label>
+        <input type="url" id="modal-avatar-url" class="form-control input-sm" placeholder="https://example.com/photo.jpg"
+          oninput="previewAvatar(this.value)">
+        <div style="font-size:11px; color:#aaa; margin-top:4px;">Tip: right-click any profile photo online → Copy image address</div>
+      </div>
+
+      <div style="display:flex; gap:8px; margin-top:20px;">
+        <button class="btn btn-danger btn-sm" onclick="saveEditProfile()">Save Changes</button>
+        <button class="btn btn-default btn-sm" onclick="closeEditModal()">Cancel</button>
+      </div>
+      <div id="modal-status" style="font-size:13px; margin-top:10px; min-height:18px;"></div>
+    </div>
   </div>
 
   <footer><p>SliceFinder &copy;2026</p></footer>
@@ -504,6 +536,81 @@
       } catch(e) { alert('Could not remove: ' + e.message); }
     };
 
+    // ── Edit profile modal ──────────────────────────────────────────
+    window.openEditModal = function() {
+      const name    = document.getElementById('profile-displayname').textContent;
+      const avatarEl = document.getElementById('profile-avatar');
+      document.getElementById('modal-displayname').value = name;
+      document.getElementById('modal-avatar-url').value = '';
+      document.getElementById('modal-status').textContent = '';
+
+      // Mirror current avatar into preview
+      const preview = document.getElementById('modal-avatar-preview');
+      const img = avatarEl.querySelector('img');
+      if (img) {
+        preview.innerHTML = `<img src="${img.src}" alt="avatar">`;
+      } else {
+        preview.textContent = name.charAt(0).toUpperCase();
+        preview.style.background = '#c0392b';
+      }
+
+      document.getElementById('edit-modal').classList.add('open');
+    };
+
+    window.closeEditModal = function() {
+      document.getElementById('edit-modal').classList.remove('open');
+    };
+
+    window.previewAvatar = function(url) {
+      const preview = document.getElementById('modal-avatar-preview');
+      if (url) {
+        preview.innerHTML = `<img src="${url}" alt="avatar" onerror="this.parentElement.textContent='?'">`;
+      } else {
+        const name = document.getElementById('modal-displayname').value || '?';
+        preview.innerHTML = '';
+        preview.textContent = name.charAt(0).toUpperCase();
+      }
+    };
+
+    window.saveEditProfile = async function() {
+      const statusEl  = document.getElementById('modal-status');
+      const name      = document.getElementById('modal-displayname').value.trim();
+      const avatarUrl = document.getElementById('modal-avatar-url').value.trim();
+
+      if (!name) { statusEl.textContent = '❌ Name cannot be empty.'; statusEl.style.color = 'red'; return; }
+
+      statusEl.textContent = 'Saving…'; statusEl.style.color = '#888';
+
+      try {
+        const updates = { displayName: name };
+        const authUpdates = { displayName: name };
+        if (avatarUrl) { authUpdates.photoURL = avatarUrl; updates.photoURL = avatarUrl; }
+
+        await updateProfile(auth.currentUser, authUpdates);
+        await setDoc(doc(db, 'users', auth.currentUser.uid), updates, { merge: true });
+
+        // Update hero
+        document.getElementById('profile-displayname').textContent = name;
+        document.getElementById('edit-displayname').value = name;
+        const avatarEl = document.getElementById('profile-avatar');
+        if (avatarUrl) {
+          avatarEl.innerHTML = `<img src="${avatarUrl}" alt="avatar">`;
+        } else {
+          avatarEl.textContent = name.charAt(0).toUpperCase();
+        }
+
+        statusEl.textContent = '✅ Profile updated!'; statusEl.style.color = 'green';
+        setTimeout(closeEditModal, 900);
+      } catch(e) {
+        statusEl.textContent = '❌ ' + e.message; statusEl.style.color = 'red';
+      }
+    };
+
+    // Close modal on overlay click
+    document.getElementById('edit-modal').addEventListener('click', function(e) {
+      if (e.target === this) closeEditModal();
+    });
+
     // ── Auth state ───────────────────────────────────────────────────
     const viewingUid = new URLSearchParams(window.location.search).get('user');
 
@@ -590,6 +697,7 @@
           navBtn.textContent = 'Sign Out';
           navBtn.onclick = () => fbSignOut(auth);
           await loadProfileData(user);
+        document.getElementById('edit-profile-btn').style.display = 'inline-block';
         } else {
           document.getElementById('auth-gate').style.display = 'block';
           document.getElementById('profile-content').style.display = 'none';
