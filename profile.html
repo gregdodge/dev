@@ -505,21 +505,99 @@
     };
 
     // ── Auth state ───────────────────────────────────────────────────
-    onAuthStateChanged(auth, async (user) => {
-      const navBtn = document.getElementById('nav-auth-btn');
-      if (user) {
-        document.getElementById('auth-gate').style.display = 'none';
-        document.getElementById('profile-content').style.display = 'block';
-        navBtn.textContent = 'Sign Out';
-        navBtn.onclick = () => fbSignOut(auth);
-        await loadProfileData(user);
-      } else {
-        document.getElementById('auth-gate').style.display = 'block';
-        document.getElementById('profile-content').style.display = 'none';
-        navBtn.textContent = 'Login';
-        navBtn.onclick = () => { window.location.href = 'profile.html'; };
+    const viewingUid = new URLSearchParams(window.location.search).get('user');
+
+    if (viewingUid) {
+      // ── Public profile view ────────────────────────────────────────
+      document.getElementById('auth-gate').style.display = 'none';
+      document.getElementById('profile-content').style.display = 'block';
+
+      // Hide private tabs (favorites, settings)
+      document.querySelectorAll('.profile-tab').forEach(t => {
+        if (t.textContent.trim() === 'Favorites' || t.textContent.trim() === 'Settings') {
+          t.style.display = 'none';
+        }
+      });
+
+      // Load public user data from Firestore users collection
+      try {
+        const userSnap = await getDoc(doc(db, 'users', viewingUid));
+        const userData = userSnap.exists() ? userSnap.data() : {};
+        const displayName = userData.displayName || 'SliceFinder User';
+
+        // Populate hero
+        const avatarEl = document.getElementById('profile-avatar');
+        avatarEl.textContent = displayName.charAt(0).toUpperCase();
+        document.getElementById('profile-displayname').textContent = displayName;
+        document.getElementById('profile-email').textContent = '';
+        document.getElementById('edit-displayname').closest('.tab-panel').style.display = 'none';
+
+        // Load their reviews
+        let theirReviews = [];
+        try {
+          const rq = query(collection(db, 'reviews'), where('uid', '==', viewingUid));
+          const rSnaps = await getDocs(rq);
+          rSnaps.forEach(s => theirReviews.push({ id: s.id, ...s.data() }));
+        } catch(e) { console.warn('Could not load reviews', e); }
+
+        document.getElementById('badge-reviews').textContent = theirReviews.length;
+        document.getElementById('badge-favs').closest('.profile-badge').style.display = 'none';
+
+        const reviewsEl = document.getElementById('my-reviews-list');
+        if (theirReviews.length === 0) {
+          reviewsEl.innerHTML = '<p class="empty-state">No reviews yet.</p>';
+        } else {
+          theirReviews.sort((a, b) => {
+            const ta = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+            const tb = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+            return tb - ta;
+          });
+          reviewsEl.innerHTML = '';
+          for (const rv of theirReviews) {
+            let restaurantName = rv.restaurantId;
+            try {
+              const rSnap = await getDoc(doc(db, 'restaurants', rv.restaurantId));
+              if (rSnap.exists()) restaurantName = rSnap.data().name;
+            } catch(e) {}
+            const starStr = '★'.repeat(rv.rating || 0) + '☆'.repeat(5 - (rv.rating || 0));
+            const dateStr = rv.createdAt?.toDate
+              ? rv.createdAt.toDate().toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' })
+              : '';
+            const div = document.createElement('div');
+            div.className = 'review-card';
+            div.innerHTML = `
+              <div>
+                <a class="restaurant-name" href="restaurant.html?id=${rv.restaurantId}">${restaurantName}</a>
+                <span class="review-date">${dateStr}</span>
+                <span class="stars" style="float:right;">${starStr}</span>
+              </div>
+              <div class="review-text">${rv.text || ''}</div>
+            `;
+            reviewsEl.appendChild(div);
+          }
+        }
+      } catch(e) {
+        console.error('Public profile error:', e);
       }
-    });
+
+    } else {
+      // ── Own profile (must be logged in) ───────────────────────────
+      onAuthStateChanged(auth, async (user) => {
+        const navBtn = document.getElementById('nav-auth-btn');
+        if (user) {
+          document.getElementById('auth-gate').style.display = 'none';
+          document.getElementById('profile-content').style.display = 'block';
+          navBtn.textContent = 'Sign Out';
+          navBtn.onclick = () => fbSignOut(auth);
+          await loadProfileData(user);
+        } else {
+          document.getElementById('auth-gate').style.display = 'block';
+          document.getElementById('profile-content').style.display = 'none';
+          navBtn.textContent = 'Login';
+          navBtn.onclick = () => { window.location.href = 'profile.html'; };
+        }
+      });
+    }
   </script>
 
   <script>
