@@ -195,9 +195,14 @@
               <input type="text" id="state-input" class="form-control input-sm"
                 placeholder="State (optional)" autocomplete="off" maxlength="2">
             </div>
-            <button type="submit" class="btn btn-danger btn-sm btn-block">Search</button>
+            <button type="submit" class="btn btn-danger btn-sm btn-block">Search Location</button>
             <div id="search-status"></div>
           </form>
+          <div class="form-group" style="margin-top:10px; margin-bottom:0;">
+            <input type="text" id="name-search-input" class="form-control input-sm"
+              placeholder="Filter by restaurant name…" autocomplete="off"
+              oninput="filterMarkersByName(this.value)">
+          </div>
           <hr>
           <h5><strong>Add a Pizzeria</strong></h5>
           <p style="font-size:12px;">Know a great spot that's missing? Help the community!</p>
@@ -272,11 +277,15 @@
         .catch(function(e) { console.warn('Geocode failed:', r.name, e); });
     }
 
+    // Store all markers for filtering
+    var allMarkers = [];
+
     // Place a single marker on the map
     function addMarker(docId, r) {
       if (!r.lat || !r.lng) return;
 
       var marker = L.marker([r.lat, r.lng], { icon: makePizzaIcon(false) }).addTo(map);
+      marker._restaurantName = (r.name || '').toLowerCase();
 
       var tagsHtml = (r.tags || []).map(function(t) {
         return '<span>' + t + '</span>';
@@ -295,6 +304,37 @@
       marker.on('mouseover', function() { this.setIcon(makePizzaIcon(true)); });
       marker.on('mouseout',  function() { this.setIcon(makePizzaIcon(false)); });
       marker.on('click',     function() { this.openPopup(); });
+
+      allMarkers.push(marker);
+    }
+
+    // Filter markers by restaurant name and pan map to show all matches
+    function filterMarkersByName(query) {
+      var q = query.toLowerCase().trim();
+      var matchedMarkers = [];
+
+      allMarkers.forEach(function(m) {
+        if (!q || m._restaurantName.indexOf(q) !== -1) {
+          if (!map.hasLayer(m)) map.addLayer(m);
+          matchedMarkers.push(m);
+        } else {
+          if (map.hasLayer(m)) map.removeLayer(m);
+        }
+      });
+
+      var total = allMarkers.length;
+      var headerEl = document.getElementById('slices-header');
+
+      if (q && matchedMarkers.length > 0) {
+        // Fit map to show all matching pins
+        var group = L.featureGroup(matchedMarkers);
+        map.fitBounds(group.getBounds().pad(0.3));
+        headerEl.textContent = '🍕 ' + matchedMarkers.length + ' match' + (matchedMarkers.length !== 1 ? 'es' : '') + ' for "' + query + '"';
+      } else if (q && matchedMarkers.length === 0) {
+        headerEl.textContent = '🍕 No matches for "' + query + '"';
+      } else {
+        headerEl.textContent = '🍕 ' + total + ' slice' + (total !== 1 ? 's' : '') + ' found!';
+      }
     }
 
     // Search helpers
