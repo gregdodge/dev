@@ -1,0 +1,534 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🍕</text></svg>'>
+  <title>SliceFinder – My Profile</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Alfa%20Slab%20One">
+  <style>
+    html, body { margin:0; padding:0; font-family:Tahoma,sans-serif; background:#f5f5f5; overflow-x:hidden; }
+
+    .navbar { margin-bottom:0; border-radius:0; width:100%; }
+    .navbar-brand { font-family:'Alfa Slab One',serif; color:#c0392b !important; font-size:24px; letter-spacing:1px; }
+    @media (max-width:767px) {
+      #bs-navbar { display:none; width:100%; }
+      #bs-navbar.open { display:block; }
+      #bs-navbar .nav > li > a { color:#fff !important; padding:10px 16px; }
+      #bs-navbar .nav > li > a:hover { background:#333 !important; }
+      #nav-toggle { display:block !important; }
+    }
+    @media (min-width:768px) {
+      #bs-navbar { display:block !important; }
+      #nav-toggle { display:none !important; }
+    }
+
+    .page-container { max-width:860px; margin:30px auto; padding:0 16px 60px; }
+
+    /* ── Auth gate ── */
+    #auth-gate {
+      text-align:center; padding:60px 20px;
+      background:#fff; border-radius:8px;
+      box-shadow:0 2px 10px rgba(0,0,0,0.08);
+      margin-top:40px;
+    }
+    #auth-gate h2 { font-family:'Alfa Slab One',serif; color:#c0392b; margin-bottom:8px; }
+    #auth-gate p { color:#888; margin-bottom:24px; }
+
+    /* ── Auth forms ── */
+    .auth-tabs { display:flex; border-bottom:2px solid #eee; margin-bottom:20px; }
+    .auth-tab {
+      padding:10px 24px; cursor:pointer; font-weight:bold;
+      font-size:14px; color:#999; border-bottom:2px solid transparent;
+      margin-bottom:-2px;
+    }
+    .auth-tab.active { color:#c0392b; border-bottom-color:#c0392b; }
+    .auth-panel { display:none; }
+    .auth-panel.active { display:block; }
+    .auth-form { max-width:340px; margin:0 auto; }
+    .auth-form .form-group { margin-bottom:12px; }
+    .auth-divider { text-align:center; color:#aaa; font-size:12px; margin:16px 0; position:relative; }
+    .auth-divider::before { content:''; position:absolute; top:50%; left:0; right:0; height:1px; background:#eee; }
+    .auth-divider span { background:#fff; padding:0 10px; position:relative; }
+    .btn-google {
+      width:100%; display:flex; align-items:center; justify-content:center;
+      gap:10px; background:#fff; border:1px solid #ddd; color:#444;
+      padding:9px 16px; border-radius:4px; font-size:13px; cursor:pointer;
+      font-family:Tahoma,sans-serif; transition:background 0.15s;
+    }
+    .btn-google:hover { background:#f7f7f7; }
+    .btn-google img { width:18px; height:18px; }
+    #auth-status { font-size:13px; margin-top:10px; min-height:18px; text-align:center; }
+
+    /* ── Profile hero ── */
+    .profile-hero {
+      background:#222; color:#fff;
+      border-radius:8px 8px 0 0; padding:28px;
+      display:flex; align-items:center; gap:20px;
+    }
+    .avatar {
+      width:72px; height:72px; border-radius:50%;
+      background:#c0392b; display:flex; align-items:center;
+      justify-content:center; font-size:32px; font-weight:bold;
+      color:#fff; flex-shrink:0; border:3px solid #fff;
+      overflow:hidden;
+    }
+    .avatar img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
+    .profile-info h2 { font-family:'Alfa Slab One',serif; margin:0 0 4px; font-size:22px; }
+    .profile-info .profile-email { color:#aaa; font-size:13px; margin-bottom:8px; }
+    .badge-row { display:flex; gap:10px; flex-wrap:wrap; }
+    .profile-badge {
+      background:rgba(255,255,255,0.1); border-radius:20px;
+      padding:4px 12px; font-size:12px; color:#fff;
+    }
+    .profile-badge strong { color:#f0a500; }
+
+    /* ── Tabs ── */
+    .profile-tabs {
+      background:#fff; border-bottom:2px solid #eee;
+      display:flex; padding:0 20px;
+    }
+    .profile-tab {
+      padding:12px 18px; cursor:pointer; font-size:13px;
+      font-weight:bold; color:#999; border-bottom:2px solid transparent;
+      margin-bottom:-2px;
+    }
+    .profile-tab.active { color:#c0392b; border-bottom-color:#c0392b; }
+
+    /* ── Tab panels ── */
+    .tab-panel { display:none; padding:24px 20px; background:#fff; }
+    .tab-panel.active { display:block; }
+
+    .profile-card {
+      background:#fff; border-radius:0 0 8px 8px;
+      box-shadow:0 2px 10px rgba(0,0,0,0.08);
+      overflow:hidden; margin-bottom:24px;
+    }
+
+    /* ── Review cards ── */
+    .review-card {
+      border:1px solid #eee; border-radius:6px;
+      padding:14px 16px; margin-bottom:12px; background:#fafafa;
+    }
+    .review-card .restaurant-name { font-weight:bold; color:#c0392b; font-size:13px; }
+    .review-card .review-date { font-size:11px; color:#aaa; margin-left:8px; }
+    .review-card .review-text { font-size:13px; color:#555; margin:6px 0 0; }
+    .stars { color:#e67e22; font-size:14px; letter-spacing:1px; }
+
+    /* ── Favorites ── */
+    .fav-card {
+      display:flex; align-items:center; justify-content:space-between;
+      border:1px solid #eee; border-radius:6px; padding:12px 16px;
+      margin-bottom:10px; background:#fafafa;
+    }
+    .fav-card .fav-name { font-weight:bold; font-size:13px; color:#333; }
+    .fav-card .fav-addr { font-size:11px; color:#999; margin-top:2px; }
+    .fav-card a { color:#c0392b; font-size:12px; font-weight:bold; text-decoration:none; }
+    .fav-card a:hover { text-decoration:underline; }
+    .unfav-btn {
+      background:none; border:1px solid #eee; border-radius:4px;
+      color:#aaa; font-size:11px; cursor:pointer; padding:3px 8px;
+    }
+    .unfav-btn:hover { border-color:#c0392b; color:#c0392b; }
+
+    /* ── Edit display name ── */
+    .edit-name-row { display:flex; gap:8px; align-items:center; margin-bottom:16px; }
+    .edit-name-row input { max-width:220px; }
+
+    /* ── Empty states ── */
+    .empty-state { color:#aaa; font-size:13px; padding:20px 0; text-align:center; }
+
+    footer { background:#555; color:#fff; padding:15px; text-align:center; margin-top:20px; }
+    footer p { margin:0; }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar navbar-inverse">
+    <div class="container-fluid" style="padding:0 10px;">
+      <div class="navbar-header">
+        <button id="nav-toggle" type="button" class="navbar-toggle" aria-expanded="false">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="sf-staging.html">SliceFinder</a>
+      </div>
+      <div id="bs-navbar">
+        <ul class="nav navbar-nav">
+          <li><a href="sf-staging.html">Restaurants</a></li>
+          <li><a href="#">Frozen Pizza</a></li>
+          <li><a href="#">Pizza News</a></li>
+          <li class="active"><a href="profile.html">My Profile</a></li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+          <li><a href="#" id="nav-auth-btn">Login</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-container">
+
+    <!-- Auth Gate (shown when logged out) -->
+    <div id="auth-gate" style="display:none;">
+      <h2>🍕 Welcome to SliceFinder</h2>
+      <p>Sign in to write reviews, save favorites, and build your pizza profile.</p>
+
+      <div class="auth-tabs">
+        <div class="auth-tab active" onclick="switchTab('login')">Sign In</div>
+        <div class="auth-tab" onclick="switchTab('signup')">Create Account</div>
+      </div>
+
+      <!-- Google -->
+      <div style="max-width:340px; margin:0 auto 0;">
+        <button class="btn-google" onclick="signInWithGoogle()">
+          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+          Continue with Google
+        </button>
+      </div>
+
+      <div class="auth-divider" style="max-width:340px; margin:16px auto;"><span>or</span></div>
+
+      <!-- Login panel -->
+      <div id="panel-login" class="auth-panel active">
+        <div class="auth-form">
+          <div class="form-group">
+            <input type="email" id="login-email" class="form-control input-sm" placeholder="Email">
+          </div>
+          <div class="form-group">
+            <input type="password" id="login-password" class="form-control input-sm" placeholder="Password">
+          </div>
+          <button class="btn btn-danger btn-block btn-sm" onclick="signInEmail()">Sign In</button>
+        </div>
+      </div>
+
+      <!-- Signup panel -->
+      <div id="panel-signup" class="auth-panel">
+        <div class="auth-form">
+          <div class="form-group">
+            <input type="text" id="signup-name" class="form-control input-sm" placeholder="Display Name (e.g. gregdodge)">
+          </div>
+          <div class="form-group">
+            <input type="email" id="signup-email" class="form-control input-sm" placeholder="Email">
+          </div>
+          <div class="form-group">
+            <input type="password" id="signup-password" class="form-control input-sm" placeholder="Password (min 6 chars)">
+          </div>
+          <button class="btn btn-danger btn-block btn-sm" onclick="signUpEmail()">Create Account</button>
+        </div>
+      </div>
+
+      <div id="auth-status"></div>
+    </div>
+
+    <!-- Profile (shown when logged in) -->
+    <div id="profile-content" style="display:none;">
+      <div class="profile-card">
+
+        <!-- Hero -->
+        <div class="profile-hero">
+          <div class="avatar" id="profile-avatar">?</div>
+          <div class="profile-info">
+            <h2 id="profile-displayname">Loading…</h2>
+            <div class="profile-email" id="profile-email"></div>
+            <div class="badge-row">
+              <div class="profile-badge">🍕 <strong id="badge-reviews">0</strong> reviews</div>
+              <div class="profile-badge">❤️ <strong id="badge-favs">0</strong> favorites</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="profile-tabs">
+          <div class="profile-tab active" onclick="showProfileTab('tab-reviews')">My Reviews</div>
+          <div class="profile-tab" onclick="showProfileTab('tab-favorites')">Favorites</div>
+          <div class="profile-tab" onclick="showProfileTab('tab-settings')">Settings</div>
+        </div>
+
+        <!-- Reviews tab -->
+        <div id="tab-reviews" class="tab-panel active">
+          <div id="my-reviews-list"><p class="empty-state">Loading your reviews…</p></div>
+        </div>
+
+        <!-- Favorites tab -->
+        <div id="tab-favorites" class="tab-panel">
+          <div id="my-favs-list"><p class="empty-state">Loading favorites…</p></div>
+        </div>
+
+        <!-- Settings tab -->
+        <div id="tab-settings" class="tab-panel">
+          <h5 style="margin-top:0;"><strong>Display Name</strong></h5>
+          <div class="edit-name-row">
+            <input type="text" id="edit-displayname" class="form-control input-sm" placeholder="Your display name">
+            <button class="btn btn-danger btn-sm" onclick="saveDisplayName()">Save</button>
+          </div>
+          <div id="name-status" style="font-size:13px; margin-bottom:20px;"></div>
+          <hr>
+          <button class="btn btn-default btn-sm" onclick="signOut()">Sign Out</button>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <footer><p>SliceFinder &copy;2026</p></footer>
+
+  <script type="module">
+    import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js';
+    import {
+      getAuth, onAuthStateChanged, signOut as fbSignOut,
+      signInWithEmailAndPassword, createUserWithEmailAndPassword,
+      GoogleAuthProvider, signInWithPopup, updateProfile
+    } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js';
+    import {
+      getFirestore, collection, query, where, getDocs,
+      doc, getDoc, setDoc, orderBy, serverTimestamp
+    } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyB-5Bz4rpHehUbxX7kP__-ap0xSuSdwZ0E",
+      authDomain: "slicefinder-afd7f.firebaseapp.com",
+      projectId: "slicefinder-afd7f",
+      storageBucket: "slicefinder-afd7f.firebasestorage.app",
+      messagingSenderId: "103165329059",
+      appId: "1:103165329059:web:721f516c20d701ebe98916"
+    };
+
+    const app  = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db   = getFirestore(app);
+    const googleProvider = new GoogleAuthProvider();
+
+    // ── Tab helpers ──────────────────────────────────────────────────
+    window.switchTab = function(tab) {
+      document.querySelectorAll('.auth-tab').forEach((t, i) => {
+        t.classList.toggle('active', (i === 0 && tab === 'login') || (i === 1 && tab === 'signup'));
+      });
+      document.getElementById('panel-login').classList.toggle('active', tab === 'login');
+      document.getElementById('panel-signup').classList.toggle('active', tab === 'signup');
+    };
+
+    window.showProfileTab = function(id) {
+      document.querySelectorAll('.profile-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      event.target.classList.add('active');
+    };
+
+    // ── Auth actions ─────────────────────────────────────────────────
+    function setAuthStatus(msg, color) {
+      const el = document.getElementById('auth-status');
+      el.textContent = msg;
+      el.style.color = color || '#888';
+    }
+
+    window.signInWithGoogle = async function() {
+      try {
+        await signInWithPopup(auth, googleProvider);
+      } catch(e) { setAuthStatus('❌ ' + e.message, 'red'); }
+    };
+
+    window.signInEmail = async function() {
+      const email = document.getElementById('login-email').value.trim();
+      const pass  = document.getElementById('login-password').value;
+      if (!email || !pass) { setAuthStatus('❌ Please enter email and password.', 'red'); return; }
+      try {
+        await signInWithEmailAndPassword(auth, email, pass);
+      } catch(e) { setAuthStatus('❌ ' + e.message, 'red'); }
+    };
+
+    window.signUpEmail = async function() {
+      const name  = document.getElementById('signup-name').value.trim();
+      const email = document.getElementById('signup-email').value.trim();
+      const pass  = document.getElementById('signup-password').value;
+      if (!name || !email || !pass) { setAuthStatus('❌ Please fill in all fields.', 'red'); return; }
+      try {
+        const cred = await createUserWithEmailAndPassword(auth, email, pass);
+        await updateProfile(cred.user, { displayName: name });
+        // Save user doc to Firestore
+        await setDoc(doc(db, 'users', cred.user.uid), {
+          displayName: name, email, createdAt: serverTimestamp()
+        });
+      } catch(e) { setAuthStatus('❌ ' + e.message, 'red'); }
+    };
+
+    window.signOut = async function() {
+      await fbSignOut(auth);
+    };
+
+    window.saveDisplayName = async function() {
+      const name = document.getElementById('edit-displayname').value.trim();
+      const statusEl = document.getElementById('name-status');
+      if (!name) { statusEl.textContent = '❌ Name cannot be empty.'; statusEl.style.color = 'red'; return; }
+      try {
+        await updateProfile(auth.currentUser, { displayName: name });
+        await setDoc(doc(db, 'users', auth.currentUser.uid), { displayName: name }, { merge: true });
+        document.getElementById('profile-displayname').textContent = name;
+        statusEl.textContent = '✅ Name updated!';
+        statusEl.style.color = 'green';
+      } catch(e) {
+        statusEl.textContent = '❌ ' + e.message;
+        statusEl.style.color = 'red';
+      }
+    };
+
+    // ── Load profile data ────────────────────────────────────────────
+    async function loadProfileData(user) {
+      const displayName = user.displayName || user.email.split('@')[0];
+
+      // Avatar
+      const avatarEl = document.getElementById('profile-avatar');
+      if (user.photoURL) {
+        avatarEl.innerHTML = `<img src="${user.photoURL}" alt="avatar">`;
+      } else {
+        avatarEl.textContent = displayName.charAt(0).toUpperCase();
+      }
+
+      document.getElementById('profile-displayname').textContent = displayName;
+      document.getElementById('profile-email').textContent = user.email;
+      document.getElementById('edit-displayname').value = displayName;
+
+      // Load reviews
+      let myReviews = [];
+      try {
+        const rq = query(collection(db, 'reviews'), where('uid', '==', user.uid));
+        const rSnaps = await getDocs(rq);
+        rSnaps.forEach(s => myReviews.push({ id: s.id, ...s.data() }));
+      } catch(e) {
+        // Fallback: match by username
+        try {
+          const rq2 = query(collection(db, 'reviews'), where('username', '==', displayName));
+          const rSnaps2 = await getDocs(rq2);
+          rSnaps2.forEach(s => myReviews.push({ id: s.id, ...s.data() }));
+        } catch(e2) { console.warn('Could not load reviews', e2); }
+      }
+
+      document.getElementById('badge-reviews').textContent = myReviews.length;
+
+      const reviewsEl = document.getElementById('my-reviews-list');
+      if (myReviews.length === 0) {
+        reviewsEl.innerHTML = '<p class="empty-state">No reviews yet — go find some pizza! 🍕</p>';
+      } else {
+        // Sort newest first
+        myReviews.sort((a, b) => {
+          const ta = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+          const tb = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+          return tb - ta;
+        });
+        reviewsEl.innerHTML = '';
+        for (const rv of myReviews) {
+          // Look up restaurant name
+          let restaurantName = rv.restaurantId;
+          try {
+            const rSnap = await getDoc(doc(db, 'restaurants', rv.restaurantId));
+            if (rSnap.exists()) restaurantName = rSnap.data().name;
+          } catch(e) {}
+
+          const starStr = '★'.repeat(rv.rating || 0) + '☆'.repeat(5 - (rv.rating || 0));
+          const dateStr = rv.createdAt?.toDate
+            ? rv.createdAt.toDate().toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' })
+            : '';
+
+          const div = document.createElement('div');
+          div.className = 'review-card';
+          div.innerHTML = `
+            <div>
+              <a class="restaurant-name" href="restaurant.html?id=${rv.restaurantId}">${restaurantName}</a>
+              <span class="review-date">${dateStr}</span>
+              <span class="stars" style="float:right;">${starStr}</span>
+            </div>
+            <div class="review-text">${rv.text || ''}</div>
+          `;
+          reviewsEl.appendChild(div);
+        }
+      }
+
+      // Load favorites
+      let favs = [];
+      try {
+        const fSnap = await getDoc(doc(db, 'users', user.uid));
+        if (fSnap.exists()) favs = fSnap.data().favorites || [];
+      } catch(e) {}
+
+      document.getElementById('badge-favs').textContent = favs.length;
+
+      const favsEl = document.getElementById('my-favs-list');
+      if (favs.length === 0) {
+        favsEl.innerHTML = '<p class="empty-state">No favorites yet — heart a restaurant from its page! ❤️</p>';
+      } else {
+        favsEl.innerHTML = '';
+        for (const rid of favs) {
+          let name = rid, address = '';
+          try {
+            const rSnap = await getDoc(doc(db, 'restaurants', rid));
+            if (rSnap.exists()) {
+              name = rSnap.data().name;
+              const d = rSnap.data();
+              address = [d.address, d.city].filter(Boolean).join(', ');
+            }
+          } catch(e) {}
+
+          const div = document.createElement('div');
+          div.className = 'fav-card';
+          div.innerHTML = `
+            <div>
+              <div class="fav-name">${name}</div>
+              <div class="fav-addr">${address}</div>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <a href="restaurant.html?id=${rid}">View →</a>
+              <button class="unfav-btn" onclick="removeFavorite('${rid}', this)">✕ Remove</button>
+            </div>
+          `;
+          favsEl.appendChild(div);
+        }
+      }
+    }
+
+    // ── Remove favorite ──────────────────────────────────────────────
+    window.removeFavorite = async function(restaurantId, btn) {
+      const user = auth.currentUser;
+      if (!user) return;
+      try {
+        const { updateDoc, arrayRemove } = await import('https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js');
+        await updateDoc(doc(db, 'users', user.uid), { favorites: arrayRemove(restaurantId) });
+        btn.closest('.fav-card').remove();
+        const count = document.querySelectorAll('.fav-card').length;
+        document.getElementById('badge-favs').textContent = count;
+        if (count === 0) {
+          document.getElementById('my-favs-list').innerHTML = '<p class="empty-state">No favorites yet — heart a restaurant from its page! ❤️</p>';
+        }
+      } catch(e) { alert('Could not remove: ' + e.message); }
+    };
+
+    // ── Auth state ───────────────────────────────────────────────────
+    onAuthStateChanged(auth, async (user) => {
+      const navBtn = document.getElementById('nav-auth-btn');
+      if (user) {
+        document.getElementById('auth-gate').style.display = 'none';
+        document.getElementById('profile-content').style.display = 'block';
+        navBtn.textContent = 'Sign Out';
+        navBtn.onclick = () => fbSignOut(auth);
+        await loadProfileData(user);
+      } else {
+        document.getElementById('auth-gate').style.display = 'block';
+        document.getElementById('profile-content').style.display = 'none';
+        navBtn.textContent = 'Login';
+        navBtn.onclick = () => { window.location.href = 'profile.html'; };
+      }
+    });
+  </script>
+
+  <script>
+    document.getElementById('nav-toggle').addEventListener('click', function() {
+      var nav = document.getElementById('bs-navbar');
+      nav.classList.toggle('open');
+      this.setAttribute('aria-expanded', nav.classList.contains('open'));
+    });
+  </script>
+
+</body>
+</html>
