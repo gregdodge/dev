@@ -269,14 +269,16 @@
           if (data && data.length > 0) {
             r.lat = +data[0].lat;
             r.lng = +data[0].lon;
-            var m = addMarker(docId, r);
-            if (m) allMarkers.push(m);
+            addMarker(docId, r);
           } else {
             console.warn('Could not geocode:', r.name);
           }
         })
         .catch(function(e) { console.warn('Geocode failed:', r.name, e); });
     }
+
+    // Shared marker registry (accessible by both plain and module scripts)
+    window.allMarkers = [];
 
     // Place a single marker on the map
     function addMarker(docId, r) {
@@ -389,13 +391,13 @@
     sessionStorage.setItem('sf-firebase-config', JSON.stringify(firebaseConfig));
 
     // ── Marker registry for name filtering ───────────────────────────
-    const allMarkers = [];
+    // allMarkers lives on window, set in plain script above
 
     window.filterMarkersByName = function(query) {
       var q = query.toLowerCase().trim();
       var matchedMarkers = [];
 
-      allMarkers.forEach(function(m) {
+      window.allMarkers.forEach(function(m) {
         if (!q || m._restaurantName.indexOf(q) !== -1) {
           if (!map.hasLayer(m)) map.addLayer(m);
           matchedMarkers.push(m);
@@ -404,7 +406,7 @@
         }
       });
 
-      var total = allMarkers.length;
+      var total = window.allMarkers.length;
       var headerEl = document.getElementById('slices-header');
 
       if (q && matchedMarkers.length > 0) {
@@ -425,8 +427,7 @@
       snapshot.forEach(function(docSnap) {
         const r = docSnap.data();
         if (r.lat && r.lng) {
-          const m = addMarker(docSnap.id, r);
-          if (m) allMarkers.push(m);
+          addMarker(docSnap.id, r);
         } else {
           geocodeAndAddMarker(docSnap.id, r);
         }
