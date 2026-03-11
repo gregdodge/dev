@@ -304,7 +304,8 @@
       marker.on('mouseover', function() { this.setIcon(makePizzaIcon(true)); });
       marker.on('mouseout',  function() { this.setIcon(makePizzaIcon(false)); });
       marker.on('click',     function() { this.openPopup(); });
-
+      window.allMarkers.push(marker);
+      return marker;
     }
 
 
@@ -343,24 +344,6 @@
       statusEl.textContent = '';
       geocodeAndPan(city + (state ? ', ' + state : '') + ', USA', statusEl, 'Showing pizza near ' + city);
     }
-
-    // Update nav auth button based on auth state
-    import('https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js').then(({ getAuth, onAuthStateChanged }) => {
-      import('https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js').then(({ getApps }) => {
-        const auth = getAuth(getApps()[0]);
-        onAuthStateChanged(auth, (user) => {
-          const btn = document.getElementById('nav-auth-btn');
-          if (!btn) return;
-          if (user) {
-            btn.textContent = user.displayName || 'My Profile';
-            btn.href = 'profile.html';
-          } else {
-            btn.textContent = 'Login';
-            btn.href = 'profile.html';
-          }
-        });
-      });
-    });
 
     // Hamburger
     document.getElementById('nav-toggle').addEventListener('click', function() {
@@ -441,6 +424,21 @@
       document.getElementById('slices-header').textContent = '🍕 Could not load restaurants';
       console.error('Firestore error:', e);
     }
+    // ── Nav auth state ───────────────────────────────────────────────
+    const { getAuth, onAuthStateChanged } = await import('https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js');
+    const auth = getAuth(app);
+    onAuthStateChanged(auth, (user) => {
+      const btn = document.getElementById('nav-auth-btn');
+      if (!btn) return;
+      if (user) {
+        btn.textContent = user.displayName || 'My Profile';
+        btn.href = 'profile.html';
+      } else {
+        btn.textContent = 'Login';
+        btn.href = 'profile.html';
+      }
+    });
+
   </script>
 
 </body>
