@@ -58,7 +58,14 @@
     #map-frame { flex:1; min-height:400px; display:block; z-index:1; }
     #recent-reviews {
       display:flex; gap:10px; margin-bottom:10px;
+      padding:12px 14px; background:#fafafa;
+      border:1px solid #e8e8e8; border-radius:6px;
     }
+    #recent-reviews-header {
+      font-size:11px; font-weight:bold; text-transform:uppercase;
+      letter-spacing:0.5px; color:#888; margin-bottom:6px;
+    }
+    #recent-reviews-wrap { margin-bottom:10px; }
     .recent-review-card {
       flex:1; background:#fff; border:1px solid #e0e0e0;
       border-radius:6px; padding:8px 10px; font-size:12px;
@@ -206,10 +213,16 @@
 
         <!-- Main Content -->
         <div class="col-sm-8" style="display:flex;flex-direction:column;flex:1;">
-          <div id="slices-header">🍕 Loading restaurants…</div>
+          <div style="margin-bottom:8px;">
+            <h2 style="font-size:20px;font-weight:bold;color:#c0392b;margin:0 0 2px 0;">Find and rate the best pizza near you</h2>
+            <div id="slices-header" style="font-size:13px;color:#555;margin:0;">🍕 Loading restaurants…</div>
+          </div>
           <div id="geo-status">Detecting your location…</div>
-          <div id="recent-reviews">
-            <div class="recent-review-card" style="color:#aaa;font-style:italic;">Loading recent reviews…</div>
+          <div id="recent-reviews-wrap">
+            <div id="recent-reviews-header">Recent user reviews</div>
+            <div id="recent-reviews">
+              <div class="recent-review-card" style="color:#aaa;font-style:italic;">Loading recent reviews…</div>
+            </div>
           </div>
           <div id="map-frame"></div>
         </div>
