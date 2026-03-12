@@ -56,6 +56,28 @@
     }
 
     #map-frame { flex:1; min-height:400px; display:block; z-index:1; }
+    #recent-reviews {
+      display:flex; gap:10px; margin-bottom:10px;
+    }
+    .recent-review-card {
+      flex:1; background:#fff; border:1px solid #e0e0e0;
+      border-radius:6px; padding:8px 10px; font-size:12px;
+      min-width:0; overflow:hidden;
+    }
+    .recent-review-card .rr-name {
+      font-weight:bold; font-size:13px; white-space:nowrap;
+      overflow:hidden; text-overflow:ellipsis; margin-bottom:2px;
+    }
+    .recent-review-card .rr-name a { color:#c0392b; text-decoration:none; }
+    .recent-review-card .rr-name a:hover { text-decoration:underline; }
+    .recent-review-card .rr-stars { color:#c0392b; letter-spacing:1px; margin-bottom:3px; }
+    .recent-review-card .rr-text {
+      color:#555; overflow:hidden;
+      display:-webkit-box; -webkit-line-clamp:2;
+      -webkit-box-orient:vertical;
+    }
+    .recent-review-card .rr-user { color:#888; margin-top:4px; font-size:11px; }
+    @media (max-width:767px) { #recent-reviews { display:none; } }
 
     .pizza-marker-wrap {
       width:38px; height:38px;
@@ -186,6 +208,9 @@
         <div class="col-sm-8" style="display:flex;flex-direction:column;flex:1;">
           <div id="slices-header">🍕 Loading restaurants…</div>
           <div id="geo-status">Detecting your location…</div>
+          <div id="recent-reviews">
+            <div class="recent-review-card" style="color:#aaa;font-style:italic;">Loading recent reviews…</div>
+          </div>
           <div id="map-frame"></div>
         </div>
 
@@ -369,7 +394,7 @@
   <!-- ── Firebase: load restaurants near a location ──────────────── -->
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js';
-    import { getFirestore, collection, getDocs, query, where, orderBy } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js';
+    import { getFirestore, collection, getDocs, getDoc, doc, query, where, orderBy, limit } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js';
 
     const firebaseConfig = {
       apiKey: "AIzaSyB-5Bz4rpHehUbxX7kP__-ap0xSuSdwZ0E",
@@ -384,6 +409,50 @@
     const db  = getFirestore(app);
 
     sessionStorage.setItem('sf-firebase-config', JSON.stringify(firebaseConfig));
+
+    // ── Load 3 most recent reviews ────────────────────────────────────
+    async function loadRecentReviews() {
+      const container = document.getElementById('recent-reviews');
+      if (!container) return;
+      try {
+        const q = query(collection(db, 'reviews'), orderBy('createdAt', 'desc'), limit(3));
+        const snap = await getDocs(q);
+        if (snap.empty) { container.innerHTML = ''; return; }
+
+        const cards = [];
+        for (const reviewDoc of snap.docs) {
+          const rv = reviewDoc.data();
+          // Fetch restaurant name
+          let restName = '', restId = rv.restaurantId || '';
+          if (restId) {
+            try {
+              const restSnap = await getDoc(doc(db, 'restaurants', restId));
+              if (restSnap.exists()) restName = restSnap.data().name || '';
+            } catch(e) {}
+          }
+
+          // Build star string
+          const stars = rv.rating ? '★'.repeat(Math.round(rv.rating)) + '☆'.repeat(5 - Math.round(rv.rating)) : '';
+          const text  = (rv.text || '').trim();
+          const user  = rv.username || rv.uid || 'Anonymous';
+          const link  = restId ? `restaurant.html?id=${restId}` : '#';
+
+          cards.push(
+            `<div class="recent-review-card">` +
+            `<div class="rr-name"><a href="${link}">${restName || 'Unknown Restaurant'}</a></div>` +
+            (stars ? `<div class="rr-stars">${stars}</div>` : '') +
+            (text   ? `<div class="rr-text">${text}</div>` : '') +
+            `<div class="rr-user">— ${user}</div>` +
+            `</div>`
+          );
+        }
+        container.innerHTML = cards.join('');
+      } catch(e) {
+        container.innerHTML = '';
+        console.warn('Could not load recent reviews:', e);
+      }
+    }
+    loadRecentReviews();
 
     // ── Load restaurants within a lat/lng bounding box ───────────────
     // Radius in degrees: ~0.25 deg ≈ ~17 miles
