@@ -213,8 +213,8 @@
 
 
           <div id="slices-header" style="font-size:16px;padding-left:15px;">Recent user reviews:</div>
-          <div id="recent-reviews">
-            <div class="recent-review-card" style="color:#aaa;font-style:italic;">Loading recent reviews…</div>
+          <div id="recent-reviews" style="padding:10px;">
+            <div class="recent-review-card" style="color:#aaa;font-style:italic;padding:10px;">Loading recent reviews…</div>
           </div>
           
         </div>
@@ -490,7 +490,7 @@
         });
 
         document.getElementById('slices-header').textContent =
-          '🍕 Find and rate the best pizza near you ' + '"div align="right"'  + count + ' slice' + (count !== 1 ? 's' : '') + ' found!';
+          '🍕 Find and rate the best pizza near you' + count + ' slice' + (count !== 1 ? 's' : '') + ' found!';
 
         // Apply any active name filter
         var nameInput = document.getElementById('name-search-input');
