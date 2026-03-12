@@ -48,8 +48,12 @@
     #slices-header {
       background-color:#c0392b; color:#fff;
       font-family:'Alfa Slab One',serif; font-size:18px;
-      padding:8px 14px; letter-spacing:0.5px;
+      padding:8px 20px 8px 14px; letter-spacing:0.5px;
+      display:flex; justify-content:space-between; align-items:center;
     }
+    #slices-headline { flex:1; }
+    #slices-count { font-size:14px; text-align:right; white-space:nowrap; padding-left:12px; }
+
     #geo-status {
       font-size:14px; font-weight:bold; color:#888;
       text-align:center; padding:5px 0; min-height:18px;
@@ -99,6 +103,7 @@
     .popup-inner { padding:14px 16px; font-family:Tahoma,sans-serif; }
     .popup-inner h4 { margin:0 0 4px; font-size:14px; color:#222; }
     .popup-inner .popup-addr { font-size:12px; color:#666; margin-bottom:4px; }
+    .popup-inner .popup-stars { color:#c0392b; font-size:14px; margin-bottom:4px; }
     .popup-inner .popup-hours { font-size:11px; color:#888; margin-bottom:8px; }
     .popup-inner .popup-tags span {
       display:inline-block; background:#f0e6e6; color:#c0392b;
@@ -206,17 +211,16 @@
 
         <!-- Main Content -->
         <div class="col-sm-8" style="display:flex;flex-direction:column;flex:1;">
-          <div id="slices-header">🍕 Loading restaurants…</div>
-          <div id="geo-status">Detecting your location…</div>
-
-          <div id="map-frame"></div>
-
-
-          <div id="slices-header" style="font-size:16px;padding-left:15px;">Recent user reviews:</div>
-          <div id="recent-reviews" style="padding:10px;">
-            <div class="recent-review-card" style="color:#aaa;font-style:italic;padding:10px;">Loading recent reviews…</div>
+          <div id="slices-header">
+            <span id="slices-headline">🍕 Find and rate the best pizza near you</span>
+            <span id="slices-count">Loading…</span>
           </div>
-          
+          <div id="geo-status">Detecting your location…</div>
+          <div id="map-frame"></div>
+          <div style="padding:10px 14px 4px; font-size:11px; font-weight:bold; text-transform:uppercase; letter-spacing:0.5px; color:#888;">Recent user reviews</div>
+          <div id="recent-reviews" style="padding:0 10px 10px;">
+            <div class="recent-review-card" style="color:#aaa;font-style:italic;">Loading recent reviews…</div>
+          </div>
         </div>
 
         <!-- Right Sidebar -->
@@ -268,6 +272,10 @@
 
     function setGeoStatus(msg) {
       document.getElementById('geo-status').textContent = msg;
+    }
+
+    function setSlicesCount(msg) {
+      document.getElementById('slices-count').textContent = msg;
     }
 
     // Geolocation
@@ -327,9 +335,18 @@
         return '<span>' + t + '</span>';
       }).join('');
 
+      // Build star display from avgRating if available
+      var starsHtml = '';
+      if (r.avgRating) {
+        var full  = Math.round(r.avgRating);
+        var stars = '★'.repeat(full) + '☆'.repeat(5 - full);
+        starsHtml = '<div class="popup-stars">' + stars + ' <span style="font-size:11px;color:#888;">(' + r.avgRating.toFixed(1) + ')</span></div>';
+      }
+
       var popupHtml =
         '<div class="popup-inner">' +
-        '<h4>' + r.name + '</h4>' +
+        '<h4><strong>' + r.name + '</strong></h4>' +
+        starsHtml +
         '<div class="popup-addr">📍 ' + (r.address || '') + ', ' + (r.city || '') + '</div>' +
         (r.hours ? '<div class="popup-hours">⏰ ' + r.hours + '</div>' : '') +
         (tagsHtml ? '<div class="popup-tags">' + tagsHtml + '</div>' : '') +
@@ -345,8 +362,6 @@
       return marker;
     }
 
-
-
     // Search helpers
     function geocodeAndPan(query, statusEl, label) {
       var url = 'https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(query);
@@ -360,7 +375,6 @@
             map.setView([lat, lon], 13);
             setGeoStatus(label);
             statusEl.textContent = '';
-            // Load restaurants near this location from Firestore
             if (window.loadRestaurantsNear) window.loadRestaurantsNear(lat, lon);
           } else {
             statusEl.textContent = 'Location not found. Try a different search.';
@@ -427,7 +441,6 @@
         const cards = [];
         for (const reviewDoc of snap.docs) {
           const rv = reviewDoc.data();
-          // Fetch restaurant name
           let restName = '', restId = rv.restaurantId || '';
           if (restId) {
             try {
@@ -435,13 +448,10 @@
               if (restSnap.exists()) restName = restSnap.data().name || '';
             } catch(e) {}
           }
-
-          // Build star string
           const stars = rv.rating ? '★'.repeat(Math.round(rv.rating)) + '☆'.repeat(5 - Math.round(rv.rating)) : '';
           const text  = (rv.text || '').trim();
           const user  = rv.username || rv.uid || 'Anonymous';
           const link  = restId ? `restaurant.html?id=${restId}` : '#';
-
           cards.push(
             `<div class="recent-review-card">` +
             `<div class="rr-name"><a href="${link}">${restName || 'Unknown Restaurant'}</a></div>` +
@@ -460,15 +470,12 @@
     loadRecentReviews();
 
     // ── Load restaurants within a lat/lng bounding box ───────────────
-    // Radius in degrees: ~0.25 deg ≈ ~17 miles
     const RADIUS = 0.25;
 
     window.loadRestaurantsNear = async function(lat, lng) {
-      // Clear existing markers
       window.allMarkers.forEach(function(m) { map.removeLayer(m); });
       window.allMarkers = [];
-
-      document.getElementById('slices-header').textContent = '🍕 Searching…';
+      setSlicesCount('Searching…');
 
       try {
         const q = query(
@@ -481,7 +488,6 @@
 
         snapshot.forEach(function(docSnap) {
           const r = docSnap.data();
-          // Also filter by lng client-side (Firestore only supports one range filter)
           if (r.lat && r.lng &&
               r.lng >= lng - RADIUS && r.lng <= lng + RADIUS) {
             addMarker(docSnap.id, r);
@@ -489,16 +495,15 @@
           }
         });
 
-        document.getElementById('slices-header').textContent =
-          '🍕 Find and rate the best pizza near you ... ' + count + ' slice' + (count !== 1 ? 's' : '') + ' found!';
-        // Apply any active name filter
+        setSlicesCount(count + ' slice' + (count !== 1 ? 's' : '') + ' found!');
+
         var nameInput = document.getElementById('name-search-input');
         if (nameInput && nameInput.value.trim()) {
           window.filterMarkersByName(nameInput.value);
         }
 
       } catch(e) {
-        document.getElementById('slices-header').textContent = '🍕 Could not load restaurants';
+        setSlicesCount('Could not load restaurants');
         console.error('Firestore error:', e);
       }
     };
@@ -518,28 +523,22 @@
       });
 
       var total = window.allMarkers.length;
-      var headerEl = document.getElementById('slices-header');
       if (q && matchedMarkers.length > 0) {
         var group = L.featureGroup(matchedMarkers);
         map.fitBounds(group.getBounds().pad(0.3));
-        headerEl.textContent = '🍕 ' + matchedMarkers.length + ' match' + (matchedMarkers.length !== 1 ? 'es' : '') + ' for "' + query + '"';
+        setSlicesCount(matchedMarkers.length + ' match' + (matchedMarkers.length !== 1 ? 'es' : '') + ' for "' + query + '"');
       } else if (q && matchedMarkers.length === 0) {
-        headerEl.textContent = '🍕 No matches for "' + query + '"';
+        setSlicesCount('No matches for "' + query + '"');
       } else {
-        headerEl.textContent = '🍕 ' + total + ' slice' + (total !== 1 ? 's' : '') + ' found!';
+        setSlicesCount(total + ' slice' + (total !== 1 ? 's' : '') + ' found!');
       }
     };
 
     // ── On page load: use geolocation to load nearby restaurants ─────
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        function(pos) {
-          window.loadRestaurantsNear(pos.coords.latitude, pos.coords.longitude);
-        },
-        function() {
-          // Default to San Francisco if geolocation denied
-          window.loadRestaurantsNear(37.7749, -122.4194);
-        },
+        function(pos) { window.loadRestaurantsNear(pos.coords.latitude, pos.coords.longitude); },
+        function()    { window.loadRestaurantsNear(37.7749, -122.4194); },
         { timeout: 8000, maximumAge: 60000 }
       );
     } else {
