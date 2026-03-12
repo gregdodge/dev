@@ -163,7 +163,7 @@
           <li class="active"><a href="profile.html">My Profile</a></li>
         </ul>
         <ul class="nav navbar-nav navbar-right">
-          <li><a href="#" id="nav-auth-btn">Login</a></li>
+          <li><a href="#" id="nav-auth-btn" style="color:#c0392b !important;font-weight:bold;">Login</a></li>
         </ul>
       </div>
     </div>
@@ -284,7 +284,7 @@
       <button class="modal-close" onclick="closeEditModal()">✕</button>
       <h4>✏️ Edit Profile</h4>
 
-      <div class="avatar-preview" id="modal-avatar-preview">?</div>
+      <div class="avatar-preview" id="modal-avatar-preview" style="width:60px;height:60px;font-size:22px;margin-bottom:12px;">?</div>
 
       <div class="form-group">
         <label style="font-size:12px; font-weight:bold; color:#999; text-transform:uppercase; letter-spacing:1px;">Display Name</label>
@@ -774,7 +774,7 @@
           navBtn.textContent = 'Sign Out';
           navBtn.onclick = () => fbSignOut(auth);
           await loadProfileData(user);
-        document.getElementById('edit-profile-btn').style.display = 'inline-block';
+        // edit-profile-btn hidden
         } else {
           document.getElementById('auth-gate').style.display = 'block';
           document.getElementById('profile-content').style.display = 'none';
