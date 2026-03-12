@@ -122,17 +122,17 @@
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
         </button>
-        <a class="navbar-brand" href="bs-sf.html">SliceFinder</a>
+        <a class="navbar-brand" href="sf-staging.html">SliceFinder</a>
       </div>
       <div id="bs-navbar">
         <ul class="nav navbar-nav">
-          <li><a href="bs-sf.html">Restaurants</a></li>
+          <li><a href="sf-staging.html">Restaurants</a></li>
           <li><a href="#">Frozen Pizza</a></li>
           <li><a href="#">Pizza News</a></li>
-          <li><a href="#">My Profile</a></li>
+          <li><a href="profile.html">My Profile</a></li>
         </ul>
         <ul class="nav navbar-nav navbar-right">
-          <li><a href="#">Login</a></li>
+          <li><a href="profile.html" id="nav-auth-btn" style="color:#c0392b !important;font-weight:bold;">Login</a></li>
         </ul>
       </div>
     </div>
@@ -368,11 +368,31 @@
   </script>
 
   <script>
-    // Hamburger toggle (same pattern as bs-sf.html)
     document.getElementById('nav-toggle').addEventListener('click', function() {
       var nav = document.getElementById('bs-navbar');
       nav.classList.toggle('open');
       this.setAttribute('aria-expanded', nav.classList.contains('open'));
+    });
+  </script>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js';
+    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js';
+    const firebaseConfig = {
+      apiKey: "AIzaSyB-5Bz4rpHehUbxX7kP__-ap0xSuSdwZ0E",
+      authDomain: "slicefinder-afd7f.firebaseapp.com",
+      projectId: "slicefinder-afd7f",
+      storageBucket: "slicefinder-afd7f.firebasestorage.app",
+      messagingSenderId: "103165329059",
+      appId: "1:103165329059:web:721f516c20d701ebe98916"
+    };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    onAuthStateChanged(auth, (user) => {
+      const btn = document.getElementById('nav-auth-btn');
+      if (!btn) return;
+      btn.textContent = user ? (user.displayName || 'My Profile') : 'Login';
+      btn.href = 'profile.html';
     });
   </script>
 
