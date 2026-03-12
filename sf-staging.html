@@ -471,11 +471,53 @@
 
     // ── Load restaurants within a lat/lng bounding box ───────────────
     const RADIUS = 0.25;
+    const CACHE_KEY = 'sf-restaurants-cache';
+    const CACHE_TTL = 30 * 60 * 1000; // 30 minutes
 
-    window.loadRestaurantsNear = async function(lat, lng) {
+    function getCachedRestaurants(lat, lng) {
+      try {
+        const raw = sessionStorage.getItem(CACHE_KEY);
+        if (!raw) return null;
+        const { ts, clat, clng, restaurants } = JSON.parse(raw);
+        if (Date.now() - ts > CACHE_TTL) return null;
+        if (Math.abs(clat - lat) > RADIUS || Math.abs(clng - lng) > RADIUS) return null;
+        return restaurants;
+      } catch(e) { return null; }
+    }
+
+    function setCachedRestaurants(lat, lng, restaurants) {
+      try {
+        sessionStorage.setItem(CACHE_KEY, JSON.stringify({
+          ts: Date.now(), clat: lat, clng: lng, restaurants
+        }));
+      } catch(e) {}
+    }
+
+    function renderRestaurants(restaurants) {
       window.allMarkers.forEach(function(m) { map.removeLayer(m); });
       window.allMarkers = [];
+      let count = 0;
+      restaurants.forEach(function(item) {
+        addMarker(item.id, item.data);
+        count++;
+      });
+      setSlicesCount(count + ' slice' + (count !== 1 ? 's' : '') + ' found in your area!');
+      var nameInput = document.getElementById('name-search-input');
+      if (nameInput && nameInput.value.trim()) {
+        window.filterMarkersByName(nameInput.value);
+      }
+    }
+
+    window.loadRestaurantsNear = async function(lat, lng) {
       setSlicesCount('Searching…');
+
+      // Serve from cache if available
+      const cached = getCachedRestaurants(lat, lng);
+      if (cached) {
+        console.log('Loading ' + cached.length + ' restaurants from cache');
+        renderRestaurants(cached);
+        return;
+      }
 
       try {
         const q = query(
@@ -484,23 +526,18 @@
           where('lat', '<=', lat + RADIUS)
         );
         const snapshot = await getDocs(q);
-        let count = 0;
+        const restaurants = [];
 
         snapshot.forEach(function(docSnap) {
           const r = docSnap.data();
           if (r.lat && r.lng &&
               r.lng >= lng - RADIUS && r.lng <= lng + RADIUS) {
-            addMarker(docSnap.id, r);
-            count++;
+            restaurants.push({ id: docSnap.id, data: r });
           }
         });
 
-        setSlicesCount(count + ' slice' + (count !== 1 ? 's' : '') + ' found in your area!');
-
-        var nameInput = document.getElementById('name-search-input');
-        if (nameInput && nameInput.value.trim()) {
-          window.filterMarkersByName(nameInput.value);
-        }
+        setCachedRestaurants(lat, lng, restaurants);
+        renderRestaurants(restaurants);
 
       } catch(e) {
         setSlicesCount('Could not load restaurants');
@@ -530,7 +567,7 @@
       } else if (q && matchedMarkers.length === 0) {
         setSlicesCount('No matches for "' + query + '"');
       } else {
-        setSlicesCount(total + ' slice' + (total !== 1 ? 's' : '') + ' found!');
+        setSlicesCount(total + ' slice' + (total !== 1 ? 's' : '') + ' found in your area!');
       }
     };
 
