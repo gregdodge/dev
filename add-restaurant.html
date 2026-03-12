@@ -1,10 +1,11 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🍕</text></svg>'>
-  <title>SliceFinder – Add a Restaurant</title>
+  <title>SliceFinder – Add a Pizzeria</title>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Alfa%20Slab%20One">
   <style>
@@ -121,14 +122,14 @@
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
         </button>
-        <a class="navbar-brand" href="sf-staging.html">SliceFinder</a>
+        <a class="navbar-brand" href="bs-sf.html">SliceFinder</a>
       </div>
       <div id="bs-navbar">
         <ul class="nav navbar-nav">
-          <li><a href="sf-staging.html">Restaurants</a></li>
+          <li><a href="bs-sf.html">Restaurants</a></li>
           <li><a href="#">Frozen Pizza</a></li>
           <li><a href="#">Pizza News</a></li>
-          <li><a href="profile.html">My Profile</a></li>
+          <li><a href="#">My Profile</a></li>
         </ul>
         <ul class="nav navbar-nav navbar-right">
           <li><a href="#">Login</a></li>
@@ -155,8 +156,8 @@
 
   <!-- Add Restaurant Form -->
   <div class="form-card container">
-    <h3>🍕 Add a Pizza Spot</h3>
-    <p style="font-size:13px; color:#666;">Know a great slice spot that's missing from SliceFinder? Add it to our growing database!</p>
+    <h3>🍕 Add a Pizzeria</h3>
+    <p style="font-size:13px; color:#666;">Know a great slice spot that's missing from SliceFinder? Add it to the community map!</p>
 
     <div class="section-label">Restaurant Info</div>
 
@@ -209,18 +210,6 @@
     </div>
 
     <div class="row">
-      <div class="col-sm-6">
-        <div class="form-group">
-          <label>Latitude <span style="color:#888; font-size:11px;">(optional)</span></label>
-          <input type="number" id="f-lat" class="form-control" placeholder="37.7997" step="0.0001">
-        </div>
-      </div>
-      <div class="col-sm-6">
-        <div class="form-group">
-          <label>Longitude <span style="color:#888; font-size:11px;">(optional)</span></label>
-          <input type="number" id="f-lng" class="form-control" placeholder="-122.4082" step="0.0001">
-        </div>
-      </div>
     </div>
 
     <div class="section-label">Tags</div>
@@ -342,9 +331,6 @@
       const pending = tagInput.value.replace(/,/g, '').trim();
       if (pending && !tags.includes(pending)) { tags.push(pending); tagInput.value = ''; renderTags(); }
 
-      const lat = parseFloat(document.getElementById('f-lat').value) || null;
-      const lng = parseFloat(document.getElementById('f-lng').value) || null;
-
       const data = {
         name,
         address,
@@ -353,10 +339,7 @@
         zip,
         phone:  document.getElementById('f-phone').value.trim() || null,
         hours:  document.getElementById('f-hours').value.trim() || null,
-        url:    document.getElementById('f-url').value.trim() || null,
-        lat,
-        lng,
-        tags:   [...tags],
+        url:    document.getElementById('f-url').value.trim() || null,        tags:   [...tags],
       };
 
       btn.disabled = true;
@@ -366,10 +349,10 @@
       try {
         const { collection, addDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js');
         const ref = await addDoc(collection(db, 'restaurants'), { ...data, createdAt: serverTimestamp() });
-        statusEl.textContent = `✅ "${name}" added successfully! (ID: ${ref.id})`;
+        statusEl.innerHTML = `✅ "${name}" added! <a href="restaurant.html?id=${ref.id}" style="color:#c0392b;font-weight:bold;">View listing → Rate it now!</a>`;
         statusEl.style.color = 'green';
         // Clear form
-        ['f-name','f-phone','f-hours','f-url','f-address','f-city','f-state','f-zip','f-lat','f-lng'].forEach(id => {
+        ['f-name','f-phone','f-hours','f-url','f-address','f-city','f-state','f-zip'].forEach(id => {
           document.getElementById(id).value = '';
         });
         tags.length = 0;
