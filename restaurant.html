@@ -227,7 +227,7 @@
           <li class="active"><a href="sf-staging.html">Restaurants</a></li>
           <li><a href="#">Frozen Pizza</a></li>
           <li><a href="#">Pizza News</a></li>
-          <li><a href="profile.html">My Profile</a></li>
+          <li><a href="#">My Profile</a></li>
         </ul>
         <ul class="nav navbar-nav navbar-right">
           <li><a href="profile.html" id="nav-auth-btn">Login</a></li>
@@ -284,10 +284,8 @@
       <div class="photo-grid" id="photo-grid">
         <!-- placeholder slots -->
         <div class="photo-slot">🍕</div>
-        <!--
         <div class="photo-slot">🍕</div>
         <div class="photo-slot">🍕</div>
-        -->
         <div class="photo-slot" style="font-size:13px; color:#c0392b;">+ Add photo<br><span style="font-size:10px;">(coming soon)</span></div>
       </div>
 
@@ -628,6 +626,24 @@
           text,
           createdAt: serverTimestamp()
         });
+
+        // Recalculate and store avgRating + reviewCount on the restaurant doc
+        try {
+          const allReviewsSnap = await getDocs(
+            query(collection(db, 'reviews'), where('restaurantId', '==', restaurantId))
+          );
+          let total = 0, count = 0;
+          allReviewsSnap.forEach(d => {
+            if (d.data().rating) { total += d.data().rating; count++; }
+          });
+          if (count > 0) {
+            await updateDoc(doc(db, 'restaurants', restaurantId), {
+              avgRating:   Math.round((total / count) * 10) / 10,
+              reviewCount: count,
+            });
+          }
+        } catch(e) { console.warn('Could not update avgRating:', e); }
+
         statusEl.textContent = '✅ Review submitted!';
         statusEl.style.color = 'green';
         document.getElementById('rv-text').value = '';
