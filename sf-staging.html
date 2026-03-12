@@ -81,7 +81,7 @@
       -webkit-box-orient:vertical;
     }
     .recent-review-card .rr-user { color:#888; margin-top:4px; font-size:11px; }
-    @media (max-width:767px) { #recent-reviews { display:none; } }
+    @media (max-width:767px) { #recent-reviews { display:none; } .recent-reviews-label { display:none !important; } }
 
     .pizza-marker-wrap {
       width:38px; height:38px;
@@ -156,7 +156,7 @@
           <li><a href="profile.html">My Profile</a></li>
         </ul>
         <ul class="nav navbar-nav navbar-right">
-          <li><a href="profile.html" id="nav-auth-btn">Login</a></li>
+          <li><a href="profile.html" id="nav-auth-btn" style="color:#c0392b !important;font-weight:bold;">Login</a></li>
         </ul>
       </div>
     </div>
@@ -217,7 +217,7 @@
           </div>
           <div id="geo-status">Detecting your location…</div>
           <div id="map-frame"></div>
-          <div id="slices-header" style="font-size:14px;">Recent user reviews</div>
+          <div id="slices-header" style="font-size:14px; display:block;" class="recent-reviews-label">Recent user reviews</div>
           <div id="recent-reviews" style="padding:0 10px 10px;">
             <div class="recent-review-card" style="color:#aaa;font-style:italic;">Loading recent reviews…</div>
           </div>
