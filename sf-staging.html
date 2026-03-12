@@ -168,7 +168,7 @@
           </p>
           <h5><strong>Most Reviewed</strong></h5>
           <ul class="list-unstyled" style="font-size:13px;">
-            <li><a href="restaurant.html?id=RKms8lEdpo09eDWkajNv">Tony's SF</a></li>
+            <li><a href="restaurant.html?id=tp2XYlZzZiDQbpFzKC7od">Tony's SF</a></li>
             <li><a href="restaurant.html?id=LbwJwdku1teLPuVdJPcy">Arinell Pizza</a></li>
             <li><a href="restaurant.html?id=22pmp2wIqI8MBwAv4WNm">Goat Hill Pizza</a></li>
             <li><a href="restaurant.html?id=Wg4q8KSMRnL04voEppE2">Golden Boy Pizza</a></li>
@@ -320,12 +320,18 @@
     // Search helpers
     function geocodeAndPan(query, statusEl, label) {
       var url = 'https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(query);
+      statusEl.textContent = 'Searching…';
       fetch(url)
         .then(function(r) { return r.json(); })
         .then(function(data) {
           if (data && data.length > 0) {
-            map.setView([+data[0].lat, +data[0].lon], 13);
+            var lat = +data[0].lat;
+            var lon = +data[0].lon;
+            map.setView([lat, lon], 13);
             setGeoStatus(label);
+            statusEl.textContent = '';
+            // Load restaurants near this location from Firestore
+            if (window.loadRestaurantsNear) window.loadRestaurantsNear(lat, lon);
           } else {
             statusEl.textContent = 'Location not found. Try a different search.';
           }
@@ -360,10 +366,10 @@
     });
   </script>
 
-  <!-- ── Firebase: load all restaurants from Firestore ───────────── -->
+  <!-- ── Firebase: load restaurants near a location ──────────────── -->
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js';
-    import { getFirestore, collection, getDocs } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js';
+    import { getFirestore, collection, getDocs, query, where, orderBy } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js';
 
     const firebaseConfig = {
       apiKey: "AIzaSyB-5Bz4rpHehUbxX7kP__-ap0xSuSdwZ0E",
@@ -377,12 +383,54 @@
     const app = initializeApp(firebaseConfig);
     const db  = getFirestore(app);
 
-    // Also store in sessionStorage so restaurant.html can use it
     sessionStorage.setItem('sf-firebase-config', JSON.stringify(firebaseConfig));
 
-    // ── Marker registry for name filtering ───────────────────────────
-    // allMarkers lives on window, set in plain script above
+    // ── Load restaurants within a lat/lng bounding box ───────────────
+    // Radius in degrees: ~0.25 deg ≈ ~17 miles
+    const RADIUS = 0.25;
 
+    window.loadRestaurantsNear = async function(lat, lng) {
+      // Clear existing markers
+      window.allMarkers.forEach(function(m) { map.removeLayer(m); });
+      window.allMarkers = [];
+
+      document.getElementById('slices-header').textContent = '🍕 Searching…';
+
+      try {
+        const q = query(
+          collection(db, 'restaurants'),
+          where('lat', '>=', lat - RADIUS),
+          where('lat', '<=', lat + RADIUS)
+        );
+        const snapshot = await getDocs(q);
+        let count = 0;
+
+        snapshot.forEach(function(docSnap) {
+          const r = docSnap.data();
+          // Also filter by lng client-side (Firestore only supports one range filter)
+          if (r.lat && r.lng &&
+              r.lng >= lng - RADIUS && r.lng <= lng + RADIUS) {
+            addMarker(docSnap.id, r);
+            count++;
+          }
+        });
+
+        document.getElementById('slices-header').textContent =
+          '🍕 ' + count + ' slice' + (count !== 1 ? 's' : '') + ' found!';
+
+        // Apply any active name filter
+        var nameInput = document.getElementById('name-search-input');
+        if (nameInput && nameInput.value.trim()) {
+          window.filterMarkersByName(nameInput.value);
+        }
+
+      } catch(e) {
+        document.getElementById('slices-header').textContent = '🍕 Could not load restaurants';
+        console.error('Firestore error:', e);
+      }
+    };
+
+    // ── Name filter ───────────────────────────────────────────────────
     window.filterMarkersByName = function(query) {
       var q = query.toLowerCase().trim();
       var matchedMarkers = [];
@@ -398,7 +446,6 @@
 
       var total = window.allMarkers.length;
       var headerEl = document.getElementById('slices-header');
-
       if (q && matchedMarkers.length > 0) {
         var group = L.featureGroup(matchedMarkers);
         map.fitBounds(group.getBounds().pad(0.3));
@@ -410,28 +457,23 @@
       }
     };
 
-    try {
-      const snapshot = await getDocs(collection(db, 'restaurants'));
-      let count = 0;
-
-      snapshot.forEach(function(docSnap) {
-        const r = docSnap.data();
-        if (r.lat && r.lng) {
-          addMarker(docSnap.id, r);
-        } else {
-          geocodeAndAddMarker(docSnap.id, r);
-        }
-        count++;
-      });
-
-      document.getElementById('slices-header').textContent =
-        '🍕 ' + count + ' slice' + (count !== 1 ? 's' : '') + ' found!';
-
-    } catch(e) {
-      document.getElementById('slices-header').textContent = '🍕 Could not load restaurants';
-      console.error('Firestore error:', e);
+    // ── On page load: use geolocation to load nearby restaurants ─────
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        function(pos) {
+          window.loadRestaurantsNear(pos.coords.latitude, pos.coords.longitude);
+        },
+        function() {
+          // Default to San Francisco if geolocation denied
+          window.loadRestaurantsNear(37.7749, -122.4194);
+        },
+        { timeout: 8000, maximumAge: 60000 }
+      );
+    } else {
+      window.loadRestaurantsNear(37.7749, -122.4194);
     }
-    // ── Nav auth state ───────────────────────────────────────────────
+
+    // ── Nav auth state ────────────────────────────────────────────────
     const { getAuth, onAuthStateChanged } = await import('https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js');
     const auth = getAuth(app);
     onAuthStateChanged(auth, (user) => {
