@@ -209,9 +209,6 @@
       </div>
     </div>
 
-    <div class="row">
-    </div>
-
     <div class="section-label">Tags</div>
     <div class="form-group">
       <label>Pizza Style Tags <span style="color:#888; font-size:11px;">(type and press Enter or comma)</span></label>
@@ -303,6 +300,21 @@
       }
     });
 
+    // ── Geocode address via Nominatim ───────────────────────────────────
+    async function geocodeAddress(address, city, state, zip) {
+      const q = [address, city, state, zip].filter(Boolean).join(', ') + ', USA';
+      try {
+        const res  = await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q=' + encodeURIComponent(q));
+        const data = await res.json();
+        if (data && data.length > 0) {
+          return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+        }
+      } catch(e) {
+        console.warn('Geocoding failed:', e);
+      }
+      return null; // still save the restaurant, just won't appear on map
+    }
+
     // ── Form submit ─────────────────────────────────────────────────────
     window.submitRestaurant = async function() {
       const statusEl = document.getElementById('form-status');
@@ -331,6 +343,16 @@
       const pending = tagInput.value.replace(/,/g, '').trim();
       if (pending && !tags.includes(pending)) { tags.push(pending); tagInput.value = ''; renderTags(); }
 
+      btn.disabled = true;
+      btn.textContent = 'Locating…';
+      statusEl.textContent = '';
+
+      // Geocode silently — restaurant won't show on map without lat/lng
+      const coords = await geocodeAddress(address, city, state, zip);
+      if (!coords) {
+        console.warn('Could not geocode address for', name, '— saving without lat/lng');
+      }
+
       const data = {
         name,
         address,
@@ -339,18 +361,22 @@
         zip,
         phone:  document.getElementById('f-phone').value.trim() || null,
         hours:  document.getElementById('f-hours').value.trim() || null,
-        url:    document.getElementById('f-url').value.trim() || null,        tags:   [...tags],
+        url:    document.getElementById('f-url').value.trim() || null,
+        tags:   [...tags],
+        lat:    coords ? coords.lat : null,
+        lng:    coords ? coords.lng : null,
       };
 
-      btn.disabled = true;
       btn.textContent = 'Saving…';
-      statusEl.textContent = '';
 
       try {
         const { collection, addDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js');
         const ref = await addDoc(collection(db, 'restaurants'), { ...data, createdAt: serverTimestamp() });
         statusEl.innerHTML = `✅ "${name}" added! <a href="restaurant.html?id=${ref.id}" style="color:#c0392b;font-weight:bold;">View listing → Rate it now!</a>`;
         statusEl.style.color = 'green';
+        if (!coords) {
+          statusEl.innerHTML += '<br><span style="color:#e67e22; font-size:12px; font-weight:normal;">⚠️ Could not auto-detect location — this restaurant won\'t appear on the map yet.</span>';
+        }
         // Clear form
         ['f-name','f-phone','f-hours','f-url','f-address','f-city','f-state','f-zip'].forEach(id => {
           document.getElementById(id).value = '';
