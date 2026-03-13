@@ -203,7 +203,10 @@
         <div class="col-sm-8" style="display:flex;flex-direction:column;flex:1;">
           <div id="frozen-header">
             <span id="frozen-headline">🧊 Frozen Pizza Rankings</span>
-            <span id="frozen-count"></span>
+            <span style="display:flex;align-items:center;gap:12px;">
+              <span id="frozen-count"></span>
+              <a id="add-frozen-btn" href="add-frozen.html" style="display:none; background:#fff; color:#c0392b; font-size:12px; font-weight:bold; padding:3px 10px; border-radius:4px; text-decoration:none; font-family:Tahoma,sans-serif;">+ Add</a>
+            </span>
           </div>
 
           <!-- List view -->
@@ -301,11 +304,21 @@
     let selectedRating = 0;
 
     // ── Auth state ──────────────────────────────────────────────────────
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
       currentUser = user;
       const btn = document.getElementById('nav-auth-btn');
-      if (btn) {
-        btn.textContent = user ? (user.displayName || 'My Profile') : 'Login';
+      if (btn) btn.textContent = user ? (user.displayName || 'My Profile') : 'Login';
+
+      // Show "+ Add" button for admins only
+      if (user) {
+        try {
+          const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js');
+          const userDoc = await getDoc(doc(db, 'users', user.uid));
+          if (userDoc.exists() && userDoc.data().isAdmin === true) {
+            const addBtn = document.getElementById('add-frozen-btn');
+            if (addBtn) addBtn.style.display = 'inline-block';
+          }
+        } catch(e) { console.warn('Admin check failed:', e); }
       }
     });
 
