@@ -1,0 +1,511 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🍕</text></svg>'>
+  <title>SliceFinder - Frozen Pizza</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Alfa%20Slab%20One">
+  <style>
+    html, body {
+      height: 100%; margin: 0; padding: 0;
+      font-family: Tahoma, sans-serif;
+      overflow-x: hidden; max-width: 100%;
+    }
+    body { display: flex; flex-direction: column; }
+
+    .container-fluid { padding-left:0; padding-right:0; }
+    .row { margin-left:0; margin-right:0; }
+    .col-sm-2, .col-sm-8 { padding-left:0; padding-right:0; }
+    .col-sm-8 { width:auto; flex:1; }
+
+    .navbar { margin-bottom:0; border-radius:0; width:100%; flex-shrink:0; }
+    .navbar-brand { font-family:'Alfa Slab One',serif; color:#c0392b !important; font-size:24px; letter-spacing:1px; }
+
+    @media (max-width:767px) {
+      #bs-navbar { display:none; width:100%; }
+      #bs-navbar.open { display:block; }
+      #bs-navbar .nav > li > a { color:#fff !important; padding:10px 16px; }
+      #bs-navbar .nav > li > a:hover { background:#333 !important; }
+      #nav-toggle { display:block !important; }
+    }
+    @media (min-width:768px) {
+      #bs-navbar { display:block !important; }
+      #nav-toggle { display:none !important; }
+    }
+
+    .page-wrapper { flex:1; display:flex; flex-direction:column; width:100%; }
+    .row.content { flex:1; min-height:600px; display:flex; }
+
+    .sidenav { padding:20px 14px; background-color:#f1f1f1; }
+
+    footer { background:#555; color:#fff; padding:15px; text-align:center; flex-shrink:0; }
+    footer p { margin:0; }
+
+    /* Red header bar */
+    #frozen-header {
+      background-color:#c0392b; color:#fff;
+      font-family:'Alfa Slab One',serif; font-size:18px;
+      padding:8px 20px 8px 14px; letter-spacing:0.5px;
+      display:flex; justify-content:space-between; align-items:center;
+    }
+    #frozen-headline { flex:1; }
+    #frozen-count { font-size:14px; text-align:right; white-space:nowrap; padding-left:12px; }
+
+    /* Pizza list */
+    #pizza-list {
+      padding: 16px;
+    }
+
+    .pizza-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+      transition: background 0.1s;
+      text-decoration: none;
+      color: inherit;
+    }
+    .pizza-row:hover { background: #fdf5f5; text-decoration: none; color: inherit; }
+    .pizza-row:last-child { border-bottom: none; }
+
+    .pizza-name {
+      font-size: 15px;
+      font-weight: bold;
+      color: #222;
+      flex: 1;
+    }
+    .pizza-stars {
+      color: #c0392b;
+      font-size: 15px;
+      letter-spacing: 1px;
+      white-space: nowrap;
+      margin-left: 12px;
+    }
+    .pizza-rating-num {
+      font-size: 12px;
+      color: #888;
+      margin-left: 4px;
+    }
+    .pizza-reviews {
+      font-size: 12px;
+      color: #aaa;
+      margin-left: 10px;
+      white-space: nowrap;
+    }
+
+    #loading-msg {
+      padding: 30px 16px;
+      color: #888;
+      font-style: italic;
+    }
+
+    /* Frozen pizza detail panel */
+    #detail-panel {
+      display: none;
+      padding: 20px;
+      border-top: 3px solid #c0392b;
+      background: #fff;
+    }
+    #detail-panel h3 {
+      font-family: 'Alfa Slab One', serif;
+      color: #c0392b;
+      margin-top: 0;
+    }
+    #detail-stars { color: #c0392b; font-size: 22px; letter-spacing: 2px; }
+    #detail-reviews { margin-top: 16px; }
+
+    .review-block {
+      border-bottom: 1px solid #eee;
+      padding: 12px 0;
+    }
+    .review-block:last-child { border-bottom: none; }
+    .review-user { font-weight: bold; color: #c0392b; font-size: 13px; }
+    .review-stars { color: #c0392b; font-size: 13px; margin: 2px 0 4px; }
+    .review-text { font-size: 13px; color: #444; }
+
+    .back-btn {
+      color: #c0392b;
+      cursor: pointer;
+      font-size: 13px;
+      margin-bottom: 14px;
+      display: inline-block;
+    }
+    .back-btn:hover { text-decoration: underline; }
+
+    /* Submit review */
+    #review-form { margin-top: 20px; border-top: 1px solid #eee; padding-top: 16px; }
+    #review-form h5 { font-weight: bold; margin-bottom: 10px; }
+    .star-select { display: flex; gap: 6px; margin-bottom: 10px; }
+    .star-select span {
+      font-size: 24px; cursor: pointer; color: #ccc; transition: color 0.1s;
+    }
+    .star-select span.active { color: #c0392b; }
+
+    @media (max-width:800px) {
+      .col-sm-2 { display:none !important; }
+      .col-sm-8 { width:100% !important; }
+      .row.content { min-height:auto; }
+      #frozen-count { display:none; }
+    }
+  </style>
+</head>
+<body>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+  <!-- Navigation -->
+  <nav class="navbar navbar-inverse">
+    <div class="container-fluid" style="padding:0 10px;">
+      <div class="navbar-header">
+        <button id="nav-toggle" type="button" class="navbar-toggle" aria-expanded="false">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="sf-staging.html">SliceFinder</a>
+      </div>
+      <div id="bs-navbar">
+        <ul class="nav navbar-nav">
+          <li><a href="sf-staging.html">Restaurants</a></li>
+          <li class="active"><a href="frozen.html">Frozen Pizza</a></li>
+          <li><a href="#">Pizza News</a></li>
+          <li><a href="profile.html">My Profile</a></li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+          <li><a href="profile.html" id="nav-auth-btn" style="color:#c0392b !important;font-weight:bold;">Login</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Page Content -->
+  <div class="page-wrapper">
+    <div class="container-fluid" style="flex:1;display:flex;flex-direction:column;width:100%;">
+      <div class="row content">
+
+        <!-- Left Sidebar -->
+        <div class="col-sm-2 sidenav">
+          <h5><strong>Top Rated</strong></h5>
+          <ul class="list-unstyled" id="top-rated-list" style="font-size:13px;">
+            <li style="color:#aaa; font-style:italic;">Loading…</li>
+          </ul>
+          <hr>
+          <h5><strong>Which suck the least?</strong></h5>
+          <p style="font-size:12px; color:#666;">Rate and review your frozen pizza picks!</p>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-sm-8" style="display:flex;flex-direction:column;flex:1;">
+          <div id="frozen-header">
+            <span id="frozen-headline">🧊 Frozen Pizza Rankings</span>
+            <span id="frozen-count"></span>
+          </div>
+
+          <!-- List view -->
+          <div id="list-view">
+            <div id="pizza-list">
+              <div id="loading-msg">Loading frozen pizzas…</div>
+            </div>
+          </div>
+
+          <!-- Detail view -->
+          <div id="detail-panel">
+            <span class="back-btn" onclick="showList()">← Back to all frozen pizzas</span>
+            <h3 id="detail-name"></h3>
+            <div id="detail-stars"></div>
+            <div id="detail-review-count" style="font-size:13px; color:#888; margin-top:4px;"></div>
+            <div id="detail-reviews"></div>
+
+            <!-- Review form -->
+            <div id="review-form">
+              <h5>Add your review</h5>
+              <div id="review-auth-msg" style="font-size:13px; color:#888; display:none;">
+                <a href="profile.html" style="color:#c0392b;">Log in</a> to leave a review.
+              </div>
+              <div id="review-inputs">
+                <div class="star-select" id="star-select">
+                  <span data-val="1">★</span>
+                  <span data-val="2">★</span>
+                  <span data-val="3">★</span>
+                  <span data-val="4">★</span>
+                  <span data-val="5">★</span>
+                </div>
+                <textarea id="review-text" class="form-control" rows="3" placeholder="What did you think?" style="margin-bottom:8px;"></textarea>
+                <button class="btn btn-danger btn-sm" onclick="submitFrozenReview()">Submit Review</button>
+                <div id="review-status" style="margin-top:8px; font-size:13px; font-weight:bold;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Sidebar -->
+        <div class="col-sm-2 sidenav">
+          <h5><strong>Filter</strong></h5>
+          <input type="text" id="filter-input" class="form-control input-sm"
+            placeholder="Search brands…" autocomplete="off"
+            oninput="filterList(this.value)" style="margin-bottom:10px;">
+          <h5><strong>Sort by</strong></h5>
+          <div style="font-size:13px;">
+            <label style="font-weight:normal; display:block; cursor:pointer;">
+              <input type="radio" name="sort" value="rating" checked onchange="sortList('rating')"> Highest rated
+            </label>
+            <label style="font-weight:normal; display:block; cursor:pointer;">
+              <input type="radio" name="sort" value="reviews" onchange="sortList('reviews')"> Most reviewed
+            </label>
+            <label style="font-weight:normal; display:block; cursor:pointer;">
+              <input type="radio" name="sort" value="name" onchange="sortList('name')"> A–Z
+            </label>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <footer><p>SliceFinder &copy;2026</p></footer>
+
+  <script>
+    document.getElementById('nav-toggle').addEventListener('click', function() {
+      var nav = document.getElementById('bs-navbar');
+      nav.classList.toggle('open');
+      this.setAttribute('aria-expanded', nav.classList.contains('open'));
+    });
+  </script>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js';
+    import { getFirestore, collection, getDocs, addDoc, doc, getDoc, query, orderBy, where, serverTimestamp, updateDoc } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js';
+    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyB-5Bz4rpHehUbxX7kP__-ap0xSuSdwZ0E",
+      authDomain: "slicefinder-afd7f.firebaseapp.com",
+      projectId: "slicefinder-afd7f",
+      storageBucket: "slicefinder-afd7f.firebasestorage.app",
+      messagingSenderId: "103165329059",
+      appId: "1:103165329059:web:721f516c20d701ebe98916"
+    };
+
+    const app  = initializeApp(firebaseConfig);
+    const db   = getFirestore(app);
+    const auth = getAuth(app);
+
+    let currentUser  = null;
+    let allPizzas    = [];
+    let currentPizza = null;
+    let selectedRating = 0;
+
+    // ── Auth state ──────────────────────────────────────────────────────
+    onAuthStateChanged(auth, (user) => {
+      currentUser = user;
+      const btn = document.getElementById('nav-auth-btn');
+      if (btn) {
+        btn.textContent = user ? (user.displayName || 'My Profile') : 'Login';
+      }
+    });
+
+    // ── Star rating selector ────────────────────────────────────────────
+    document.querySelectorAll('#star-select span').forEach(star => {
+      star.addEventListener('mouseover', () => highlightStars(+star.dataset.val));
+      star.addEventListener('mouseout',  () => highlightStars(selectedRating));
+      star.addEventListener('click',     () => { selectedRating = +star.dataset.val; highlightStars(selectedRating); });
+    });
+
+    function highlightStars(n) {
+      document.querySelectorAll('#star-select span').forEach(s => {
+        s.classList.toggle('active', +s.dataset.val <= n);
+      });
+    }
+
+    // ── Helpers ─────────────────────────────────────────────────────────
+    function starsHtml(rating, size) {
+      if (!rating) return '<span style="color:#ccc;">Not yet rated</span>';
+      const full = Math.round(rating);
+      return '★'.repeat(full) + '☆'.repeat(5 - full);
+    }
+
+    // ── Load all frozen pizzas ───────────────────────────────────────────
+    async function loadPizzas() {
+      try {
+        const snap = await getDocs(collection(db, 'frozen_pizzas'));
+        allPizzas = [];
+        snap.forEach(d => allPizzas.push({ id: d.id, ...d.data() }));
+        sortList('rating');
+        renderTopRated();
+        document.getElementById('frozen-count').textContent =
+          allPizzas.length + ' frozen pizza' + (allPizzas.length !== 1 ? 's' : '') + ' ranked';
+      } catch(e) {
+        document.getElementById('loading-msg').textContent = 'Could not load frozen pizzas.';
+        console.error(e);
+      }
+    }
+
+    function renderList(pizzas) {
+      const list = document.getElementById('pizza-list');
+      if (pizzas.length === 0) {
+        list.innerHTML = '<div id="loading-msg">No results.</div>';
+        return;
+      }
+      list.innerHTML = pizzas.map((p, i) => {
+        const stars = p.avgRating ? starsHtml(p.avgRating) : '';
+        const ratingNum = p.avgRating ? `<span class="pizza-rating-num">(${p.avgRating.toFixed(1)})</span>` : '';
+        const reviewCount = p.reviewCount ? `<span class="pizza-reviews">${p.reviewCount} review${p.reviewCount !== 1 ? 's' : ''}</span>` : '';
+        return `<div class="pizza-row" onclick="showDetail('${p.id}')">
+          <span class="pizza-name">${i + 1}. ${p.name || 'Unknown'}</span>
+          <span class="pizza-stars">${stars}${ratingNum}${reviewCount}</span>
+        </div>`;
+      }).join('');
+    }
+
+    function renderTopRated() {
+      const top = [...allPizzas]
+        .filter(p => p.avgRating)
+        .sort((a, b) => (b.avgRating || 0) - (a.avgRating || 0))
+        .slice(0, 5);
+      const el = document.getElementById('top-rated-list');
+      if (top.length === 0) { el.innerHTML = '<li style="color:#aaa;">No ratings yet</li>'; return; }
+      el.innerHTML = top.map(p =>
+        `<li style="margin-bottom:4px;"><a href="#" onclick="showDetail('${p.id}'); return false;" style="color:#c0392b;">${p.name}</a>
+         <span style="color:#888; font-size:11px;"> ${p.avgRating.toFixed(1)}★</span></li>`
+      ).join('');
+    }
+
+    // ── Filter & sort ────────────────────────────────────────────────────
+    let currentFilter = '';
+    let currentSort   = 'rating';
+
+    window.filterList = function(q) {
+      currentFilter = q.toLowerCase().trim();
+      applyFilterSort();
+    };
+
+    window.sortList = function(by) {
+      currentSort = by;
+      applyFilterSort();
+    };
+
+    function applyFilterSort() {
+      let list = currentFilter
+        ? allPizzas.filter(p => (p.name || '').toLowerCase().includes(currentFilter))
+        : [...allPizzas];
+
+      if (currentSort === 'rating')  list.sort((a, b) => (b.avgRating || 0) - (a.avgRating || 0));
+      if (currentSort === 'reviews') list.sort((a, b) => (b.reviewCount || 0) - (a.reviewCount || 0));
+      if (currentSort === 'name')    list.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+
+      renderList(list);
+    }
+
+    // ── Detail view ──────────────────────────────────────────────────────
+    window.showDetail = async function(id) {
+      const pizza = allPizzas.find(p => p.id === id);
+      if (!pizza) return;
+      currentPizza = pizza;
+
+      document.getElementById('detail-name').textContent = pizza.name || '';
+      const full = pizza.avgRating ? Math.round(pizza.avgRating) : 0;
+      document.getElementById('detail-stars').innerHTML = full
+        ? `${'★'.repeat(full)}${'☆'.repeat(5 - full)} <span style="font-size:14px; color:#888;">(${pizza.avgRating.toFixed(1)})</span>`
+        : '<span style="color:#ccc;">No ratings yet</span>';
+      document.getElementById('detail-review-count').textContent =
+        pizza.reviewCount ? `${pizza.reviewCount} review${pizza.reviewCount !== 1 ? 's' : ''}` : 'No reviews yet';
+
+      document.getElementById('detail-reviews').innerHTML = '<em style="color:#aaa;">Loading reviews…</em>';
+      document.getElementById('list-view').style.display  = 'none';
+      document.getElementById('detail-panel').style.display = 'block';
+
+      // Show/hide review form based on auth
+      const authMsg    = document.getElementById('review-auth-msg');
+      const reviewInputs = document.getElementById('review-inputs');
+      if (currentUser) {
+        authMsg.style.display = 'none';
+        reviewInputs.style.display = 'block';
+      } else {
+        authMsg.style.display = 'block';
+        reviewInputs.style.display = 'none';
+      }
+
+      // Reset review form
+      selectedRating = 0;
+      highlightStars(0);
+      document.getElementById('review-text').value = '';
+      document.getElementById('review-status').textContent = '';
+
+      // Load reviews
+      try {
+        const q = query(collection(db, 'frozen_reviews'), where('pizzaId', '==', id), orderBy('createdAt', 'desc'));
+        const snap = await getDocs(q);
+        if (snap.empty) {
+          document.getElementById('detail-reviews').innerHTML = '<p style="color:#aaa; font-style:italic;">No reviews yet — be the first!</p>';
+        } else {
+          document.getElementById('detail-reviews').innerHTML = snap.docs.map(d => {
+            const rv = d.data();
+            const full = rv.rating ? Math.round(rv.rating) : 0;
+            const stars = full ? '★'.repeat(full) + '☆'.repeat(5 - full) : '';
+            return `<div class="review-block">
+              <div class="review-user">${rv.username || 'Anonymous'}</div>
+              ${stars ? `<div class="review-stars">${stars}</div>` : ''}
+              <div class="review-text">${rv.text || ''}</div>
+            </div>`;
+          }).join('');
+        }
+      } catch(e) {
+        document.getElementById('detail-reviews').innerHTML = '<p style="color:#aaa;">Could not load reviews.</p>';
+      }
+    };
+
+    window.showList = function() {
+      document.getElementById('detail-panel').style.display = 'none';
+      document.getElementById('list-view').style.display    = 'block';
+      currentPizza = null;
+    };
+
+    // ── Submit review ────────────────────────────────────────────────────
+    window.submitFrozenReview = async function() {
+      const statusEl = document.getElementById('review-status');
+      if (!currentUser) { statusEl.textContent = 'Please log in to review.'; return; }
+      if (!selectedRating) { statusEl.textContent = 'Please select a star rating.'; statusEl.style.color = 'red'; return; }
+      const text = document.getElementById('review-text').value.trim();
+
+      try {
+        statusEl.textContent = 'Saving…';
+        statusEl.style.color = '#888';
+        await addDoc(collection(db, 'frozen_reviews'), {
+          pizzaId:  currentPizza.id,
+          username: currentUser.displayName || currentUser.email,
+          uid:      currentUser.uid,
+          rating:   selectedRating,
+          text,
+          createdAt: serverTimestamp(),
+        });
+
+        // Recalculate avgRating
+        const allRevSnap = await getDocs(query(collection(db, 'frozen_reviews'), where('pizzaId', '==', currentPizza.id)));
+        let sum = 0, count = 0;
+        allRevSnap.forEach(d => { if (d.data().rating) { sum += d.data().rating; count++; } });
+        const avg = Math.round((sum / count) * 10) / 10;
+        await updateDoc(doc(db, 'frozen_pizzas', currentPizza.id), { avgRating: avg, reviewCount: count });
+
+        // Update local data
+        const local = allPizzas.find(p => p.id === currentPizza.id);
+        if (local) { local.avgRating = avg; local.reviewCount = count; }
+
+        statusEl.textContent = '✅ Review submitted!';
+        statusEl.style.color = 'green';
+        showDetail(currentPizza.id); // reload reviews
+      } catch(e) {
+        statusEl.textContent = '❌ Error: ' + e.message;
+        statusEl.style.color = 'red';
+      }
+    };
+
+    loadPizzas();
+  </script>
+
+</body>
+</html>
