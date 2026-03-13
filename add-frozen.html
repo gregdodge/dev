@@ -1,0 +1,347 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🍕</text></svg>'>
+  <title>SliceFinder – Add Frozen Pizza</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Alfa%20Slab%20One">
+  <style>
+    html, body { height: 100%; margin: 0; padding: 0; font-family: Tahoma, sans-serif; background: #f5f5f5; }
+
+    .navbar { margin-bottom: 0; border-radius: 0; }
+    .navbar-brand { font-family: 'Alfa Slab One', serif; color: #c0392b !important; font-size: 24px; }
+
+    .form-card {
+      background: #fff;
+      border-radius: 6px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 30px;
+      margin: 30px auto;
+      max-width: 640px;
+    }
+    .form-card h3 {
+      font-family: 'Alfa Slab One', serif;
+      color: #c0392b;
+      margin-top: 0;
+      margin-bottom: 20px;
+    }
+    .section-label {
+      font-size: 11px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #999;
+      margin: 20px 0 8px;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 4px;
+    }
+    #submit-btn { min-width: 160px; }
+    #form-status {
+      margin-top: 16px;
+      font-weight: bold;
+      font-size: 14px;
+      min-height: 20px;
+    }
+
+    /* Tag chips */
+    .tag-input-wrap {
+      display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+      border: 1px solid #ccc; border-radius: 4px; padding: 6px 8px;
+      background: #fff; min-height: 38px; cursor: text;
+    }
+    .tag-chip {
+      background: #c0392b; color: #fff; border-radius: 12px;
+      padding: 2px 10px; font-size: 12px; display: flex;
+      align-items: center; gap: 4px; white-space: nowrap;
+    }
+    .tag-chip button { background: none; border: none; color: #fff; cursor: pointer; font-size: 13px; padding: 0; }
+    #tag-input { border: none; outline: none; flex: 1; min-width: 100px; font-size: 13px; font-family: Tahoma, sans-serif; }
+
+    /* Access denied / loading states */
+    #access-denied, #auth-loading {
+      text-align: center; padding: 60px 20px; max-width: 640px; margin: 0 auto;
+    }
+    #access-denied h4 { color: #c0392b; }
+
+    footer { background: #555; color: #fff; padding: 15px; text-align: center; margin-top: 40px; }
+    footer p { margin: 0; }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar navbar-inverse">
+    <div class="container-fluid" style="padding: 0 10px;">
+      <div class="navbar-header">
+        <button id="nav-toggle" type="button" class="navbar-toggle" aria-expanded="false">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="sf-staging.html">SliceFinder</a>
+      </div>
+      <div id="bs-navbar">
+        <ul class="nav navbar-nav">
+          <li><a href="sf-staging.html">Restaurants</a></li>
+          <li class="active"><a href="frozen.html">Frozen Pizza</a></li>
+          <li><a href="#">Pizza News</a></li>
+          <li><a href="profile.html">My Profile</a></li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+          <li><a href="profile.html" id="nav-auth-btn" style="color:#c0392b !important;font-weight:bold;">Login</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Auth loading state -->
+  <div id="auth-loading">
+    <p style="color:#aaa;">Checking permissions…</p>
+  </div>
+
+  <!-- Access denied state -->
+  <div id="access-denied" style="display:none;">
+    <h4>🚫 Admin Access Required</h4>
+    <p style="color:#666;">You need to be logged in as an admin to add frozen pizzas.</p>
+    <a href="frozen.html" class="btn btn-default btn-sm">← Back to Frozen Pizza</a>
+  </div>
+
+  <!-- Add Frozen Pizza Form -->
+  <div id="form-wrapper" style="display:none;">
+    <div class="form-card container">
+      <h3>🧊 Add a Frozen Pizza</h3>
+      <p style="font-size:13px; color:#666;">Add a new frozen pizza product to the SliceFinder rankings.</p>
+
+      <div class="section-label">Product Info</div>
+
+      <div class="form-group">
+        <label>Product Name <span style="color:#c0392b">*</span></label>
+        <input type="text" id="f-name" class="form-control" placeholder="e.g. Trader Joe's Formaggi Frozen Pizza">
+      </div>
+
+      <div class="form-group">
+        <label>Brand</label>
+        <input type="text" id="f-brand" class="form-control" placeholder="e.g. Trader Joe's">
+      </div>
+
+      <div class="form-group">
+        <label>Description</label>
+        <textarea id="f-description" class="form-control" rows="3" placeholder="Brief description of the pizza…"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>URL Slug <span style="color:#c0392b">*</span> <span style="color:#888; font-size:11px;">(unique identifier, lowercase, hyphens only)</span></label>
+        <input type="text" id="f-slug" class="form-control" placeholder="e.g. trader-joes-formaggi">
+      </div>
+
+      <div class="section-label">Tags</div>
+      <div class="form-group">
+        <label>Tags <span style="color:#888; font-size:11px;">(type and press Enter or comma)</span></label>
+        <div class="tag-input-wrap" id="tag-wrap" onclick="document.getElementById('tag-input').focus()">
+          <input type="text" id="tag-input" placeholder="e.g. thin crust, organic, gluten-free…">
+        </div>
+      </div>
+
+      <button id="submit-btn" class="btn btn-danger" onclick="submitFrozenPizza()">
+        + Add Frozen Pizza
+      </button>
+      <a href="frozen.html" class="btn btn-default" style="margin-left:8px;">Cancel</a>
+
+      <div id="form-status"></div>
+    </div>
+  </div>
+
+  <footer><p>SliceFinder &copy;2026</p></footer>
+
+  <script>
+    document.getElementById('nav-toggle').addEventListener('click', function() {
+      var nav = document.getElementById('bs-navbar');
+      nav.classList.toggle('open');
+      this.setAttribute('aria-expanded', nav.classList.contains('open'));
+    });
+
+    // Auto-generate slug from name
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('f-name').addEventListener('input', function() {
+        const slugEl = document.getElementById('f-slug');
+        if (!slugEl._manuallyEdited) {
+          slugEl.value = this.value.toLowerCase()
+            .replace(/[^a-z0-9\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
+            .replace(/^-|-$/g, '');
+        }
+      });
+      document.getElementById('f-slug').addEventListener('input', function() {
+        this._manuallyEdited = true;
+      });
+    });
+  </script>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js';
+    import { getFirestore, collection, addDoc, doc, getDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js';
+    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyB-5Bz4rpHehUbxX7kP__-ap0xSuSdwZ0E",
+      authDomain: "slicefinder-afd7f.firebaseapp.com",
+      projectId: "slicefinder-afd7f",
+      storageBucket: "slicefinder-afd7f.firebasestorage.app",
+      messagingSenderId: "103165329059",
+      appId: "1:103165329059:web:721f516c20d701ebe98916"
+    };
+
+    const app  = initializeApp(firebaseConfig);
+    const db   = getFirestore(app);
+    const auth = getAuth(app);
+
+    let currentUser = null;
+
+    // ── Check admin status ──────────────────────────────────────────────
+    onAuthStateChanged(auth, async (user) => {
+      currentUser = user;
+      const btn = document.getElementById('nav-auth-btn');
+      if (btn) btn.textContent = user ? (user.displayName || 'My Profile') : 'Login';
+
+      if (!user) {
+        showAccessDenied();
+        return;
+      }
+
+      // Check isAdmin field in users collection
+      try {
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        if (userDoc.exists() && userDoc.data().isAdmin === true) {
+          showForm();
+        } else {
+          showAccessDenied();
+        }
+      } catch(e) {
+        console.error('Error checking admin:', e);
+        showAccessDenied();
+      }
+    });
+
+    function showForm() {
+      document.getElementById('auth-loading').style.display  = 'none';
+      document.getElementById('access-denied').style.display = 'none';
+      document.getElementById('form-wrapper').style.display  = 'block';
+    }
+
+    function showAccessDenied() {
+      document.getElementById('auth-loading').style.display  = 'none';
+      document.getElementById('form-wrapper').style.display  = 'none';
+      document.getElementById('access-denied').style.display = 'block';
+    }
+
+    // ── Tag chip UI ─────────────────────────────────────────────────────
+    const tags = [];
+
+    function renderTags() {
+      const wrap  = document.getElementById('tag-wrap');
+      const input = document.getElementById('tag-input');
+      wrap.querySelectorAll('.tag-chip').forEach(c => c.remove());
+      tags.forEach((tag, i) => {
+        const chip = document.createElement('span');
+        chip.className = 'tag-chip';
+        chip.innerHTML = `${tag} <button type="button" onclick="removeTag(${i})">&times;</button>`;
+        wrap.insertBefore(chip, input);
+      });
+    }
+
+    window.removeTag = function(i) { tags.splice(i, 1); renderTags(); };
+
+    document.getElementById('tag-input').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ',') {
+        e.preventDefault();
+        const val = this.value.replace(/,/g, '').trim();
+        if (val && !tags.includes(val)) { tags.push(val); renderTags(); }
+        this.value = '';
+      }
+      if (e.key === 'Backspace' && this.value === '' && tags.length) {
+        tags.pop(); renderTags();
+      }
+    });
+
+    // ── Submit ──────────────────────────────────────────────────────────
+    window.submitFrozenPizza = async function() {
+      const statusEl = document.getElementById('form-status');
+      const btn      = document.getElementById('submit-btn');
+
+      const name = document.getElementById('f-name').value.trim();
+      const slug = document.getElementById('f-slug').value.trim();
+
+      if (!name) {
+        statusEl.textContent = '❌ Product name is required.';
+        statusEl.style.color = 'red';
+        return;
+      }
+      if (!slug) {
+        statusEl.textContent = '❌ URL slug is required.';
+        statusEl.style.color = 'red';
+        return;
+      }
+
+      // Flush pending tag
+      const tagInput = document.getElementById('tag-input');
+      const pending  = tagInput.value.replace(/,/g, '').trim();
+      if (pending && !tags.includes(pending)) { tags.push(pending); tagInput.value = ''; renderTags(); }
+
+      btn.disabled    = true;
+      btn.textContent = 'Saving…';
+      statusEl.textContent = '';
+
+      try {
+        const ref = await addDoc(collection(db, 'frozen_pizzas'), {
+          name,
+          slug,
+          brand:       document.getElementById('f-brand').value.trim() || null,
+          description: document.getElementById('f-description').value.trim() || null,
+          tags:        [...tags],
+          avgRating:   null,
+          reviewCount: 0,
+          createdAt:   serverTimestamp(),
+          addedBy:     currentUser.uid,
+        });
+
+        statusEl.innerHTML = `✅ "${name}" added! <a href="frozen.html" style="color:#c0392b;font-weight:bold;">View on Frozen Pizza page →</a>`;
+        statusEl.style.color = 'green';
+
+        // Clear form
+        ['f-name','f-brand','f-description','f-slug'].forEach(id => {
+          document.getElementById(id).value = '';
+        });
+        document.getElementById('f-slug')._manuallyEdited = false;
+        tags.length = 0;
+        renderTags();
+
+      } catch(e) {
+        statusEl.textContent = '❌ Error saving: ' + e.message;
+        statusEl.style.color = 'red';
+      } finally {
+        btn.disabled    = false;
+        btn.textContent = '+ Add Frozen Pizza';
+      }
+    };
+
+  </script>
+
+  <style>
+    @media (max-width: 767px) {
+      #bs-navbar { display: none; width: 100%; }
+      #bs-navbar.open { display: block; }
+      #bs-navbar .nav > li > a { color: #fff !important; padding: 10px 16px; }
+      #bs-navbar .nav > li > a:hover { background: #333 !important; }
+      #nav-toggle { display: block !important; }
+    }
+    @media (min-width: 768px) {
+      #bs-navbar { display: block !important; }
+      #nav-toggle { display: none !important; }
+    }
+  </style>
+
+</body>
+</html>
