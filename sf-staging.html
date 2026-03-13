@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +9,7 @@
   <title>SliceFinder - Find Your Slice</title>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Alfa%20Slab%20One">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <link rel="stylesheet" href="https://unpkg.com/[email protected]/dist/leaflet.css"/>
   <style>
     html, body {
       height: 100%; margin: 0; padding: 0;
@@ -129,7 +130,7 @@
       .col-sm-2 { display:none !important; }
       .col-sm-8 { width:100% !important; }
       .row.content { min-height:auto; }
-      #slices-count { display:none; } 
+      #slices-count { display:none; }
     }
   </style>
 </head>
@@ -137,7 +138,7 @@
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/[email protected]/dist/leaflet.js"></script>
 
   <!-- Navigation -->
   <nav class="navbar navbar-inverse">
@@ -152,7 +153,7 @@
       <div id="bs-navbar">
         <ul class="nav navbar-nav">
           <li class="active"><a href="#">Restaurants</a></li>
-          <li><a href="frozen.html">Frozen Pizza</a></li>
+          <li><a href="#">Frozen Pizza</a></li>
           <li><a href="#">Pizza News</a></li>
           <li><a href="profile.html">My Profile</a></li>
         </ul>
@@ -195,25 +196,19 @@
                data-show-count="false" data-lang="en">Follow @slicefinder</a>
           </p>
           <h5><strong>Most Reviewed</strong></h5>
-          <ul class="list-unstyled" style="font-size:13px;">
-            <li><a href="restaurant.html?id=p2XYlZzZiDQbpFzKC7od">Tony's SF</a></li>
-            <li><a href="restaurant.html?id=LbwJwdku1teLPuVdJPcy">Arinell Pizza</a></li>
-            <li><a href="restaurant.html?id=22pmp2wIqI8MBwAv4WNm">Goat Hill Pizza</a></li>
-            <li><a href="restaurant.html?id=Wg4q8KSMRnL04voEppE2">Golden Boy Pizza</a></li>
+          <ul class="list-unstyled" id="most-reviewed-list" style="font-size:13px;">
+            <li style="color:#aaa; font-style:italic;">Loading…</li>
           </ul>
           <h5><strong>Top Reviewers</strong></h5>
-          <ul class="list-unstyled" style="font-size:13px;">
-            <li>gregdodge &nbsp;<span class="badge">85</span></li>
-            <li>fergusontj &nbsp;<span class="badge">77</span></li>
-            <li>KingTut &nbsp;<span class="badge">34</span></li>
-            <li>wintergreenta &nbsp;<span class="badge">32</span></li>
+          <ul class="list-unstyled" id="top-reviewers-list" style="font-size:13px;">
+            <li style="color:#aaa; font-style:italic;">Loading…</li>
           </ul>
         </div>
 
         <!-- Main Content -->
         <div class="col-sm-8" style="display:flex;flex-direction:column;flex:1;">
           <div id="slices-header">
-            <span id="slices-headline">🍕 Find and rate pizza near you</span>
+            <span id="slices-headline">🍕 Find and rate the best pizza near you</span>
             <span id="slices-count">Loading…</span>
           </div>
           <div id="geo-status">Detecting your location…</div>
@@ -431,6 +426,62 @@
     sessionStorage.setItem('sf-firebase-config', JSON.stringify(firebaseConfig));
 
     // ── Load 3 most recent reviews ────────────────────────────────────
+    // ── Load Most Reviewed restaurants ──────────────────────────────────
+    async function loadMostReviewed() {
+      const el = document.getElementById('most-reviewed-list');
+      if (!el) return;
+      try {
+        const q = query(
+          collection(db, 'restaurants'),
+          orderBy('reviewCount', 'desc'),
+          limit(5)
+        );
+        const snap = await getDocs(q);
+        if (snap.empty) { el.innerHTML = '<li style="color:#aaa;">No data yet</li>'; return; }
+        el.innerHTML = '';
+        snap.forEach(d => {
+          const r = d.data();
+          if (!r.name) return;
+          const li = document.createElement('li');
+          li.style.marginBottom = '4px';
+          li.innerHTML = `<a href="restaurant.html?id=${d.id}" style="color:#c0392b;">${r.name}</a>` +
+            (r.reviewCount ? ` <span class="badge" style="background:#c0392b;">${r.reviewCount}</span>` : '');
+          el.appendChild(li);
+        });
+      } catch(e) {
+        el.innerHTML = '<li style="color:#aaa;">Could not load</li>';
+        console.warn('Most reviewed error:', e);
+      }
+    }
+
+    // ── Load Top Reviewers ────────────────────────────────────────────────
+    async function loadTopReviewers() {
+      const el = document.getElementById('top-reviewers-list');
+      if (!el) return;
+      try {
+        // Fetch all reviews and tally by username client-side
+        // (Firestore doesn't support group-by natively)
+        const snap = await getDocs(collection(db, 'reviews'));
+        const counts = {};
+        snap.forEach(d => {
+          const rv = d.data();
+          const name = rv.username || rv.uid || 'Anonymous';
+          if (name === 'Anonymous') return;
+          counts[name] = (counts[name] || 0) + 1;
+        });
+        const sorted = Object.entries(counts)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 5);
+        if (sorted.length === 0) { el.innerHTML = '<li style="color:#aaa;">No data yet</li>'; return; }
+        el.innerHTML = sorted.map(([name, count]) =>
+          `<li style="margin-bottom:4px;">${name} &nbsp;<span class="badge" style="background:#555;">${count}</span></li>`
+        ).join('');
+      } catch(e) {
+        el.innerHTML = '<li style="color:#aaa;">Could not load</li>';
+        console.warn('Top reviewers error:', e);
+      }
+    }
+
     async function loadRecentReviews() {
       const container = document.getElementById('recent-reviews');
       if (!container) return;
@@ -469,6 +520,8 @@
       }
     }
     loadRecentReviews();
+    loadMostReviewed();
+    loadTopReviewers();
 
     // ── Load restaurants within a lat/lng bounding box ───────────────
     const RADIUS = 0.25;
@@ -601,4 +654,3 @@
   </script>
 
 </body>
-</html>
