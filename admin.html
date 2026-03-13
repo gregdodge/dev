@@ -1,0 +1,442 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🍕</text></svg>'>
+  <title>SliceFinder – Admin Search</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Alfa%20Slab%20One">
+  <style>
+    html, body { margin: 0; padding: 0; font-family: Tahoma, sans-serif; background: #f5f5f5; }
+
+    .navbar { margin-bottom: 0; border-radius: 0; }
+    .navbar-brand { font-family: 'Alfa Slab One', serif; color: #c0392b !important; font-size: 24px; }
+
+    .page-container { max-width: 860px; margin: 30px auto; padding: 0 16px 60px; }
+
+    .admin-card {
+      background: #fff;
+      border-radius: 6px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+    .admin-card h3 {
+      font-family: 'Alfa Slab One', serif;
+      color: #c0392b;
+      margin-top: 0;
+      margin-bottom: 4px;
+      font-size: 22px;
+    }
+    .admin-card .subtitle {
+      color: #888; font-size: 13px; margin-bottom: 20px;
+    }
+
+    /* Search bar */
+    .search-row { display: flex; gap: 8px; margin-bottom: 6px; }
+    .search-row input { flex: 1; }
+
+    /* Collection tabs */
+    .tab-bar { display: flex; gap: 6px; margin-bottom: 16px; }
+    .tab-btn {
+      padding: 5px 14px; border-radius: 4px; border: 1px solid #ddd;
+      background: #f9f9f9; cursor: pointer; font-size: 13px; font-family: Tahoma, sans-serif;
+    }
+    .tab-btn.active { background: #c0392b; color: #fff; border-color: #c0392b; }
+
+    /* Results table */
+    #results-wrap { margin-top: 10px; }
+    .result-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .result-table th {
+      text-align: left; padding: 8px 10px;
+      background: #f5f5f5; border-bottom: 2px solid #eee;
+      font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #888;
+    }
+    .result-table td { padding: 9px 10px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+    .result-table tr:hover td { background: #fdf5f5; }
+    .result-table tr:last-child td { border-bottom: none; }
+
+    .doc-id {
+      font-family: monospace; font-size: 11px; color: #aaa;
+      max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .copy-btn {
+      font-size: 10px; padding: 1px 6px; margin-left: 4px;
+      cursor: pointer; border: 1px solid #ddd; border-radius: 3px;
+      background: #f9f9f9; color: #666;
+    }
+    .copy-btn:hover { background: #eee; }
+
+    .action-links a { margin-right: 8px; font-size: 12px; }
+
+    .result-count { font-size: 12px; color: #888; margin-bottom: 8px; }
+
+    #status-msg { font-size: 13px; color: #888; padding: 20px 0; text-align: center; }
+
+    /* Access denied */
+    #access-denied, #auth-loading {
+      text-align: center; padding: 60px 20px;
+    }
+    #access-denied h4 { color: #c0392b; }
+
+    /* Stats row */
+    .stats-row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+    .stat-box {
+      flex: 1; min-width: 120px; background: #f9f9f9; border: 1px solid #eee;
+      border-radius: 6px; padding: 12px 16px; text-align: center;
+    }
+    .stat-box .stat-num { font-size: 28px; font-weight: bold; color: #c0392b; font-family: 'Alfa Slab One', serif; }
+    .stat-box .stat-label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+
+    footer { background: #555; color: #fff; padding: 15px; text-align: center; margin-top: 40px; }
+    footer p { margin: 0; }
+
+    @media (max-width: 767px) {
+      #bs-navbar { display: none; width: 100%; }
+      #bs-navbar.open { display: block; }
+      #bs-navbar .nav > li > a { color: #fff !important; padding: 10px 16px; }
+      #bs-navbar .nav > li > a:hover { background: #333 !important; }
+      #nav-toggle { display: block !important; }
+    }
+    @media (min-width: 768px) {
+      #bs-navbar { display: block !important; }
+      #nav-toggle { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar navbar-inverse">
+    <div class="container-fluid" style="padding:0 10px;">
+      <div class="navbar-header">
+        <button id="nav-toggle" type="button" class="navbar-toggle" aria-expanded="false">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="sf-staging.html">SliceFinder</a>
+      </div>
+      <div id="bs-navbar">
+        <ul class="nav navbar-nav">
+          <li><a href="sf-staging.html">Restaurants</a></li>
+          <li><a href="frozen.html">Frozen Pizza</a></li>
+          <li><a href="#">Pizza News</a></li>
+          <li><a href="profile.html">My Profile</a></li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+          <li><a href="profile.html" id="nav-auth-btn" style="color:#c0392b !important;font-weight:bold;">Login</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div id="auth-loading" class="page-container">
+    <p style="color:#aaa; text-align:center;">Checking permissions…</p>
+  </div>
+
+  <div id="access-denied" class="page-container" style="display:none;">
+    <h4>🚫 Admin Access Required</h4>
+    <p style="color:#666;">You need to be logged in as an admin to access this page.</p>
+    <a href="sf-staging.html" class="btn btn-default btn-sm">← Back to Map</a>
+  </div>
+
+  <div id="admin-content" style="display:none;">
+    <div class="page-container">
+
+      <!-- Header -->
+      <div class="admin-card">
+        <h3>⚙️ Admin Search</h3>
+        <p class="subtitle">Search and manage your Firestore data</p>
+
+        <!-- Stats -->
+        <div class="stats-row">
+          <div class="stat-box"><div class="stat-num" id="stat-restaurants">—</div><div class="stat-label">Restaurants</div></div>
+          <div class="stat-box"><div class="stat-num" id="stat-reviews">—</div><div class="stat-label">Reviews</div></div>
+          <div class="stat-box"><div class="stat-num" id="stat-users">—</div><div class="stat-label">Users</div></div>
+          <div class="stat-box"><div class="stat-num" id="stat-frozen">—</div><div class="stat-label">Frozen Pizzas</div></div>
+        </div>
+
+        <!-- Collection tabs -->
+        <div class="tab-bar">
+          <button class="tab-btn active" onclick="setCollection('restaurants')">Restaurants</button>
+          <button class="tab-btn" onclick="setCollection('reviews')">Reviews</button>
+          <button class="tab-btn" onclick="setCollection('users')">Users</button>
+          <button class="tab-btn" onclick="setCollection('frozen_pizzas')">Frozen Pizzas</button>
+        </div>
+
+        <!-- Search -->
+        <div class="search-row">
+          <input type="text" id="search-input" class="form-control input-sm"
+            placeholder="Search by name…" autocomplete="off"
+            oninput="onSearchInput(this.value)"
+            onkeydown="if(event.key==='Enter') doSearch()">
+          <button class="btn btn-danger btn-sm" onclick="doSearch()">Search</button>
+          <button class="btn btn-default btn-sm" onclick="clearSearch()">Clear</button>
+        </div>
+        <div id="search-hint" style="font-size:11px; color:#aaa; margin-bottom:8px;">
+          Searching restaurants — type a name and press Enter
+        </div>
+
+        <!-- Results -->
+        <div id="results-wrap">
+          <div id="status-msg">Enter a search term or browse all below</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer><p>SliceFinder &copy;2026</p></footer>
+
+  <script>
+    document.getElementById('nav-toggle').addEventListener('click', function() {
+      var nav = document.getElementById('bs-navbar');
+      nav.classList.toggle('open');
+      this.setAttribute('aria-expanded', nav.classList.contains('open'));
+    });
+
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        event.target.textContent = '✓';
+        setTimeout(() => event.target.textContent = 'copy', 1200);
+      });
+    }
+  </script>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js';
+    import { getFirestore, collection, getDocs, getDoc, doc, query, where, orderBy, limit, deleteDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js';
+    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyB-5Bz4rpHehUbxX7kP__-ap0xSuSdwZ0E",
+      authDomain: "slicefinder-afd7f.firebaseapp.com",
+      projectId: "slicefinder-afd7f",
+      storageBucket: "slicefinder-afd7f.firebasestorage.app",
+      messagingSenderId: "103165329059",
+      appId: "1:103165329059:web:721f516c20d701ebe98916"
+    };
+
+    const app  = initializeApp(firebaseConfig);
+    const db   = getFirestore(app);
+    const auth = getAuth(app);
+
+    let currentCollection = 'restaurants';
+    let searchTimeout = null;
+
+    // ── Auth & admin check ──────────────────────────────────────────────
+    onAuthStateChanged(auth, async (user) => {
+      const btn = document.getElementById('nav-auth-btn');
+      if (btn) btn.textContent = user ? (user.displayName || 'My Profile') : 'Login';
+
+      if (!user) { showAccessDenied(); return; }
+
+      try {
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        if (userDoc.exists() && userDoc.data().isAdmin === true) {
+          showAdmin();
+          loadStats();
+        } else {
+          showAccessDenied();
+        }
+      } catch(e) {
+        showAccessDenied();
+      }
+    });
+
+    function showAdmin() {
+      document.getElementById('auth-loading').style.display  = 'none';
+      document.getElementById('access-denied').style.display = 'none';
+      document.getElementById('admin-content').style.display = 'block';
+    }
+    function showAccessDenied() {
+      document.getElementById('auth-loading').style.display  = 'none';
+      document.getElementById('admin-content').style.display = 'none';
+      document.getElementById('access-denied').style.display = 'block';
+    }
+
+    // ── Stats ───────────────────────────────────────────────────────────
+    async function loadStats() {
+      const collections = ['restaurants', 'reviews', 'users', 'frozen_pizzas'];
+      const ids = ['stat-restaurants', 'stat-reviews', 'stat-users', 'stat-frozen'];
+      for (let i = 0; i < collections.length; i++) {
+        try {
+          const snap = await getDocs(collection(db, collections[i]));
+          document.getElementById(ids[i]).textContent = snap.size.toLocaleString();
+        } catch(e) {
+          document.getElementById(ids[i]).textContent = '—';
+        }
+      }
+    }
+
+    // ── Collection switching ────────────────────────────────────────────
+    window.setCollection = function(col) {
+      currentCollection = col;
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+      const hints = {
+        restaurants: 'Searching restaurants — type a name and press Enter',
+        reviews: 'Searching reviews — type a username and press Enter',
+        users: 'Searching users — type a display name and press Enter',
+        frozen_pizzas: 'Searching frozen pizzas — type a name and press Enter',
+      };
+      document.getElementById('search-hint').textContent = hints[col] || '';
+      document.getElementById('search-input').value = '';
+      document.getElementById('results-wrap').innerHTML = '<div id="status-msg">Enter a search term above</div>';
+    };
+
+    // ── Search ──────────────────────────────────────────────────────────
+    window.onSearchInput = function(val) {
+      clearTimeout(searchTimeout);
+      if (val.length >= 2) {
+        searchTimeout = setTimeout(doSearch, 400);
+      }
+    };
+
+    window.clearSearch = function() {
+      document.getElementById('search-input').value = '';
+      document.getElementById('results-wrap').innerHTML = '<div id="status-msg">Enter a search term above</div>';
+    };
+
+    window.doSearch = async function() {
+      const q = document.getElementById('search-input').value.trim();
+      const wrap = document.getElementById('results-wrap');
+
+      if (!q) { wrap.innerHTML = '<div id="status-msg">Enter a search term above</div>'; return; }
+
+      wrap.innerHTML = '<div id="status-msg">Searching…</div>';
+
+      try {
+        // Firestore doesn't support full-text search, so we fetch and filter client-side
+        // For large collections this is fine at our scale
+        const snap = await getDocs(collection(db, currentCollection));
+        const qLower = q.toLowerCase();
+        const results = [];
+
+        snap.forEach(d => {
+          const data = d.data();
+          const searchField = getSearchField(data);
+          if (searchField.toLowerCase().includes(qLower)) {
+            results.push({ id: d.id, data });
+          }
+        });
+
+        if (results.length === 0) {
+          wrap.innerHTML = `<div id="status-msg">No results for "${q}"</div>`;
+          return;
+        }
+
+        renderResults(results, wrap);
+      } catch(e) {
+        wrap.innerHTML = `<div id="status-msg" style="color:red;">Error: ${e.message}</div>`;
+      }
+    };
+
+    function getSearchField(data) {
+      switch(currentCollection) {
+        case 'restaurants':  return data.name || '';
+        case 'reviews':      return data.username || '';
+        case 'users':        return data.displayName || data.email || '';
+        case 'frozen_pizzas': return data.name || '';
+        default: return '';
+      }
+    }
+
+    function renderResults(results, wrap) {
+      const count = `<div class="result-count">${results.length} result${results.length !== 1 ? 's' : ''}</div>`;
+
+      let rows = results.map(({ id, data }) => {
+        const cols = getColumns(id, data);
+        return `<tr>${cols}</tr>`;
+      }).join('');
+
+      const headers = getHeaders();
+      wrap.innerHTML = count + `
+        <table class="result-table">
+          <thead><tr>${headers}</tr></thead>
+          <tbody>${rows}</tbody>
+        </table>`;
+    }
+
+    function getHeaders() {
+      switch(currentCollection) {
+        case 'restaurants':
+          return '<th>Name</th><th>City, State</th><th>Reviews</th><th>Doc ID</th><th>Actions</th>';
+        case 'reviews':
+          return '<th>Username</th><th>Rating</th><th>Text</th><th>Doc ID</th><th>Actions</th>';
+        case 'users':
+          return '<th>Display Name</th><th>Email</th><th>Doc ID</th><th>Actions</th>';
+        case 'frozen_pizzas':
+          return '<th>Name</th><th>Avg Rating</th><th>Reviews</th><th>Doc ID</th><th>Actions</th>';
+        default: return '';
+      }
+    }
+
+    function getColumns(id, d) {
+      const copyBtn = `<button class="copy-btn" onclick="copyToClipboard('${id}')">copy</button>`;
+      const docIdCell = `<td><span class="doc-id" title="${id}">${id}</span>${copyBtn}</td>`;
+
+      switch(currentCollection) {
+        case 'restaurants': {
+          const location = [d.city, d.state].filter(Boolean).join(', ') || '—';
+          const actions = `
+            <a href="restaurant.html?id=${id}" target="_blank">View</a>
+            <a href="#" onclick="deleteRecord('restaurants','${id}','${(d.name||'').replace(/'/g,"\\'")}'); return false;" style="color:#c0392b;">Delete</a>`;
+          return `<td><strong>${d.name || '—'}</strong></td><td>${location}</td><td>${d.reviewCount || 0}</td>${docIdCell}<td class="action-links">${actions}</td>`;
+        }
+        case 'reviews': {
+          const stars = d.rating ? '★'.repeat(d.rating) + '☆'.repeat(5 - d.rating) : '—';
+          const text = (d.text || '').slice(0, 60) + ((d.text||'').length > 60 ? '…' : '');
+          const actions = `<a href="#" onclick="deleteRecord('reviews','${id}','this review'); return false;" style="color:#c0392b;">Delete</a>`;
+          return `<td>${d.username || '—'}</td><td style="color:#c0392b;">${stars}</td><td style="color:#555;">${text}</td>${docIdCell}<td class="action-links">${actions}</td>`;
+        }
+        case 'users': {
+          const actions = `<a href="profile.html?user=${id}" target="_blank">View Profile</a>`;
+          return `<td>${d.displayName || '—'}</td><td>${d.email || '—'}</td>${docIdCell}<td class="action-links">${actions}</td>`;
+        }
+        case 'frozen_pizzas': {
+          const rating = d.avgRating ? d.avgRating.toFixed(1) + ' ★' : '—';
+          const actions = `
+            <a href="frozen.html" target="_blank">View</a>
+            <a href="#" onclick="deleteRecord('frozen_pizzas','${id}','${(d.name||'').replace(/'/g,"\\'")}'); return false;" style="color:#c0392b;">Delete</a>`;
+          return `<td><strong>${d.name || '—'}</strong></td><td>${rating}</td><td>${d.reviewCount || 0}</td>${docIdCell}<td class="action-links">${actions}</td>`;
+        }
+        default: return '';
+      }
+    }
+
+    // ── Delete ──────────────────────────────────────────────────────────
+    window.deleteRecord = async function(col, id, label) {
+      if (!confirm(`Delete "${label}"? This cannot be undone.`)) return;
+      try {
+        await deleteDoc(doc(db, col, id));
+        // Remove row from table
+        const rows = document.querySelectorAll('.result-table tbody tr');
+        rows.forEach(row => {
+          if (row.innerHTML.includes(id)) row.remove();
+        });
+        alert('Deleted.');
+      } catch(e) {
+        alert('Delete failed: ' + e.message);
+      }
+    };
+
+  </script>
+
+  <style>
+    @media (max-width: 767px) {
+      #bs-navbar { display: none; width: 100%; }
+      #bs-navbar.open { display: block; }
+      #bs-navbar .nav > li > a { color: #fff !important; padding: 10px 16px; }
+      #bs-navbar .nav > li > a:hover { background: #333 !important; }
+      #nav-toggle { display: block !important; }
+    }
+    @media (min-width: 768px) {
+      #bs-navbar { display: block !important; }
+      #nav-toggle { display: none !important; }
+    }
+  </style>
+
+</body>
+</html>
