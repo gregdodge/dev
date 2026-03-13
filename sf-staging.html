@@ -462,20 +462,26 @@
         // Fetch all reviews and tally by username client-side
         // (Firestore doesn't support group-by natively)
         const snap = await getDocs(collection(db, 'reviews'));
-        const counts = {};
+        // Tally by uid (when available) or username, preserving link info
+        const counts = {}; // key -> { name, uid, count }
         snap.forEach(d => {
           const rv = d.data();
+          const key  = rv.uid || rv.username || 'Anonymous';
           const name = rv.username || rv.uid || 'Anonymous';
           if (name === 'Anonymous') return;
-          counts[name] = (counts[name] || 0) + 1;
+          if (!counts[key]) counts[key] = { name, uid: rv.uid || null, count: 0 };
+          counts[key].count++;
         });
-        const sorted = Object.entries(counts)
-          .sort((a, b) => b[1] - a[1])
+        const sorted = Object.values(counts)
+          .sort((a, b) => b.count - a.count)
           .slice(0, 5);
         if (sorted.length === 0) { el.innerHTML = '<li style="color:#aaa;">No data yet</li>'; return; }
-        el.innerHTML = sorted.map(([name, count]) =>
-          `<li style="margin-bottom:4px;">${name} &nbsp;<span class="badge" style="background:#555;">${count}</span></li>`
-        ).join('');
+        el.innerHTML = sorted.map(({ name, uid, count }) => {
+          const nameHtml = uid
+            ? `<a href="profile.html?user=${uid}" style="color:#c0392b;">${name}</a>`
+            : `<span>${name}</span>`;
+          return `<li style="margin-bottom:4px;">${nameHtml} &nbsp;<span class="badge" style="background:#555;">${count}</span></li>`;
+        }).join('');
       } catch(e) {
         el.innerHTML = '<li style="color:#aaa;">Could not load</li>';
         console.warn('Top reviewers error:', e);
