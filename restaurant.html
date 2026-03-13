@@ -201,6 +201,47 @@
     .star-picker span { color: #ddd; transition: color 0.1s; }
     .star-picker span.on { color: #e67e22; }
 
+    /* ── Admin controls ── */
+    #admin-bar {
+      display: none;
+      background: #2c3e50;
+      padding: 8px 16px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+      display: none;
+      align-items: center;
+      gap: 10px;
+    }
+    #admin-bar span { color: #aaa; font-size: 12px; }
+    .admin-btn { font-size: 12px; padding: 4px 12px; }
+
+    /* Edit modal */
+    #edit-modal {
+      display: none;
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 9999;
+      overflow-y: auto;
+    }
+    #edit-modal-inner {
+      background: #fff;
+      max-width: 640px;
+      margin: 40px auto;
+      border-radius: 8px;
+      padding: 28px;
+    }
+    #edit-modal-inner h4 {
+      font-family: 'Alfa Slab One', serif;
+      color: #c0392b;
+      margin-top: 0;
+      margin-bottom: 20px;
+    }
+    .edit-section-label {
+      font-size: 11px; font-weight: bold; text-transform: uppercase;
+      letter-spacing: 1px; color: #999; margin: 16px 0 6px;
+      border-bottom: 1px solid #eee; padding-bottom: 4px;
+    }
+
     /* ── Loading/error states ── */
     #loading { text-align: center; padding: 60px 0; color: #888; font-size: 18px; }
     #error-msg { display: none; text-align: center; padding: 60px 0; color: #c0392b; }
@@ -225,7 +266,7 @@
       <div id="bs-navbar">
         <ul class="nav navbar-nav">
           <li class="active"><a href="sf-staging.html">Restaurants</a></li>
-          <li><a href="frozen.html">Frozen Pizza</a></li>
+          <li><a href="#">Frozen Pizza</a></li>
           <li><a href="#">Pizza News</a></li>
           <li><a href="#">My Profile</a></li>
         </ul>
@@ -245,6 +286,12 @@
       <!-- Hero + Detail Card -->
       <div class="restaurant-hero">
         <a href="sf-staging.html" class="back-link">← Back to map</a>
+        <!-- Admin bar — only shown to admins -->
+        <div id="admin-bar">
+          <span>⚙️ Admin</span>
+          <button class="btn btn-warning btn-sm admin-btn" onclick="openEditModal()">✏️ Edit</button>
+          <button class="btn btn-danger btn-sm admin-btn" onclick="confirmDelete()">🗑 Delete</button>
+        </div>
         <h1 id="r-name"></h1>
         <div id="r-avg-rating" style="margin-bottom:8px; font-size:15px; color:#f0a500; min-height:20px;"></div>
         <div id="r-tags"></div>
@@ -284,10 +331,8 @@
       <div class="photo-grid" id="photo-grid">
         <!-- placeholder slots -->
         <div class="photo-slot">🍕</div>
-        <!--
         <div class="photo-slot">🍕</div>
         <div class="photo-slot">🍕</div>
-        -->
         <div class="photo-slot" style="font-size:13px; color:#c0392b;">+ Add photo<br><span style="font-size:10px;">(coming soon)</span></div>
       </div>
 
@@ -335,6 +380,60 @@
     </div>
   </div>
 
+  <!-- Edit Restaurant Modal -->
+  <div id="edit-modal">
+    <div id="edit-modal-inner">
+      <h4>✏️ Edit Restaurant</h4>
+      <div class="edit-section-label">Restaurant Info</div>
+      <div class="form-group">
+        <label style="font-size:13px;">Name <span style="color:#c0392b">*</span></label>
+        <input type="text" id="edit-name" class="form-control input-sm">
+      </div>
+      <div class="form-group">
+        <label style="font-size:13px;">Phone</label>
+        <input type="text" id="edit-phone" class="form-control input-sm">
+      </div>
+      <div class="form-group">
+        <label style="font-size:13px;">Hours</label>
+        <input type="text" id="edit-hours" class="form-control input-sm">
+      </div>
+      <div class="form-group">
+        <label style="font-size:13px;">Website</label>
+        <input type="url" id="edit-url" class="form-control input-sm">
+      </div>
+      <div class="edit-section-label">Location</div>
+      <div class="form-group">
+        <label style="font-size:13px;">Address</label>
+        <input type="text" id="edit-address" class="form-control input-sm">
+      </div>
+      <div class="row">
+        <div class="col-sm-5">
+          <div class="form-group">
+            <label style="font-size:13px;">City</label>
+            <input type="text" id="edit-city" class="form-control input-sm">
+          </div>
+        </div>
+        <div class="col-sm-3">
+          <div class="form-group">
+            <label style="font-size:13px;">State</label>
+            <input type="text" id="edit-state" class="form-control input-sm" maxlength="2">
+          </div>
+        </div>
+        <div class="col-sm-4">
+          <div class="form-group">
+            <label style="font-size:13px;">ZIP</label>
+            <input type="text" id="edit-zip" class="form-control input-sm" maxlength="10">
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:16px; display:flex; gap:8px; align-items:center;">
+        <button class="btn btn-danger btn-sm" onclick="saveEdit()">Save Changes</button>
+        <button class="btn btn-default btn-sm" onclick="closeEditModal()">Cancel</button>
+        <span id="edit-status" style="font-size:13px; font-weight:bold;"></span>
+      </div>
+    </div>
+  </div>
+
   <footer><p>SliceFinder &copy;2026</p></footer>
 
   <!-- Firebase config stored in sessionStorage from previous pages; or prompt inline -->
@@ -360,7 +459,7 @@
 
     // ── Init Firebase ─────────────────────────────────────────────────
     const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js');
-    const { getFirestore, doc, getDoc, collection, query, where, orderBy, addDoc, serverTimestamp, getDocs, updateDoc, arrayUnion, arrayRemove }
+    const { getFirestore, doc, getDoc, collection, query, where, orderBy, addDoc, serverTimestamp, getDocs, updateDoc, deleteDoc, arrayUnion, arrayRemove }
       = await import('https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js');
     const { getAuth, onAuthStateChanged } = await import('https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js');
 
@@ -400,6 +499,7 @@
     // ── Populate page ─────────────────────────────────────────────────
     document.title = r.name + ' – SliceFinder';
     document.getElementById('r-name').textContent = r.name;
+    restaurantData = r; // store for edit form
 
     const fullAddress = [r.address, r.city, r.state, r.zip].filter(Boolean).join(', ');
     document.getElementById('r-address').textContent = fullAddress || '—';
@@ -545,6 +645,8 @@
         const displayName = user.displayName || user.email.split('@')[0];
         document.getElementById('rv-username-display').textContent = displayName;
         if (navBtn) { navBtn.textContent = 'My Profile'; navBtn.href = 'profile.html'; }
+        // Check admin status
+        await checkAdmin(user);
         // Check if already favorited
         try {
           const userSnap = await getDoc(doc(db, 'users', user.uid));
@@ -659,6 +761,116 @@
         statusEl.style.color = 'red';
       }
     };
+
+
+    // ── Admin: check isAdmin and wire up edit/delete ──────────────────
+    let restaurantData = {};
+
+    async function checkAdmin(user) {
+      if (!user) return;
+      try {
+        const userSnap = await getDoc(doc(db, 'users', user.uid));
+        if (userSnap.exists() && userSnap.data().isAdmin === true) {
+          const bar = document.getElementById('admin-bar');
+          if (bar) { bar.style.display = 'flex'; }
+        }
+      } catch(e) { console.warn('Admin check failed:', e); }
+    }
+
+    window.openEditModal = function() {
+      // Pre-fill form with current restaurant data
+      const r = restaurantData;
+      document.getElementById('edit-name').value    = r.name    || '';
+      document.getElementById('edit-phone').value   = r.phone   || '';
+      document.getElementById('edit-hours').value   = r.hours   || '';
+      document.getElementById('edit-url').value     = r.url     || '';
+      document.getElementById('edit-address').value = r.address || '';
+      document.getElementById('edit-city').value    = r.city    || '';
+      document.getElementById('edit-state').value   = r.state   || '';
+      document.getElementById('edit-zip').value     = r.zip     || '';
+      document.getElementById('edit-status').textContent = '';
+      document.getElementById('edit-modal').style.display = 'block';
+    };
+
+    window.closeEditModal = function() {
+      document.getElementById('edit-modal').style.display = 'none';
+    };
+
+    // Close modal on backdrop click
+    document.getElementById('edit-modal').addEventListener('click', function(e) {
+      if (e.target === this) closeEditModal();
+    });
+
+    window.saveEdit = async function() {
+      const statusEl = document.getElementById('edit-status');
+      const name = document.getElementById('edit-name').value.trim();
+      if (!name) { statusEl.textContent = '❌ Name is required.'; statusEl.style.color='red'; return; }
+
+      statusEl.textContent = 'Saving…';
+      statusEl.style.color = '#888';
+
+      const updates = {
+        name,
+        phone:   document.getElementById('edit-phone').value.trim()   || null,
+        hours:   document.getElementById('edit-hours').value.trim()   || null,
+        url:     document.getElementById('edit-url').value.trim()     || null,
+        address: document.getElementById('edit-address').value.trim() || null,
+        city:    document.getElementById('edit-city').value.trim()    || null,
+        state:   document.getElementById('edit-state').value.trim().toUpperCase() || null,
+        zip:     document.getElementById('edit-zip').value.trim()     || null,
+      };
+
+      // If address changed, re-geocode
+      const addrChanged = updates.address !== (restaurantData.address || '') ||
+                          updates.city    !== (restaurantData.city    || '') ||
+                          updates.state   !== (restaurantData.state   || '');
+      if (addrChanged && updates.address) {
+        try {
+          const q = [updates.address, updates.city, updates.state, updates.zip].filter(Boolean).join(', ') + ', USA';
+          const res  = await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q=' + encodeURIComponent(q));
+          const data = await res.json();
+          if (data && data.length > 0) {
+            updates.lat = parseFloat(data[0].lat);
+            updates.lng = parseFloat(data[0].lon);
+          }
+        } catch(e) { console.warn('Re-geocode failed:', e); }
+      }
+
+      try {
+        await updateDoc(doc(db, 'restaurants', restaurantId), updates);
+        Object.assign(restaurantData, updates);
+        // Update displayed fields
+        document.getElementById('r-name').textContent    = updates.name;
+        document.getElementById('r-address').textContent = [updates.address, updates.city, updates.state, updates.zip].filter(Boolean).join(', ');
+        document.getElementById('r-phone').textContent   = updates.phone || '—';
+        document.getElementById('r-hours').textContent   = updates.hours || '—';
+        const urlEl = document.getElementById('r-url');
+        if (urlEl) { urlEl.href = updates.url || '#'; urlEl.textContent = updates.url || ''; }
+        statusEl.textContent = '✅ Saved!';
+        statusEl.style.color = 'green';
+        setTimeout(closeEditModal, 1000);
+      } catch(e) {
+        statusEl.textContent = '❌ ' + e.message;
+        statusEl.style.color = 'red';
+      }
+    };
+
+    window.confirmDelete = function() {
+      const name = restaurantData.name || 'this restaurant';
+      if (confirm('Delete "' + name + '"? This cannot be undone.')) {
+        deleteRestaurant();
+      }
+    };
+
+    async function deleteRestaurant() {
+      try {
+        await deleteDoc(doc(db, 'restaurants', restaurantId));
+        alert('Restaurant deleted.');
+        window.location.href = 'sf-staging.html';
+      } catch(e) {
+        alert('Delete failed: ' + e.message);
+      }
+    }
 
   </script>
 
